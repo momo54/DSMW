@@ -1,0 +1,33 @@
+Mediawiki P2P Plugin installation:
+
+
+    * Download the zip file and extract it
+    * Paste the folder named p2pExtension into the Mediawiki extension folder
+    * Edit LocalSettings.php in the root of your MediaWiki installation, and add the following line near the bottom:
+
+	  require_once "$IP/extensions/p2pExtension/p2pExtension.php";
+      $wgGroupPermissions['*']['ArticleAdminPage']       = true;//sysop
+      require_once("$IP/extensions/p2pExtension/specialPage/ArticleAdminPage.php" );
+
+    * Creation of a new tables in the Mediawiki database:
+
+        Create the database tables, executing the script the on your MySQL administration tool.
+        Substitute `wikidb` for the name of your database.
+        The script can be found in the file: /p2pExtension/db/addedTables.sql
+
+    * The PHP extension GMP (GNU Multiple Precision) must be installed (or activated)
+        (also available on Windows platforms since PHP5.1.0)
+
+    * The Semantic Mediawiki extension must be installed (cf: http://semantic-mediawiki.org/wiki/Semantic_MediaWiki)
+        (in the LocalSettingd.php file, set the memory limit from 20 to 50M --> ini_set( 'memory_limit', '50M' ))
+
+    *The SimpleForms extension must be installed (cf: http://www.mediawiki.org/wiki/Extension:Simple_Forms)
+
+    * If you're using a Mediawiki version below 1.14.0, you have to replace the following line
+        in the p2pExtension.php file:
+
+        $wgAPIMetaModules = array('patch' => 'ApiQueryPatch');
+
+        by this line:
+
+        $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch');
