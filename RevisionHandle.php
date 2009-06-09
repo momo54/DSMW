@@ -5,7 +5,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 }
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
-
+ 
 //require_once('magpierss/rss_fetch.inc');
 
 //include 'ConnectDB.php';

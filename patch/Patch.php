@@ -93,9 +93,9 @@ class Patch {
         wfProfileOut( __METHOD__ );
     }
 
-    public function storePage(){
+    public function storePage($pageName){
 
-        $pageName = $this->getPageTitleWithId($this->mPageId);
+        //$pageName = $this->getPageTitleWithId($this->mPageId);
         $previous = $this->getPreviousPatchId($pageName);
         if($previous==false) {
             $previous = "none";
@@ -118,6 +118,10 @@ class Patch {
  onPage: [[onPage::'.$pageName.']] ';
         $i=1;//op counter
         foreach ($this->mOperations as $operation){
+            $lineContent = $operation->getLineContent();
+            if(strpos($lineContent, '[[')!==false || strpos($lineContent, ']]')!==false){
+                $lineContent = $this->encode($lineContent);
+            }
             $type="";
             if($operation instanceof LogootIns) $type="Insert";
             else $type="Delete";
@@ -125,7 +129,7 @@ class Patch {
 ( operationID'.$i.': [[operationID'.$i.'::'.$i.']]/
 opType'.$i.': [[opType'.$i.'::'.$type.']]/
 position'.$i.': [[position'.$i.'::'.$operation->getLogootPosition()->toString().']]/
-hasLineContent'.$i.': [[hasLineContent'.$i.'::'.$operation->getLineContent().']] )';
+hasLineContent'.$i.': [[hasLineContent'.$i.'::'.$lineContent.']] )';
             $i = $i + 1;
         }
         $text.=' previous: [[previous::'.$previous.']]';
@@ -161,7 +165,7 @@ $string = $string[0];
     return $string;
 }
 
-function getPageTitleWithId($id){
+function getPageTitleWithId($id){//returns false if the article doesn't exist yet
         $dbr = wfGetDB( DB_SLAVE );
         $title = $dbr->selectField('page','page_title', array(
         'page_id'=>$id));
@@ -211,5 +215,20 @@ function getPageTitleWithId($id){
 
         return $lastid + 1;
     }
+
+
+function encode($request){
+    $req = str_replace(
+				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}'),
+				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'), $request);
+                      return $req;
+}
+
+function decode($req){
+    $request = str_replace(
+				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'),
+                          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}'), $req);
+                      return $request;
+}
 }
 ?>

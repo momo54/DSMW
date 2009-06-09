@@ -181,6 +181,7 @@ Pages concerned:
 ///////ChangeSet page////////
     elseif($_GET['action']=='onpush'){
         $patches = array();
+        $tmpPatches = array();
         $name = $_GET['push'];
         if(count($name)>1) {
             $outtext='<p><b>Select only one pushfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
@@ -213,10 +214,11 @@ Pages concerned:
         foreach ($pages as $page){
             $request1 = '[[Patch:+]][[onPage::'.$page.']]';
             $tmpPatches = getRequestedPages($request1, $localMW, false);
-            $patches = $patches + $tmpPatches;
+            $patches = array_merge($patches, $tmpPatches);
         }
         $published = getPublishedPatches($name);
         $unpublished = array_diff($patches, $published);/*unpublished = patches-published*/
+        if(empty ($unpublished)) return false; //If there is no unpublished patch
         $pos = strrpos($CSID, ":");//NS removing
             if ($pos === false) {
                 // not found...
@@ -473,6 +475,14 @@ function getPublishedPatches($pfname){
     $string = file_get_contents($url);
     if ($string=="") return array();//false;
      $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'ChangeSet:')!==false){
+            unset($res[$key]);
+        }
+    }
+    $res = array_unique($res);
+
     return $res;//published patch tab
 }
 
@@ -675,8 +685,8 @@ function attemptSave($editpage)
         $tmp = serialize($listPos);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $listPos, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-        $patch->store();
-        $patch->storePage();
+        $patch->store();//stores the patch in the DB
+        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
         //integration: diffs between VO and V2 into V1
         foreach ($listPos as $operation){
@@ -687,8 +697,8 @@ function attemptSave($editpage)
         $tmp = serialize($diffs);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-        $patch->store();
-        $patch->storePage();
+        $patch->store();//stores the patch in the DB
+        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
         
     }
     $revId = $blobInfo->getNewArticleRevId();
