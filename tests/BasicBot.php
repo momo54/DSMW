@@ -63,8 +63,8 @@ $abspath = dirname(__FILE__);
 
 // adjust as necessary
 define('SITECHARSET','UTF-8');
-if (!defined('SERVER')) {define('SERVER','http://localhost/www/mediawiki-1.13.2');}
-define('PREFIX','/wiki'); // no trailing slash. The prefix you use for index.php?title= links (e.g. editing links). Set to '' if you use no prefix other than what's in SERVER.
+define('SERVER','http://localhost/mediawiki-1.13.5');
+define('PREFIX',''); // no trailing slash. The prefix you use for index.php?title= links (e.g. editing links). Set to '' if you use no prefix other than what's in SERVER.
 define('ALTPREFIX','/w'); // no trailing slash. The prefix on valid links that visitors usually see. Might be the same as PREFIX if you don't use "pretty" links.
 define('CACHE', $abspath.'/cache/'); // a path where we can store cache files to. SHOULD EXIST and be writeable by the server. Stored for longer than files in TEMP.
 define('TEMP',$abspath.'/temp/'); // a path where we can store temp files to. SHOULD EXIST and be writeable by the server. Can be the same as CACHE if you want.
@@ -76,8 +76,8 @@ if (file_exists('username.php'))
 	require_once('username.php');
 // ELSE you need to fill out the next few settings.
 if (!defined('USERID')){	define('USERID','1');} // find it at Special:Preferences
-if (!defined('USERNAME')){	define('USERNAME','mullejea');}
-if (!defined('PASSWORD')){	define('PASSWORD','Muller.3');} // password in plain text. No md5 or anything.
+if (!defined('USERNAME')){	define('USERNAME','wikiSysop');}
+if (!defined('PASSWORD')){	define('PASSWORD','admin');} // password in plain text. No md5 or anything.
 
 
 ##########################################################
@@ -102,6 +102,7 @@ class BasicBot extends Snoopy{
 	var $wikiUser = USERNAME;
 	var $wikiPass = PASSWORD;
 	var $wikiServer = SERVER;
+        var $wikiName;
 	var $wikiCookies; // will hold the file name where our cookies are stored.
 	var $wikiConnected = false;
 	var $wikiTitle; // holds the title that wikiFilter has just called from. Makes it easy to know where we are when doing a FilterAll function.
@@ -110,6 +111,10 @@ class BasicBot extends Snoopy{
 	FUNCTIONS THAT YOU ARE LIKELY TO INTERACT WITH START HERE
 	****************************************/
 	
+        function  __construct($wikiN) {
+            $this->wikiName = $wikiN;
+        }
+
 	// wikiFilter is a single-use filter. You'll probably call this directly only when you are testing a new filtering callback. Otherwise, try wikiFilterAll() instead.
 	// You don't need to edit this function to change filter behavior. Instead, create a new CALLBACK function (see the end of this file for examples).
 	// grabs the content of $title, then passes it to $callback, which returns the new content. If the new content is different from the old content, this function edits the wiki with the new content.
@@ -118,7 +123,7 @@ class BasicBot extends Snoopy{
 			die ("Unable to connect.");
 		// $this->fetchform doesn't work for us because it strips out the content of the <textarea>. So use $this->fetch instead first:
 		$this->wikiTitle = $title; // for use by callbacks in our various bots, if needed. E.g. see FindRelatedLinksBot
-		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?title=' . $title . '&action=edit' ) )
+		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $title . '&action=edit' ) )
 			return false;
 		
 		// in order to save changes, you'll need to submit a few hidden vars. See http://www.mediawiki.org/wiki/Manual:Parameters_to_index.php#Parameters_that_are_needed_to_save
@@ -153,7 +158,7 @@ class BasicBot extends Snoopy{
 
 		// all done. Let's submit the form.
 		$this->maxredirs = 0; // we don't want to redirect from edit from back to article, or else we won't be able to sniff response codes to check for success.
-		if ($this->submit( $this->wikiServer . PREFIX . '/index.php?title=' . $title . '&action=submit', $post_vars ) ){
+		if ($this->submit( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $title . '&action=submit', $post_vars ) ){
 			// Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
 			$code = substr($this->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
 			if ('200'==$code)
@@ -232,7 +237,7 @@ class BasicBot extends Snoopy{
 				<h2>'.$callback.'</h2>
 				<p>Cache: '.$cache.'</p>
 				<p>Source: '.$source.'</p>
-				<p>Current: <a href="' . $this->wikiServer . PREFIX . '/index.php?title='.$link.'">'.$link.'</a></p>
+				<p>Current: <a href="' . $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title='.$link.'">'.$link.'</a></p>
 				<p>Remaining: '.count($links).' articles.</p>
 				
 		';
@@ -318,7 +323,7 @@ class BasicBot extends Snoopy{
 		$vars['wpPassword'] = $this->wikiPass;
 		$vars['wpRemember'] = 1;
 		$vars['wpLoginattempt'] = "Log+in";
-		$loginUrl = $this->wikiServer . PREFIX . '/index.php?title=Special:Userlogin&amp;action=submitlogin&amp;type=login';
+		$loginUrl = $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=Special:Userlogin&amp;action=submitlogin&amp;type=login';
 		if ($this->submit($loginUrl,$vars)){
 			/* 	okay, our 4 cookies will be now be in $this->cookies as an array. They look something like this (don't try hacking my site; I changed these):
 				    [wikisum__session] => gb6b4s4u6aj9prifqla73pn096
@@ -352,7 +357,7 @@ class BasicBot extends Snoopy{
 	// returns an array of all the links that a particular article has. Ignores links in the sidebar; only includes links in the actual article.
 	// WILL include external links and links from the table of contents and from any included templates. If you don't want this, use $this->wikiLinks() instead.
 	function wikiAllLinks($title){
-		$this->fetchlinks( $this->wikiServer . PREFIX . '/index.php?title=' . $title . '&action=render' );
+		$this->fetchlinks( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $title . '&action=render' );
 		var_dump( $this->results );
 	}
 
@@ -363,11 +368,11 @@ class BasicBot extends Snoopy{
 	function wikiHarvestLinks($source,$stripCats=true){
 		//if (!$this->wikiConnect())	// uncomment these two lines if logging in is required to READ (not edit) the page you're trying to scrape.
 		//	die( "Unable to connect." );
-		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?title=' . $source . '&action=raw' ))
+		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $source . '&action=raw' ))
 			return false;
 		$links = $this->wikiLinks($this->results,$stripCats);
 		if (!is_array($links))
-			die( 'Cannot harvest links from an article that has no links.' );
+			die( 'Cannot harvest links from an article that has no links.'.$this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $source . '&action=raw' );
 		foreach( $links as $key=>$link )		
 			$links[$key] = $link[1]; // remember that we're dealing with the ugly array in wikiLinks(). Let's simplify it a bit.
 		$cache = TEMP . 'harvest_' . gmdate("Ymd_his") . '.php';
@@ -378,7 +383,7 @@ class BasicBot extends Snoopy{
 	// analogous to wikiHarvestLinks, but for special pages. Special pages don't accept the ?action=raw trick we use in wikiHarvestLinks, so we use this method instead.
 	// like wikiHarvestLinks, stores the harvested links to cache and returns the cache filename. Doesn't work on all types of special pages (must use <ol class="special">...</ol>)
 	function HarvestSpecialLinks($title){
-		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?title=' . $title ) )
+		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $title ) )
 			return false;
 		// we want only the links in here:	<ol start='1' class='special'> ... </ol>
 		preg_match( "|<ol[^>]*class=['\"]special['\"][^>]*>(.*)</ol[^>]*>|Usi",$this->results,$specialLinks );
@@ -400,7 +405,7 @@ class BasicBot extends Snoopy{
 	
 	// you get the idea by now. Analogous to the last couple. Note that you'll need to edit theme files to use this.
 	function HarvestCategoryLinks($title){
-		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?title=' . $title  ) )
+		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $title  ) )
 			return false;
 		// you'll need to edit mediawiki/includes/CategoryPage.php and wrap all the category links in <div class="categoryItems"> .... </div> so that we can find them.
 		preg_match( "|<div[^>]*class=['\"]categoryItems['\"][^>]*>(.*)</div[^>]*>|Us",$this->results,$catLinks );
@@ -535,7 +540,7 @@ class BasicBot extends Snoopy{
 		$title = 'Special:Recentchanges&from='.$from.'&hidemyself=1&hidepatrolled=0&limit=5000';
 		if (false!==$ns) // use FALSE with ===, since $ns might be 0 (for main namespace)
 			$title .= '&namespace='.$ns;
-		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?title=' . $title ) )
+		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?w='.$this->wikiName.'&title=' . $title ) )
 			return false;
 		// we want only the links enclosed in one of the '<ul class="special"' tags. The <ul> starts over for each date displayed in recent changes
 		preg_match_all("~<ul[^>]*class=['\"][^'\"]*special[^'\"]*['\"][^>]*>(.*)</ul[^>]*>~Usi",$this->results,$linklist);
@@ -582,28 +587,6 @@ class BasicBot extends Snoopy{
 		$this->UpdateLinksCache( $cache, $links );
 		return $cache;
 	}
-
-
-    //////////////////////////////My methods//////////////////////
-    function createPush($url, $name, $request){
-        $post_vars['url'] = $url;
-        $post_vars['name'] = $name;
-        $post_vars['keyword'] = $request;
-        if ($this->submit( $this->wikiServer . PREFIX . '/index.php?action=pushpage', $post_vars ) ){
-            // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
-            $code = substr($this->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-            if ('200'==$code)
-            return true;
-            else
-            return false; // if you get this, it's time to debug.
-        }else{
-            // we failed to submit the form.
-            return false;
-        }
-    }
-
-
-
 }
 ////////////////////// END OF THE CLASS ////////////////////////
 
