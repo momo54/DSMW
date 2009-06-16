@@ -56,31 +56,34 @@ class p2pTest extends PHPUnit_Framework_TestCase {
 
         $res = $this->p2pBot3->createPage('wiki3','tata','toto 3');
         $this->assertTrue($res);
-    }
 
-   /* public function testGet(){
+        /*----------------- test push ---------------------- */
+        
         //create page on wiki1
-        $callback = 'callbackTestFct';
         $source = "Paris";
         $summary='sum';
         $content='content page Paris  [[category::city]]';
-        $res = $this->wiki1->wikiFilter($source,$callback,$summary,$content);
+        $res = $this->p2pBot1->createPage($source,$summary,$content);
         $this->assertTrue($res);
 
-        $callback = 'callbackTestFct';
         $source = "Berlin";
         $summary='sum';
         $content='content page Berlin  [[category::city]]';
-        $res = $this->wiki1->wikiFilter($source,$callback,$summary,$content);
+        $res = $this->p2pBot1->createPage($source,$summary,$content);
         $this->assertTrue($res);
 
         //create push on wiki1
-        $url = $this->wiki1->wikiServer.'/index.php?w='.$this->wiki1->wikiName;
-        $name = 'TestPush';
-        $request = '[[category::city]]';
+        $url = $this->p2pBot1->bot->wikiServer;
         
-        $res = $this->wiki1->createPush($url, $name, $request);
+        $name = 'pushCountry2';
+        $request = '[[category:country]]';
+
+        $res = $this->p2pBot1->createPush($name, $request);
         $this->assertTrue($res);
+    }
+
+   /* public function testGet(){
+
     }*/
 }
 ?>
