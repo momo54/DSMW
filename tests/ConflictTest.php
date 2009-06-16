@@ -1,14 +1,14 @@
 <?php
-include("Phpwikibot.php");
+include("LogootTests/Phpwikibot.php");
 require_once 'PHPUnit/Framework.php';
-require_once 'LogootOp.php';
-require_once 'LogootIns.php';
-require_once 'LogootDel.php';
-require_once 'BlobInfo.php';
-require_once 'LogootId.php';
-require_once 'LogootPosition.php';
-require_once 'DiffEngine.php';
-require_once 'persistentClock.php';
+require_once 'LogootTests/LogootOp.php';
+require_once 'LogootTests/LogootIns.php';
+require_once 'LogootTests/LogootDel.php';
+require_once 'LogootTests/BlobInfo.php';
+require_once 'LogootTests/LogootId.php';
+require_once 'LogootTests/LogootPosition.php';
+require_once 'LogootTests/DiffEngine.php';
+require_once 'LogootTests/persistentClock.php';
 define ('INT_MAX', "18446744073709551616");
 define ('INT_MIN', "0");
 /**
@@ -99,8 +99,8 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
 
         $blobInfo = new BlobInfo;
         $oldtext = "";
-        $fp = fopen(dirname( __FILE__ )."/text1.txt", "r");
-        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/text1.txt"));
+        $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
+        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text1.txt"));
         fclose($fp);
         $blobInfo->setTextImage($actualtext);
 
@@ -139,8 +139,8 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
         $pc->load();
         $blob = new BlobInfo;
         $oldtext = "";
-        $fp = fopen(dirname( __FILE__ )."/text1.txt", "r");
-        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/text1.txt"));
+        $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
+        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text1.txt"));
         fclose($fp);
 
 
@@ -168,15 +168,15 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
        $pc = new persistentClock();
         $pc->load();
         $blobInfo = new BlobInfo;
-        $fp = fopen(dirname( __FILE__ )."/text2.txt", "r");
-        $conctext = fread($fp, filesize(dirname( __FILE__ )."/text2.txt"));
+        $fp = fopen(dirname( __FILE__ )."/LogootTests/text2.txt", "r");
+        $conctext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text2.txt"));
         fclose($fp);
         //$blobInfo->setTextImage($conctext);
         $listPos = $blobInfo->handleDiff($oldtext/*V0*/, $conctext/*V2*/, $firstRev=1, $pc);
         $blobInfo1 = new BlobInfo;
         $oldtext = "";
-        $fp = fopen(dirname( __FILE__ )."/text1.txt", "r");
-        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/text1.txt"));
+        $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
+        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text1.txt"));
         fclose($fp);
 
         $listPos = $blobInfo1->handleDiff($oldtext/*V0*/, $actualtext/*V2*/, $firstRev=1, $pc);
@@ -193,36 +193,36 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
         unset($pc);
     }
 
-    function testApiPatch(){
-        
-        $wiki='http://localhost/www/mediawiki-1.13.2/';
-        $php = file_get_contents($wiki.'api.php?action=query&meta=patch&format=php');
-        $array=$php = unserialize($php);
-        $array = array_shift($array);
-        $array = array_shift($array);
-        foreach ($array as $patch){
-           $cnt = $cnt + 1;
-           //$patch['patch_id'];
-        }
-        
-        $this->assertEquals('2', $cnt);
-
-    }
-
-    function testGetDistantPatch(){
-        $wiki='http://localhost/www/mediawiki-1.13.2/';
-        $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php');
-        $array=$php = unserialize($php);
-        $array = array_shift($array);
-        $array = array_shift($array);
-        foreach ($array as $patch){
-           $cnt = $cnt + 1;
-           $op = $patch['operations'];
-           $this->assertNotNull($op);
-        }
-
-        $this->assertEquals('2', $cnt);
-    }
+//    function testApiPatch(){
+//
+//        $wiki='http://localhost/www/mediawiki-1.13.2/';
+//        $php = file_get_contents($wiki.'api.php?action=query&meta=patch&format=php');
+//        $array=$php = unserialize($php);
+//        $array = array_shift($array);
+//        $array = array_shift($array);
+//        foreach ($array as $patch){
+//           $cnt = $cnt + 1;
+//           //$patch['patch_id'];
+//        }
+//
+//        $this->assertEquals('2', $cnt);
+//
+//    }
+//
+//    function testGetDistantPatch(){
+//        $wiki='http://localhost/www/mediawiki-1.13.2/';
+//        $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php');
+//        $array=$php = unserialize($php);
+//        $array = array_shift($array);
+//        $array = array_shift($array);
+//        foreach ($array as $patch){
+//           $cnt = $cnt + 1;
+//           $op = $patch['operations'];
+//           $this->assertNotNull($op);
+//        }
+//
+//        $this->assertEquals('2', $cnt);
+//    }
 
 }
 ?>

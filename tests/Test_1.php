@@ -1,6 +1,6 @@
 <?php
-require_once 'LogootId.php';
-require_once 'LogootPosition.php';
+require_once 'LogootTests/LogootId.php';
+require_once 'LogootTests/LogootPosition.php';
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
 /**
