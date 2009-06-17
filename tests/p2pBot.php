@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 
-
 /**
  * Description of p2pBot
  *
@@ -24,16 +23,24 @@ class p2pBot {
     }
 
     function createPush($name, $request) {
-        //$post_vars['url'] = $url;
+    //$post_vars['url'] = $url;
         $post_vars['name'] = $name;
         $post_vars['keyword'] = $request;
+        $this->maxredirs = 0;
         if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=pushpage', $post_vars ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-            if ('200'==$code)
+           /* if ('200'==$code)
                 return true;
             else
-                return false; // if you get this, it's time to debug.
+                return false;*/
+            if ('200'==$code)
+                return false;
+            elseif ('302'==$code)
+                return true;
+            else
+                return false;
+        //return false; // if you get this, it's time to debug.
         }else {
         // we failed to submit the form.
             return false;
@@ -41,15 +48,21 @@ class p2pBot {
     }
 
     function push($name) {
-        $get_vars = '&pull[]='.$name;
-
-        if ($this->submit($this->bot->wikiServer . PREFIX . '/index.php?action=onpush'.$get_vars, $post_vars ) ) {
+        $get_vars = '&push[]='.$name;
+        $this->maxredirs = 0;
+        if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php?action=onpush'.$get_vars, $post_vars ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
-            $code = substr($this->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-            if ('200'==$code)
+            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+           /* if ('200'==$code)
                 return true;
             else
-                return false; // if you get this, it's time to debug.
+                return false;*/ // if you get this, it's time to debug.
+            if ('200'==$code)
+                return false;
+            elseif ('302'==$code)
+                return true;
+            else
+                return false;
         }else {
         // we failed to submit the form.
             return false;
