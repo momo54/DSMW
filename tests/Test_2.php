@@ -26,8 +26,12 @@ class Test_2 extends PHPUnit_Framework_TestCase{
     }
 
     function testSeq2(){
-//        $myBot = new BasicBot();
-//        $result = $myBot->createPush(SERVER, 'Course1', '[[Patch:+]]');
+        $myBot = new BasicBot();
+        $result = $myBot->createPush(SITE1, 'POUCHE2', '[[Category:City]]', SITE1);//on Site1
+        $this->assertTrue($result);
+//        $url = SITE1;
+//        $name = 'Prof1Course1';
+//        $result = $myBot->createPull($url, $name, SITE2);//on Site2
 //        $this->assertTrue($result);
     }
 

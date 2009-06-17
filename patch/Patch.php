@@ -99,13 +99,13 @@ class Patch {
         $previous = $this->getPreviousPatchId($pageName);
         if($previous==false) {
             $previous = "none";
-            $ID = $pageName."_0";
-        }else{
-            $count = explode(" ", $previous);
-            $cnt = $count[1] + 1;
-            $ID = $pageName."_".$cnt;
-        }
-
+            //$ID = $pageName."_0";
+        }//else{
+//            $count = explode(" ", $previous);
+//            $cnt = $count[1] + 1;
+//            $ID = $pageName."_".$cnt;
+//        }
+        $ID = utils::generateID();
 //        $pos = strrpos($ID, ":");//NS removing
 //            if ($pos === false) {
 //                // not found...
@@ -125,12 +125,8 @@ class Patch {
             $type="";
             if($operation instanceof LogootIns) $type="Insert";
             else $type="Delete";
-            $text.=' hasOperation: [[hasOperation::Op'.$i.']] :  [[Op'.$i.'::operationID'.$i.'| ]][[Op'.$i.'::opType'.$i.'| ]][[Op'.$i.'::position'.$i.'| ]][[Op'.$i.'::hasLineContent'.$i.'| ]]
-( operationID'.$i.': [[operationID'.$i.'::'.$i.']]/
-opType'.$i.': [[opType'.$i.'::'.$type.']]/
-position'.$i.': [[position'.$i.'::'.$operation->getLogootPosition()->toString().']]/
-hasLineContent'.$i.': [[hasLineContent'.$i.'::'.$lineContent.']] )';
-            $i = $i + 1;
+            $operationID = utils::generateID();
+            $text.=' hasOperation: [[hasOperation::'.$operationID.'; '.$type.'; '.$operation->getLogootPosition()->toString().'; '.$lineContent.']] ';
         }
         $text.=' previous: [[previous::'.$previous.']]';
 

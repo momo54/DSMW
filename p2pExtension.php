@@ -32,6 +32,7 @@ $wgAutoloadClasses['LogootDel'] = "$wgP2PExtensionIP/logootop/LogootDel.php";
 $wgAutoloadClasses['Patch'] = "$wgP2PExtensionIP/patch/Patch.php";
 $wgAutoloadClasses['persistentClock'] = "$wgP2PExtensionIP/clockEngine/persistentClock.php";
 $wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
+$wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 //global $wgAPIMetaModules;
 $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch');
@@ -162,7 +163,7 @@ Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=k
         
 
         $newtext = "PushFeed:
-Name: [[name::".$name."]]
+Name: [[name::PushFeed:".$name."]]
 hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
 Pages concerned:
 {{#ask: ".$request."}}
@@ -198,12 +199,13 @@ Pages concerned:
         $previousCSID = getPreviousCSID($name);
         if($previousCSID==false) {
             $previousCSID = "none";
-            $CSID = $name."_0";
-        }else{
-            $count = explode(" ", $previousCSID);
-            $cnt = $count[1] + 1;
-            $CSID = $name."_".$cnt;
-        }
+            //$CSID = $name."_0";
+          }//else{
+//            $count = explode(" ", $previousCSID);
+//            $cnt = $count[1] + 1;
+//            $CSID = $name."_".$cnt;
+//        }
+        $CSID = utils::generateID();//changesetID
         if($request==false) {
             $outtext='<p><b>No semantic request found!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'">back</a>';
             $wgOut->addHTML($outtext);
@@ -222,6 +224,7 @@ Pages concerned:
         $pos = strrpos($CSID, ":");//NS removing
             if ($pos === false) {
                 // not found...
+                $articleName = $CSID;
             }else{
                 $articleName = substr($CSID, $pos+1);
                 $CSID = "ChangeSet:".$articleName;
@@ -235,13 +238,18 @@ previousChangetSet: [[previousChangetSet::".$previousCSID."]]
         $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
         }
 
-        
-        $title = Title::newFromText($articleName, CHANGESET);
 
+            $update = updatePushFeed($name, $CSID);
+            if($update==true){// update the "hasPushHead" value successful
+            $title = Title::newFromText($articleName, CHANGESET);
             $article = new Article($title);
             $article->doEdit($newtext, $summary="");
             $article->doRedirect();
-
+            }
+            else{
+                $outtext='<p><b>PushFeed has not been updated!</b></p>';
+                $wgOut->addHTML($outtext);
+            }
 
         return false;
     }
@@ -257,8 +265,7 @@ previousChangetSet: [[previousChangetSet::".$previousCSID."]]
 relatedPushFeed: [[relatedPushFeed::".$url."]]
 ";
         
-        $title = Title::newFromText($_POST['name'], PULLFEED);
-
+            $title = Title::newFromText($_POST['name'], PULLFEED);
             $article = new Article($title);
             $article->doEdit($newtext, $summary="");
             $article->doRedirect();
@@ -421,7 +428,10 @@ function getRequestedPages($request, $url, $index=true){
 //            }else{
 //                $page = substr($page, $pos+1);
 //            }
-            $page = str_replace(',', '', $page);
+            $res[$key] = str_replace(',', '', $page);
+            $pos = strpos($page, ':');
+            $count = 1;
+            if($pos==0) $res[$key] = str_replace(':', '', $page, $count);
         }
     }
     
@@ -484,6 +494,39 @@ function getPublishedPatches($pfname){
     $res = array_unique($res);
 
     return $res;//published patch tab
+}
+
+function updatePushFeed($name, $CSID){
+    //split NS and name
+    preg_match( "/^(.+?)_*:_*(.*)$/S", $name, $m );
+    $articleName = $m[2];
+
+    //get PushFeed by name
+    $title = Title::newFromText($articleName, PUSHFEED);
+    $dbr = wfGetDB( DB_SLAVE );
+    $revision = Revision::loadFromTitle($dbr, $title);
+    $pageContent = $revision->getText();
+
+    //get hasPushHead Value if exists
+    $start = "[[hasPushHead::";
+    $val1 = strpos( $pageContent, $start );
+    if ($val1!==false){//if there is an occurence of [[hasPushHead::
+    $startVal = $val1 + strlen( $start );
+    $end = "]]";
+    $endVal = strpos( $pageContent, $end, $startVal );
+    $value = substr( $pageContent, $startVal, $endVal - $startVal );
+
+    //update hasPushHead Value
+    $result = str_replace($value, $CSID, $pageContent);
+        if($result=="")return false;
+    }else{//no occurence of [[hasPushHead:: , we add
+        $pageContent.= ' hasPushHead: [[hasPushHead::ChangeSet: '.$CSID.']]';
+    }
+    //save update
+    $article = new Article($title);
+    $article->doEdit($pageContent, $summary="");
+
+    return true;
 }
 
 function encodeRequest($request){

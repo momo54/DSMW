@@ -278,7 +278,12 @@ $i=0;
 </table>
 </FORM>';
         
-
+$output .='
+<FORM METHOD="POST" ACTION="'.dirname(dirname($_SERVER['HTTP_REFERER'])).'/extensions/p2pExtension/bot/DSMWBot.php" name="scriptExec">
+<table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
+</td></table>
+<input type="hidden" name="server" value="'.dirname(dirname($_SERVER['HTTP_REFERER'])).'">
+</form>';
 
 
 

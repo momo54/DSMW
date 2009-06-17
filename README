@@ -31,3 +31,9 @@ Mediawiki P2P Plugin installation:
         by this line:
 
         $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch');
+
+    * The store.txt file must be writeable (/p2pExtension/clockEngine/store.txt))
+
+    * The "cache" directory should exist and be writeable by the server
+
+    * The admin user must be "WikiSysop" and the password "admin"
