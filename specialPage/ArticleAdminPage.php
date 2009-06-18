@@ -239,7 +239,7 @@ $i=0;
 
         
             $output .= '
-<FORM METHOD="GET" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPush">
+<FORM METHOD="POST" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPush">
 <table'.$tableStyle.' >
   <tr>
     <th colspan="5"'.$style.'>PUSH:

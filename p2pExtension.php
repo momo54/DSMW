@@ -180,10 +180,10 @@ Pages concerned:
         return false;
     }
 ///////ChangeSet page////////
-    elseif($_GET['action']=='onpush'){
+    elseif($_POST['action']=='onpush'){
         $patches = array();
         $tmpPatches = array();
-        $name = $_GET['push'];
+        $name = $_POST['push'];
         if(count($name)>1) {
             $outtext='<p><b>Select only one pushfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
@@ -406,13 +406,15 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
 
 /**returns an array of page titles received via the request*/
 function getRequestedPages($request, $url, $index=true){
+    global $wgServerName, $wgScriptPath;
+    
     $req = str_replace(
 				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
 				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $request);
     if($index==true){
-        $url1 = $url."index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
+        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
     }elseif($index==false){
-        $url1 = $url."/Special:Ask/".$req."/format=csv/sep=,/limit=100";
+        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
     }
     $string = file_get_contents($url1);
     $res = explode("\n", $string);
@@ -426,7 +428,7 @@ function getRequestedPages($request, $url, $index=true){
 //            if ($pos === false) {
 //                // not found...
 //            }else{
-//                $page = substr($page, $pos+1);
+//                $page = substr($page, $pos+1);http://localhost/www/mediawiki-1.14.0/index.php?action=onpush&push[]=Pushfeed:YOP
 //            }
             $res[$key] = str_replace(',', '', $page);
             $pos = strpos($page, ':');
@@ -439,11 +441,13 @@ function getRequestedPages($request, $url, $index=true){
 }
 
 function getPushFeedRequest($pfName){
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[['.$pfName.']]';//'[[PushFeed:'.$pfName.']]'
     $req = str_replace(
 				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
 				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    $url = dirname($_SERVER['HTTP_REFERER']);
+    //$url = dirname($_SERVER['HTTP_REFERER']);
     $url = $url."/Special:Ask/".$req."/-3FhasSemanticQuery/headers=hide/format=csv/sep=,/limit=100";
     $string = file_get_contents($url);
     if ($string=="") return false;
@@ -453,11 +457,13 @@ function getPushFeedRequest($pfName){
 }
 
 function getPreviousCSID($pfName){// methode a construire, csid=pfname+compteur
+global $wgServerName, $wgScriptPath;
+$url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
 $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfName.']]';
     $req = str_replace(
 				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
 				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    $url = dirname($_SERVER['HTTP_REFERER']);
+    //$url = dirname($_SERVER['HTTP_REFERER']);
     $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
     $string = file_get_contents($url);
     if ($string=="") return false;
@@ -476,11 +482,13 @@ $string = $string[0];
 }
 
 function getPublishedPatches($pfname){
+   global $wgServerName, $wgScriptPath;
+   $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
    $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfname.']]';
    $req = str_replace(
 				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
 				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    $url = dirname($_SERVER['HTTP_REFERER']);
+    //$url = dirname($_SERVER['HTTP_REFERER']);
     $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
     $string = file_get_contents($url);
     if ($string=="") return array();//false;
@@ -517,7 +525,8 @@ function updatePushFeed($name, $CSID){
     $value = substr( $pageContent, $startVal, $endVal - $startVal );
 
     //update hasPushHead Value
-    $result = str_replace($value, $CSID, $pageContent);
+    $result = str_replace($value, "ChangeSet:".$CSID, $pageContent);
+    $pageContent = $result;
         if($result=="")return false;
     }else{//no occurence of [[hasPushHead:: , we add
         $pageContent.= ' hasPushHead: [[hasPushHead::ChangeSet: '.$CSID.']]';
