@@ -30,7 +30,6 @@ class p2pTest extends PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         exec('./initWikiTest.sh');
-        wfDebugLog('p2p','start p2p Test');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
@@ -90,6 +89,10 @@ class p2pTest extends PHPUnit_Framework_TestCase {
 
     }*/
 
+    /*public function testPatch(){
+        
+    }*/
+
     public function testSimple1() {
     //create page on wiki1
         $pageName = "Paris";
@@ -97,22 +100,21 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         $res = $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
         assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content);
-
         //create push on wiki1
         $pushName = 'PushCity';
         $pushRequest = '[[Category:city]]';
         $res = $this->p2pBot1->createPush($pushName, $pushRequest);
         assertPageExist($this->p2pBot1->bot->wikiServer,'PushFeed:'.$pushName);
-        assertPushCreated($this->p2pBot1->bot->wikiServer,$pushName,$pushRequest);
+        assertPushCreated($this->p2pBot1->bot->wikiServer,'PushFeed:'.$pushName,$pushRequest);
 
         
-        /*$res = $this->p2pBot1->createPush('pushCity', '[[Category:city]]');
+        /*$res = $this->p2pBot1->createPush('pushCity', '[[Category:city]]');*/
         // assert failed
-         */
         
         $res = $this->p2pBot1->push('PushFeed:'.$pushName);
         // test 1 cs dans la page, avec une opération insert qui contient category city
-        assertPushUpdated($this->p2pBot1->bot->wikiServer,$pushName,$pushRequest);
+        $op[$pageName]['insert'] = $content;
+        assertPushUpdated($this->p2pBot1->bot->wikiServer,'PushFeed:'.$pushName,$pushRequest,'none',$op);
 
         /*$res = $this->p2pBot1->push($name);
         // 2ième push nothing change...
@@ -120,47 +122,43 @@ class p2pTest extends PHPUnit_Framework_TestCase {
 
 
         $pullName = 'pullCity';
-        $res = $this->p2pBot2->createPull($pullName, 'http://localhost/wiki1/push:pushcity');
+        $pushFeed = 'http://localhost/wiki1/push:pushcity';
+        $res = $this->p2pBot2->createPull($pullName, $pushFeed);
         assertPageExist($this->p2pBot2->bot->wikiServer,'PullFeed:'.$pullName);
-        assertPullCreated($this->p2pBot2->bot->wikiServer);
+        assertPullCreated($this->p2pBot2->bot->wikiServer,$pullName,$pushFeed);
         // assert nouvelle page crée avec le contenu etc
 
         $res =  $this->p2pBot2->Pull($pullName);
         assertPullUpdated($this->p2pBot2->bot->wikiServer,$pullName);
+        assertPageExist($this->p2pBot2->bot->wikiServer,$pageName);
         // assert cs from pushincluded
         // assert page paris exist
         // asssert patch is present
         // assert that wiki1/paris == wiki2/paris
 
         $res =  $this->p2pBot2->Pull('pullCity');
+        assertPullUpdated($this->p2pBot2->bot->wikiServer,$pullName);
         // assert nothing done...
 
-        $this->p2pBot2->append('Paris',"toto");
-        // assert ...
+        $this->p2pBot2->append($pageName,'toto');
+        assertPageUpdated($this->p2pBot2->bot->wikiServer,$pageName,'toto');
 
-        $res = $this->p2pBot2->createPush('pushCity', '[[Category:city]]');
-        // assert
+        $res = $this->p2pBot2->createPush($pushName, $pushRequest);
+        assertPageExist($this->p2pBot2->bot->wikiServer,'PushFeed:'.$pushName);
+        assertPushCreated($this->p2pBot2->bot->wikiServer, $pushName, $pushRequest);
 
         $res = $this->p2pBot2->Push('pushCity');
-        // asssert ..
-        //
+        assertPushUpdated($this->p2pBot2->bot->wikiServer,$pushName,$pushRequest,'none');
 
         $res = $this->p2pBot1->createPull('pullCity', 'http://localhost/wiki2/push:pushcity');
-        // assert...
+        assertPageExist($this->p2pBot1->bot->wikiServer,'PushFeed:pullCity');
+        assertPullCreated($this->p2pBot1->bot->wikiServer, 'pullCity', $pushRequest);
 
         $res=$this->p2pBot1->Pull('pullCity');
     // assert...
     // assert that wiki1/paris == wiki2/paris
 
 
-
-
-
     }
-
-
-   /* public function testGet(){
-
-    }*/
 }
 ?>
