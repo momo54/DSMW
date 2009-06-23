@@ -107,7 +107,16 @@ elseif(!strstr($title->mTextform, "Patch")===false){
 return true;
 }
 
-
+/**
+ *MW Hook used to redirect to page creation (pushfeed, pullfeed, changeset),
+ * to forms or to push/pull action testing the action param
+ *
+ *
+ * @global <Object> $wgOut
+ * @param <Object> $action
+ * @param <Object> $article
+ * @return <boolean>
+ */
 function onUnknownAction($action, $article) {
     global $wgOut;
     
@@ -404,7 +413,15 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
 
 }
 
-/**returns an array of page titles received via the request*/
+
+/**
+ * Returns an array of page titles received via the request
+ *
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
+ * @param <String> $request
+ * @return <array>
+ */
 function getRequestedPages($request){
     global $wgServerName, $wgScriptPath;
     $req = utils::encodeRequest($request);
@@ -433,6 +450,14 @@ function getRequestedPages($request){
     return $res;
 }
 
+/**
+ *Gets the semantic request stored in the PushFeed page
+ *
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
+ * @param <String> $pfName pushfeed name
+ * @return <String>
+ */
 function getPushFeedRequest($pfName){
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -446,7 +471,14 @@ function getPushFeedRequest($pfName){
     return $res;
 }
 
-function getPreviousCSID($pfName) {// methode a construire, csid=pfname+compteur
+/**
+ *Gets the previous changeSet ID
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
+ * @param <String> $pfName PushFeed name
+ * @return <String> previous changeSet ID
+ */
+function getPreviousCSID($pfName){
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfName.']]';
@@ -468,6 +500,14 @@ function getPreviousCSID($pfName) {// methode a construire, csid=pfname+compteur
     return $string;
 }
 
+/**
+ * Gets the published patches
+ *
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
+ * @param <String> $pfname PushFeed name
+ * @return <array> array of the published patches' name
+ */
 function getPublishedPatches($pfname){
    global $wgServerName, $wgScriptPath;
    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -490,6 +530,14 @@ function getPublishedPatches($pfname){
     return $res;//published patch tab
 }
 
+/**
+ *In a pushfeed page, the value of [[hasPushHead::]] has to be updated with the
+ *ChangeSetId of the last generated ChangeSet
+ *
+ * @param <String> $name Pushfeed name
+ * @param <String> $CSID ChangeSetID
+ * @return <boolean> returns true if the update is successful
+ */
 function updatePushFeed($name, $CSID){
     //split NS and name
     preg_match( "/^(.+?)_*:_*(.*)$/S", $name, $m );

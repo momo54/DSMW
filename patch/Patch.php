@@ -126,7 +126,7 @@ class Patch {
             if($operation instanceof LogootIns) $type="Insert";
             else $type="Delete";
             $operationID = utils::generateID();
-            $text.=' hasOperation: [[hasOperation::'.$operationID.'; '.$type.'; '.$operation->getLogootPosition()->toString().'; '.$lineContent.']] ';
+            $text.=' hasOperation: [[hasOperation::'.$operationID.';'.$type.';'.$operation->getLogootPosition()->toString().';'.$lineContent.']] ';
         }
         $text.=' previous: [[previous::'.$previous.']]';
 
@@ -138,12 +138,13 @@ class Patch {
     }
 
 
-function getPreviousPatchId($pageName){// methode a construire, csid=pfname+compteur
+function getPreviousPatchId($pageName){
+global $wgServerName, $wgScriptPath;
+
 $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    $url = dirname($_SERVER['HTTP_REFERER']);
+$req = utils::encodeRequest($req);
+
+    $url = 'http://'.$wgServerName.$wgScriptPath;
     $url = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/order=desc/format=csv/limit=1";
     $string = file_get_contents($url);
     if ($string=="") return false;
@@ -159,6 +160,22 @@ $string = $string[0];
 //    $string = strtr($string, "\"", "\0");
     $string = str_replace("\"", "", $string);
     return $string;
+}
+
+function getLastPatchId($pageName, $url=''){
+    global $wgServerName, $wgScriptPath;
+    $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
+    $req = utils::encodeRequest($req);
+    if($url=='')    $url = 'http://'.$wgServerName.$wgScriptPath;
+    $url = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/format=csv/limit=100";
+    $string = file_get_contents($url);
+
+
+    $url = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/format=csv/limit=100";
+    $string = file_get_contents($url);
+
+    $string;
+return false;
 }
 
 function getPageTitleWithId($id){//returns false if the article doesn't exist yet

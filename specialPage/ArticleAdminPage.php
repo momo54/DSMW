@@ -41,7 +41,7 @@ class ArticleAdminPage extends SpecialPage {
         global $wgOut, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;
 
         $wgOut->addHeadItem('script', ArticleAdminPage::javascript());
-
+        if($_GET['FeedDel']) $this->deleteFeed($_GET['FeedDel']);
         if($_GET['site']==true){// ce post en ajax
             $url = $_POST['url'];
             $name = $_POST['name'];
@@ -88,30 +88,7 @@ class ArticleAdminPage extends SpecialPage {
 
 
 
-
-
-
-//$tableStyle1 = ' style="clear:both; float: left; margin-left: 40px; "';
-//        $output .= '
-//
-//<table'.$tableStyle1.' border>
-//  <tr>
-//    <th colspan="5"'.$style.'><FORM METHOD="GET" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'">
-//<INPUT TYPE="submit" VALUE="ADD">
-//<INPUT TYPE="hidden" name="title" VALUE="administration_pull_site_addition">
-//<INPUT TYPE="hidden" name="action" VALUE="addpullpage">
-//
-//</FORM></th>
-//  </tr>
-//  ';
-//        $output .= '
-//
-//</table>
-//';
-
-
-
-
+/////////////PULLFEEDS TABLE//////////////////////////
 $i=0;
         $req = "[[PullFeed:+]]";
         
@@ -162,73 +139,10 @@ $i=0;
         
 
 
-
-
-
-
-
-
-
-
-
-
-//        $tables = array("site");
-//        $columns = array("site_id", "site_url", "site_name");
-//        $conditions = '';
-//        $fname = "Database::select";
-//        $options = array(
-//            "ORDER BY" => "site_id",
-//        );
-//        if ($page_limit > 0) {
-//            $options["LIMIT"] = $page_limit;
-//        }
-//        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-//            $output .= '<p>Error accessing list.</p>';
-//        } else {
-//            $output .= '
-//<FORM METHOD="POST" ACTION="" name="formPull">
-//<table'.$tableStyle.' >
-//  <tr>
-//    <th colspan="5"'.$style.'>PULL:
-//  <a href='.dirname($_SERVER['HTTP_REFERER']).'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>
-//  <a href="javascript:processPull(document.formPull.pullremove.value);">[Remove]</a>
-//  <a href="javascript:processPull(document.formPull.pull.value);">[Pull]</a></th>
-//  </tr>
-//  <tr>
-//    <th colspan="2" >Site</th>
-//    <th >Pages</th>
-//    <th>Remote <br>Patchs</th>
-//    <th >Local <br>Patchs</th>
-//
-//
-//  </tr>
-//  ';
-//            while ($row = $db->fetchRow($result)) {
-//                $i = $i + 1;
-//                $data = $this->getAwarenessData($row["site_url"]);
-//                $output .= '
-//  <tr>
-//    <td align="center"><input type="checkbox" id="'.$i.'" name="pull['.$i.']" value="'.$row["site_url"].'" /></td>
-//    <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
-//    <td align="center">['.$data['pageCount'].']</td>
-//    <td align="center">['.$data['patchCount'].']</td>
-//    <td align="center">['.$data['localPatchCount'].']</td>
-//  </tr>';
-//            }
-//            $output .= '
-//
-//<input type="hidden" name="checkboxcount" value="'.$i.'">
-//</table>
-//</FORM>';
-//        }
-
-
-
-
+/////////////PUSHFEEDS TABLE//////////////////////////
 
         $i=0;
         $req = "[[PushFeed:+]]";
-        $url = dirname($_SERVER['HTTP_REFERER']);
        
             $pushFeeds = $this->getRequestedPages($req);
         
@@ -243,7 +157,7 @@ $i=0;
             if ($pushFeeds!=false) {
 
 
- $output .= ' <a href="javascript:processPull(document.formPull.pullremove.value);">[Remove]</a>
+ $output .= ' <a href="javascript:del()">[Remove]</a>
   <button type="submit">[Push]</button></th>
   </tr>
   <tr>
@@ -274,79 +188,14 @@ $i=0;
 </table>
 </FORM>';
         
+if (!$this->getArticle('Property:ChangeSetID')->exists()){
 $output .='
 <FORM METHOD="POST" ACTION="'.dirname(dirname($_SERVER['HTTP_REFERER'])).'/extensions/p2pExtension/bot/DSMWBot.php" name="scriptExec">
 <table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
 </td></table>
 <input type="hidden" name="server" value="'.dirname(dirname($_SERVER['HTTP_REFERER'])).'">
 </form>';
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//        $tables = array("site");
-//        $columns = array("site_id", "site_url", "site_name");
-//        $conditions = '';
-//        $fname = "Database::select";
-//        $options = array(
-//            "ORDER BY" => "site_id",
-//        );
-//        if ($page_limit > 0) {
-//            $options["LIMIT"] = $page_limit;
-//        }
-//        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-//            $output .= '<p>Error accessing list.</p>';
-//        } else {
-//            $output .= '
-//<FORM METHOD="GET" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPush">
-//<table'.$tableStyle.' >
-//  <tr>
-//    <th colspan="5"'.$style.'>PUSH:
-//  <a href='.dirname($_SERVER['HTTP_REFERER']).'?title=administration_push_site_addition&action=addpushpage>[Add]</a>
-//  <a href="javascript:processPull(document.formPull.pullremove.value);">[Remove]</a>
-//  <button type="submit">[Push]</button></th>
-//  </tr>
-//  <tr>
-//    <th colspan="2" >Site</th>
-//    <th >Pages</th>
-//    <th>Remote <br>Patchs</th>
-//    <th >Local <br>Patchs</th>
-//
-//
-//  </tr>
-//  ';
-//            while ($row = $db->fetchRow($result)) {
-//                $i = $i + 1;
-//                $data = $this->getAwarenessData($row["site_url"]);
-//                $output .= '
-//  <tr>
-//    <td align="center"><input type="checkbox" id="'.$i.'" name="push[]" value="'.$row["site_name"].'" /></td>
-//    <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
-//    <td align="center">['.$data['pageCount'].']</td>
-//    <td align="center">['.$data['patchCount'].']</td>
-//    <td align="center">['.$data['localPatchCount'].']</td>
-//  </tr>';
-//            }
-//            $output .= '
-//
-//<input type="hidden" name="action" value="onpush">
-//</table>
-//</FORM>';
-//        }
-
-
+}
 
         $wgOut->addHTML($output);
         return false;
@@ -983,6 +832,19 @@ tmp = tmp+"&pull["+i+"]="+document.getElementById(i).value;
 	   xhr_object.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	   var data = tmp;
 	   xhr_object.send(data);
+}
+
+function del(){
+alert(\'Incrémenter veut dire augmenter\');
+  var boxValue = "";
+  for (var i=0; i < document.formPush.Push[].length; i++)
+     {
+     if (document.formPush.Push[i].checked)
+        {
+        boxValue = document.formPush.Push[i].value;
+        }
+     }
+alert(boxValue);
 }
 </SCRIPT>';
 return $output;
