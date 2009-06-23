@@ -158,7 +158,7 @@ Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=k
         //$url = $_POST['url'];//pas url mais changesetId
         $name = $_POST['name'];
         $request = $_POST['keyword'];
-        $stringReq = encodeRequest($request);//avoid "semantic injection" :))
+        $stringReq = utils::encodeRequest($request);//avoid "semantic injection" :))
         //addPushSite($url, $name, $request);
         
 
@@ -211,11 +211,11 @@ Pages concerned:
             $wgOut->addHTML($outtext);
             return false;
         }
-        $localMW = dirname($_SERVER['HTTP_REFERER']);
-        $pages = getRequestedPages($request, $localMW, false);//ce sont des pages et non des patches
+        
+        $pages = getRequestedPages($request);//ce sont des pages et non des patches
         foreach ($pages as $page){
             $request1 = '[[Patch:+]][[onPage::'.$page.']]';
-            $tmpPatches = getRequestedPages($request1, $localMW, false);
+            $tmpPatches = getRequestedPages($request1);
             $patches = array_merge($patches, $tmpPatches);
         }
         $published = getPublishedPatches($name);
@@ -405,38 +405,31 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
 }
 
 /**returns an array of page titles received via the request*/
-function getRequestedPages($request, $url, $index=true){
+function getRequestedPages($request){
     global $wgServerName, $wgScriptPath;
-    
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $request);
-    if($index==true){
-        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
-    }elseif($index==false){
-        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
-    }
+    $req = utils::encodeRequest($request);
+    $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
     $string = file_get_contents($url1);
     $res = explode("\n", $string);
-    foreach ($res as $key=>$page){
-        if($page==""){
+    foreach ($res as $key=>$page) {
+        if($page=="") {
             unset ($res[$key]);
-        }else{
-            //$page = strtr($page, "\"", "\0");
+        }else {
+        //$page = strtr($page, "\"", "\0");
             $res[$key] = str_replace("\"", "", $page);
-//            $pos = strrpos($page, ":");//NS removing
-//            if ($pos === false) {
-//                // not found...
-//            }else{
-//                $page = substr($page, $pos+1);http://localhost/www/mediawiki-1.14.0/index.php?action=onpush&push[]=Pushfeed:YOP
-//            }
+            //            $pos = strrpos($page, ":");//NS removing
+            //            if ($pos === false) {
+            //                // not found...
+            //            }else{
+            //                $page = substr($page, $pos+1);http://localhost/www/mediawiki-1.14.0/index.php?action=onpush&push[]=Pushfeed:YOP
+            //            }
             $res[$key] = str_replace(',', '', $page);
             $pos = strpos($page, ':');
             $count = 1;
             if($pos==0) $res[$key] = str_replace(':', '', $page, $count);
         }
     }
-    
+
     return $res;
 }
 
@@ -444,39 +437,33 @@ function getPushFeedRequest($pfName){
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[['.$pfName.']]';//'[[PushFeed:'.$pfName.']]'
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    //$url = dirname($_SERVER['HTTP_REFERER']);
+    $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FhasSemanticQuery/headers=hide/format=csv/sep=,/limit=100";
     $string = file_get_contents($url);
     if ($string=="") return false;
      $res = explode(",", $string);
-     $res = decodeRequest($res[1]);
+     $res = utils::decodeRequest($res[1]);
     return $res;
 }
 
-function getPreviousCSID($pfName){// methode a construire, csid=pfname+compteur
-global $wgServerName, $wgScriptPath;
-$url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-$req = '[[ChangeSet:+]] [[inPushFeed::'.$pfName.']]';
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    //$url = dirname($_SERVER['HTTP_REFERER']);
+function getPreviousCSID($pfName) {// methode a construire, csid=pfname+compteur
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfName.']]';
+    $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
     $string = file_get_contents($url);
     if ($string=="") return false;
-//    $pos = strrpos($string, ":");
-//    if ($pos === false) {
-//        // not found...
-//    }else{
-//        $string = substr($string, $pos+1);
-//    }
-$string = explode(",", $string);
-$string = $string[0];
+    //    $pos = strrpos($string, ":");
+    //    if ($pos === false) {
+    //        // not found...
+    //    }else{
+    //        $string = substr($string, $pos+1);
+    //    }
+    $string = explode(",", $string);
+    $string = $string[0];
     $string = str_replace(',', '', $string);
-//    $string = strtr($string, "\"", "\0");
+    //    $string = strtr($string, "\"", "\0");
     $string = str_replace("\"", "", $string);
     return $string;
 }
@@ -485,17 +472,16 @@ function getPublishedPatches($pfname){
    global $wgServerName, $wgScriptPath;
    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
    $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfname.']]';
-   $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $req);
-    //$url = dirname($_SERVER['HTTP_REFERER']);
+   $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
     $string = file_get_contents($url);
     if ($string=="") return array();//false;
+    $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
      $res = explode(",", $string);
 
     foreach ($res as $key=>$resultLine){
-        if(strpos($resultLine, 'ChangeSet:')!==false){
+        if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine==""){
             unset($res[$key]);
         }
     }
@@ -537,141 +523,6 @@ function updatePushFeed($name, $CSID){
 
     return true;
 }
-
-function encodeRequest($request){
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'), $request);
-                      return $req;
-}
-
-function decodeRequest($req){
-    $request = str_replace(
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'),
-                          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}'), $req);
-                      return $request;
-}
-
-function addPushSite($wiki, $name, $search){
-    $res = siteExists($wiki, $name);
-        if($res==false){// site does not exist
-            $db = wfGetDB( DB_MASTER );
-            $db->begin();
-
-            $res = $db->insert( 'site', array(
-            'site_url'        => $wiki,
-            'site_name'    => $name,
-                ), __METHOD__ );
-            $id = $db->insertId();
-
-            $pageTitleArray = array();
-            $php = file_get_contents($wiki.'api.php?action=query&list=search&srsearch='.$search.'&srwhat=text&format=php&srlimit=100');
-            //[[catégorie:pickle]]
-            $array=$php = unserialize($php);
-            $pageTitleArray = $array['query']['search'];
-            foreach ($pageTitleArray as $title){
-                $db->insert('site_cnt', array(
-            'site_id' => $id,
-            'page_title' => $title['title'],
-            'counter' => 0
-                    ), __METHOD__);
-            }
-            $db->commit();
-        }
-        elseif($res==true){//site exists but we add the pages anyway
-            $db = wfGetDB( DB_MASTER );
-            $db->begin();
-
-
-            $id = $db->selectField('site','site_id', array(
-        'site_url'=>$wiki,
-        'site_name' => $name));
-
-            $pageTitleArray = array();
-            $php = file_get_contents($wiki.'api.php?action=query&list=search&srsearch='.$search.'&srwhat=text&format=php&srlimit=100');
-            //[[catégorie:pickle]]
-            $array=$php = unserialize($php);
-            $pageTitleArray = $array['query']['search'];
-            foreach ($pageTitleArray as $title){
-                $db->insert('site_cnt', array(
-            'site_id' => $id,
-            'page_title' => $title['title'],
-            'counter' => 0
-                    ), __METHOD__);
-            }
-            $db->commit();
-        }
-
-}
-
-function addPullSite($url, $name, $pages){
-    //ajout à la base de données, voir addSite dans ArticleAdminPage
-    echo "<script>alert(\"addPullSite\")</script>";
-    //siteAuthorized??
-        $res = siteExists($url, $name);
-        if($res==false){// site does not exist
-            $db = wfGetDB( DB_MASTER );
-            $db->begin();
-
-            $res = $db->insert( 'site', array(
-            'site_url'        => $url,
-            'site_name'    => $name,
-                ), __METHOD__ );
-            $id = $db->insertId();
-
-            foreach ($pages as $title){
-                $db->insert('site_cnt', array(
-            'site_id' => $id,
-            'page_title' => $title,
-            'counter' => 0
-                    ), __METHOD__);
-}
-            $db->commit();
-        }
-        elseif($res==true){//site exists but we add the pages anyway
-            $db = wfGetDB( DB_MASTER );
-            $db->begin();
-
-
-            $id = $dbr->selectField('site','site_id', array(
-        'site_url'=>$url,
-        'site_name' => $name));
-
-            foreach ($pages as $title){
-                $db->insert('site_cnt', array(
-            'site_id' => $id,
-            'page_title' => $title,
-            'counter' => 0
-                    ), __METHOD__);
-            }
-            $db->commit();
-        }
-}
-
-function siteExists($url, $name){
-        $val=0;
-        $db = wfGetDB(DB_SLAVE);
-        $tables = array("site");
-        $conditions = "";
-        $fname = "Database::select";
-        $columns = array("site_url","site_name");
-        $options = "";
-        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-            return false;
-        } else if($db->numRows($result) == 0) {
-            return false;
-        } else {
-            while ($row = $db->fetchRow($result)) {
-                if($row['site_name']==$name || $row['site_url']==$url){
-                    $val = true;
-                    break;
-                }
-                else return false;
-
-            }
-        }
-        return $val;
-    }
 
 
 /******************************************************************************/

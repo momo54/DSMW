@@ -120,7 +120,7 @@ class Patch {
         foreach ($this->mOperations as $operation){
             $lineContent = $operation->getLineContent();
             if(strpos($lineContent, '[[')!==false || strpos($lineContent, ']]')!==false){
-                $lineContent = $this->encode($lineContent);
+                $lineContent = utils::encodeRequest($lineContent);
             }
             $type="";
             if($operation instanceof LogootIns) $type="Insert";
@@ -211,20 +211,5 @@ function getPageTitleWithId($id){//returns false if the article doesn't exist ye
 
         return $lastid + 1;
     }
-
-
-function encode($request){
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'), $request);
-                      return $req;
-}
-
-function decode($req){
-    $request = str_replace(
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'),
-                          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}'), $req);
-                      return $request;
-}
 }
 ?>

@@ -31,3 +31,7 @@ PRIMARY KEY ( `site_id` )
 `counter` INT( 10 ) NULL ,
 PRIMARY KEY ( `site_id` , `page_title` )
 ) ENGINE = InnoDB CHARACTER SET binary;
+
+ CREATE TABLE `wikidb`.`p2p_clock` (
+`value` BIGINT( 18 ) NOT NULL DEFAULT '0'
+) ENGINE = InnoDB;

@@ -114,12 +114,10 @@ class ArticleAdminPage extends SpecialPage {
 
 $i=0;
         $req = "[[PullFeed:+]]";
-        $url = dirname($_SERVER['HTTP_REFERER']);
-        if($_GET['back']==true){
-            $pullFeeds = $this->getRequestedPages($req, $url, true);
-        }else{
-        $pullFeeds = $this->getRequestedPages($req, $url, false);
-        }
+        
+        
+            $pullFeeds = $this->getRequestedPages($req);
+        
         
             $output .= '
 <FORM METHOD="GET" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPull">
@@ -231,11 +229,9 @@ $i=0;
         $i=0;
         $req = "[[PushFeed:+]]";
         $url = dirname($_SERVER['HTTP_REFERER']);
-        if($_GET['back']==true){
-            $pushFeeds = $this->getRequestedPages($req, $url, true);
-        }else{
-        $pushFeeds = $this->getRequestedPages($req, $url, false);
-        }
+       
+            $pushFeeds = $this->getRequestedPages($req);
+        
 
         
             $output .= '
@@ -880,15 +876,10 @@ $output .='
     }
 
     /**returns an array of page titles received via the request*/
-function getRequestedPages($request, $url, $index=true){
-    $req = str_replace(
-				          array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
-				          array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $request);
-    if($index==true){
-        $url1 = $url."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
-    }elseif($index==false){
-        $url1 = $url."/Special:Ask/".$req."/format=csv/sep=,/limit=100";
-    }
+function getRequestedPages($request){
+    global $wgServerName, $wgScriptPath;
+    $req = utils::encodeRequest($request);
+    $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
     $string = file_get_contents($url1);
     $res = explode("\n", $string);
     foreach ($res as $key=>$page){

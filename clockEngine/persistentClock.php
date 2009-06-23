@@ -32,27 +32,41 @@ class persistentClock implements Clock{
         $this->mClock = $this->mClock+1;
     }
 
-    public function load() {        
-        try {
-            $fp = fopen(dirname( __FILE__ )."/store.txt", "r");
-            $ck = fread($fp, filesize(dirname( __FILE__ )."/store.txt"));
-            fclose($fp);
-            $this->mClock = unserialize($ck);
-        } catch (Exception $e) {
-             throw new Exception ($e);
-        }
+//    public function load() {
+//        try {
+//            $fp = fopen(dirname( __FILE__ )."/store.txt", "r");
+//            $ck = fread($fp, filesize(dirname( __FILE__ )."/store.txt"));
+//            fclose($fp);
+//            $this->mClock = unserialize($ck);
+//        } catch (Exception $e) {
+//             throw new Exception ($e);
+//        }
+//
+//    }
+//
+//    public function store() {
+//        try {
+//            $ck = serialize($this->mClock);
+//            $fp = fopen(dirname( __FILE__ )."/store.txt", "w");
+//            fwrite($fp, $ck);
+//            fclose($fp);
+//        } catch (Exception $e) {
+//            throw new Exception ($e);
+//        }
+//
+//    }
 
-    }
+    function load(){
+    $db = wfGetDB( DB_SLAVE );
+        $this->mClock = $db->selectField('p2p_clock','value');
+}
 
-    public function store() {
-        try {
-            $ck = serialize($this->mClock);
-            $fp = fopen(dirname( __FILE__ )."/store.txt", "w");
-            fwrite($fp, $ck);
-            fclose($fp);
-        } catch (Exception $e) {
-            throw new Exception ($e);
-        }
+function store(){
+
+        $dbw = wfGetDB( DB_MASTER );
+        $dbw->update( 'p2p_clock', array(
+            'value'        => $this->mClock,
+            ), '*', __METHOD__ );
 
     }
 
