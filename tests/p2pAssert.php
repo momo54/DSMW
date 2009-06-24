@@ -12,93 +12,113 @@ function assertContentEquals($server,$pageName,$content) {
     PHPUnit_Framework_Assert::assertEquals($content,$contentPage);
 }
 
-function assertPushCreated($server,$pushName,$request) {
-    $content = getContentPage($server,$pushName);
-
-    assertPush($content,$pushName,$request);
+/*function assertPushCreated($server,$pushName,$request) {
+    assertPush($server,$pushName,$request);
 
     //0 changeset
-    $changeSetFound = getPushChangeSet($content);
-    PHPUnit_Framework_Assert::assertNull($changeSetFound);
+    $pushFound = getSemanticRequest($server,'[[name::'.$pushName.']]','-3FhasPushHead');
+//    PHPUnit_Framework_Assert::assertEquals(' ',$pushFound[0]);
 }
 
 function assertPushUpdated($server,$pushName,$request,$previousChangeSet,$op) {
-    $content = getContentPage($server,$pushName);
 
-    assertPush($content,$pushName,$request);
+    assertPush($server,$pushName,$request);
 
     //1 changeset
-    $CSIDFound = getPushChangeSet($content);
+    $pushFound = getSemanticRequest($server,'[[name::'.$pushName.']]','-3FhasPushHead');
+    $CSIDFound = substr($pushFound[0],0,-1);
     PHPUnit_Framework_Assert::assertNotNull($CSIDFound);
-
-    assertPageExist($server,'ChangeSet:'.$CSIDFound);
+    assertPageExist($server,$CSIDFound);
     //$url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/-3FhasPatch/format=csv/sep=,/limit=100";
     //http://localhost/mediawiki-1.13.5/index.php/Special:Ask/-5B-5BchangeSetID::localhost-2Fmediawiki-1.13.5796-5D-5D-20-5B-5BhasPatch::+-5D-5D/-3FhasPatch/format=csv/sep=,/limit=100
     //http://localhost/mediawiki-1.13.5/index.php/Special:Ask/-5B-5BchangeSetID::localhost-2Fmediawiki-2D1.13.5796-5D-5D-5D-5D/-3FhasOperation/format=php/sep=,/limit=100
 
     //--------------- ChangeSet -------------------
-    $contentCS = getContentPage($server,'ChangeSet:'.$CSIDFound);
-    $CSID = getCSID($contentCS);
-    PHPUnit_Framework_Assert::assertEquals($CSIDFound,$CSID);
+    $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
+    $CSFound = getSemanticRequest($server,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet');
+    PHPUnit_Framework_Assert::assertEquals($CSIDFound,'ChangeSet:'.$CSFound[0]);
 
-    $inPushFeed = getCSPushFeed($contentCS);
-    PHPUnit_Framework_Assert::assertEquals($inPushFeed,$pushName);
+    PHPUnit_Framework_Assert::assertEquals(strtolower($pushName),strtolower($CSFound[1]));
 
-    $previousCSFound = getPreviousCS($contentCS);
-    PHPUnit_Framework_Assert::assertEquals($previousChangeSet,$previousCSFound);
+    PHPUnit_Framework_Assert::assertEquals($previousChangeSet,substr($CSFound[2],0,-1));
 
-    assertPatch($server,$CSID,$op);
+    assertPushPatch($server,$CSName,$op);
 
-}
+}*/
 
-function assertPatch($server,$changeSetId,$op){
+/*function assertPushPatch($server,$changeSetId,$op) {
     $patchFound = getSemanticRequest($server,'[[changeSetID::'.$changeSetId.']]','-3FhasPatch');
+    $patchFound = split(',',$patchFound[0]);
 
     for ($i = 0 ; $i < count($patchFound) ; $i++) {
         $posStart = strpos($patchFound[$i], ':')+1;
-        $patchId = substr($patchFound[$i], $posStart,strlen($patchFound[$i])-1-$posStart);
-        $opFound = getSemanticRequest($server, '[[patchID::'.$patchId.']]','-3FOnPage/-3FhasOperation');
-        $pageConcerned = $opFound[0];
-        
-        PHPUnit_Framework_Assert::assertTrue(count($op)+1==count($opFound));
+        $atchFound[$i] = str_replace(' ','', $patchFound[$i]);
+        $patchId = substr($patchFound[$i], $posStart,strlen($patchFound[$i])-$posStart);
+        $pageConcerned = getSemanticRequest($server, '[[patchID::'.$patchId.']]','-3FOnPage');
+        $opFound = getSemanticRequest($server, '[[patchID::'.$patchId.']]','-3FhasOperation');
+        $pageConcerned = substr($pageConcerned[0],0,-1);
 
-        for ($j = 1 ; $j < count($opFound) ; $j++) {
+        $opFound[0]  = substr($opFound[0],1,-2);
+        $opFound = split(',',$opFound[0]);
+        PHPUnit_Framework_Assert::assertTrue(count($op[$pageConcerned])==count($opFound));
+
+        for ($j = 0 ; $j < count($opFound) ; $j++) {
             $opi = split(';', $opFound[$j]);
             $opCS = $opi[0];
-            PHPUnit_Framework_Assert::assertEquals(strtolower($changeSetId), strtolower($opCS));
+            //PHPUnit_Framework_Assert::assertEquals(strtolower($changeSetId), strtolower($opCS));
             $opOp = strtolower($opi[1]);
-            $opContent = substr(reConvertRequest($opi[3]),0,-1);
-            PHPUnit_Framework_Assert::assertEquals($op[$pageConcerned][$opOp],$opContent);
+            $opContent = reConvertRequest($opi[3]);
+            $c = $op[$pageConcerned][$j][$opOp];
+            PHPUnit_Framework_Assert::assertEquals($op[$pageConcerned][$j][$opOp],$opContent);
         }
     }
-}
-//assertPatch('http://localhost/wiki1','localhost/wiki1873','');
+}*/
 
-function assertPush($content,$pushName,$request) {
-//push name
-    $pushNameFound = getPushName($content);
-    PHPUnit_Framework_Assert::assertEquals($pushName,$pushNameFound);
+function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
+    $patchName = substr($patchId,0,-strlen($clock-1));
+    $patch = getSemanticRequest($server,'[[patchID::'.$patchId,'-3FonPage/-3FhasOperation/-3Fprevious');
 
-    //push request
-    $requestFound = getPushRequest($content);
-    $request = convertRequest($request);
-    PHPUnit_Framework_Assert::assertEquals($request,$requestFound);
-}
+    PHPUnit_Framework_Assert::assertEquals($pageName,$patch[0]);
+    PHPUnit_Framework_Assert::assertEquals($previousPatch,substr($patch[2],0,-1));
 
-function assertPullCreated($server,$pullName) {
-    $content = getContentPage($server,'PullFeed:'.$pullName);
-}
-//assertPushCreated('http://localhost/wiki1','pushCity','[[Category:city]]');
+    $opFound = split(',',$patch[1]);
+    PHPUnit_Framework_Assert::assertTrue(count($op[$pageName])==count($opFound));
 
-function assertPullUpdated($server,$pullName,$changeSet) {
-    $content = getContentPage($server,'PullFeed:'.$pullName);
+    for ($j = 0 ; $j < count($opFound) ; $j++) {
+        $opi = split(';', $opFound[$j]);
+        PHPUnit_Framework_Assert::assertEquals(strtolower($patchName.($clock)), strtolower($opi[0]));
+        PHPUnit_Framework_Assert::assertEquals($op[$pageName][$j][strtolower($opi[1])],reConvertRequest($opi[3]));
+        $clock = $clock + 1;
+    }
 }
 
-function assertPull() {
+function assertPullUpdated($server,$wikiPush,$pushFeed,$pullName) {
+    $pullFound = getSemanticRequest($server,'[[name::PullFeed:'.$pullName.']][[relatedPushFeed::'.$pushFeed.']]','-3Fname/-3FrelatedPushFeed/-3FhasPullHead');
 
+    PHPUnit_Framework_Assert::assertEquals(strtolower('PullFeed:'.$pullName),strtolower($pullFound[0]));
+    PHPUnit_Framework_Assert::assertEquals(strtolower($pushName),strtolower($pullFound[1]));
+
+    $changeSetPush = getSemanticRequest($wikiPush,'[[name::'.$pushFeed.']]','-3FhasPushHead');
+    $changeSetPush = $changeSetPush[0];
+    assertPageExist($server.'/'.$changeSetPush);
+    PHPUnit_Framework_Assert::assertEquals($changeSetPush,$pullFound[3]);
+
+    $CSFound = getSemanticRequest($server,'[[changeSetId::'.$changeSetPush.']]','-3FinPullFeed');
+    PHPUnit_Framework_Assert::assertEquals($pullName,$CSFound[0]);
+
+    $patchPush = getSemanticRequest($server,'[[changeSetID::'.$changeSetPush.']]','-3FhasPatch');
+
+    for ($i = 0 ; $i < count($patchPush) ; $i++) {
+        $posStart = strpos($patchPush[$i], ':')+1;
+        $patchId = substr($patchPush[$i], $posStart,strlen($patchPush[$i])-1-$posStart);
+
+        assertPageExist($server.'/'.$patchId);
+
+        $a = getSemanticRequest($server,'[[patchID::'.$patchId.']]','-3FonPage/-3FhasOperation');
+        $b = getSemanticRequest($wikiPush,'[[patchID::'.$patchId.']]','-3FonPage/-3FhasOperation');
+        PHPUnit_Framework_Assert::assertEquals($a, $b);
+    }
 }
-
-
 
 function getContentPage($server,$pageName) {
     $php = file_get_contents($server.'/api.php?action=query&prop=revisions&titles='.$pageName.'&rvprop=content&format=php');
@@ -110,78 +130,16 @@ function getContentPage($server,$pageName) {
     return($content);
 }
 
-function getPushName($content) {
-    $posStart = strpos($content, '[[name::');
-    if($posStart > 0) $posStart += strlen('[[name::');
-    else return null;
-    $posEnd = strpos($content,']]
-hasSemanticQuery:') - $posStart;
-    return substr($content, $posStart,$posEnd);
-}
-
-function getPushRequest($content) {
-    $posStart = strpos($content, '[[hasSemanticQuery::');
-    if($posStart > 0) $posStart += strlen('[[hasSemanticQuery::');
-    else return null;
-    $posEnd = strpos($content,']]
-Pages concerned:') - $posStart;
-    return substr($content, $posStart,$posEnd);
-}
-
-function getPushChangeSet($content) {
-    $posStart = strpos($content,'[[hasPushHead::ChangeSet: ');
-    if($posStart > 0) $posStart += strlen('[[hasPushHead::ChangeSet: ');
-    else return null;
-    $posEnd = strlen($content) - 2 - $posStart;
-    return substr($content,$posStart,$posEnd);
-
-}
-
-function getCSID($content) {
-    $posStart = strpos($content,'[[changeSetID::');
-    if($posStart > 0) $posStart += strlen('[[changeSetID::');
-    else return null;
-    $posEnd = strpos($content,']]
-inPushFeed:') - $posStart;
-    return substr($content,$posStart,$posEnd);
-}
-
-function getCSPushFeed($content) {
-    $posStart = strpos($content,'[[inPushFeed::');
-    if($posStart > 0) $posStart += strlen('[[inPushFeed::');
-    else return null;
-    $posEnd = strpos($content,']]
-previousChangetSet:') - $posStart;
-    return substr($content,$posStart,$posEnd);
-}
-
-function getPreviousCS($content) {
-    $posStart = strpos($content,'[[previousChangetSet::');
-    if($posStart > 0) $posStart += strlen('[[previousChangetSet::');
-    else return null;
-    $posEnd = strpos($content,']]
- hasPatch:') - $posStart;
-    return substr($content,$posStart,$posEnd);
-}
-
-
-function getSemanticRequest($server,$request,$param) {
-    /*$posStart = strpos($content,'[[hasPatch:');
-    if($posStart > 0) $posStart += strlen('[[hasPatch:');
-    else return null;*/
+function getSemanticRequest($server,$request,$param,$sep='!') {
     $request = convertRequest($request);
-    $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep=!/limit=100';
-    $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep=!/limit=100');
-    $array = split('!', $php);
+    $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
+    $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100');
+    $array = split($sep, $php);
     $arrayRes[] = $array[1];
     for ($i = 2 ; $i < count($array) ; $i++) {
         $arrayRes[] = ereg_replace('"', '',$array[$i]);
     }
     return $arrayRes;
-}
-
-function getRelatedPushFeed($content) {
-
 }
 
 function convertRequest($request) {

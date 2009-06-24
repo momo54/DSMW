@@ -93,7 +93,7 @@ if (is_array($_GET)){
 		if (!is_array($GETval)){$_GET[$GETkey] = stripslashes($GETval);}
 }
 
-##############################################################
+##############################################################function
 ############## you probably don't need to edit this ##########
 ############## look at the end of this file for more help ####
 ##############################################################

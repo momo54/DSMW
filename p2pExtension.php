@@ -3,6 +3,7 @@
 if ( !defined( 'MEDIAWIKI' ) ) {
     exit;
 }
+require_once "$IP/includes/GlobalFunctions.php";
 
 $wgP2PExtensionIP = dirname( __FILE__ );
 
@@ -16,15 +17,15 @@ $wgHooks['EditPageBeforeConflictDiff'][] = 'conflict';
 $wgAutoloadClasses['BlobInfo'] = "$wgP2PExtensionIP/logootEngine/BlobInfo.php";
 $wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
 $wgAutoloadClasses['LogootPosition'] =
-                            "$wgP2PExtensionIP/logootEngine/LogootPosition.php";
+    "$wgP2PExtensionIP/logootEngine/LogootPosition.php";
 $wgAutoloadClasses['Diff1']
-= $wgAutoloadClasses['_DiffEngine1']
-= $wgAutoloadClasses['_DiffOp1']
-= $wgAutoloadClasses['_DiffOp_Add1']
-= $wgAutoloadClasses['_DiffOp_Change1']
-= $wgAutoloadClasses['_DiffOp_Copy1']
-= $wgAutoloadClasses['_DiffOp_Delete1']
-= "$wgP2PExtensionIP/differenceEngine/DiffEngine.php";
+    = $wgAutoloadClasses['_DiffEngine1']
+    = $wgAutoloadClasses['_DiffOp1']
+    = $wgAutoloadClasses['_DiffOp_Add1']
+    = $wgAutoloadClasses['_DiffOp_Change1']
+    = $wgAutoloadClasses['_DiffOp_Copy1']
+    = $wgAutoloadClasses['_DiffOp_Delete1']
+    = "$wgP2PExtensionIP/differenceEngine/DiffEngine.php";
 
 $wgAutoloadClasses['LogootOp'] = "$wgP2PExtensionIP/logootop/LogootOp.php";
 $wgAutoloadClasses['LogootIns'] = "$wgP2PExtensionIP/logootop/LogootIns.php";
@@ -53,58 +54,58 @@ function conflict(&$editor, &$out) {
 }
 
 function performAction($output, $article, $title, $user, $request, $wiki) {
-if($wiki->params['action']!='view') return true;
-if(!strstr($title->mTextform, "PushChannel")===false){
+    if($wiki->params['action']!='view') return true;
+    if(!strstr($title->mTextform, "PushChannel")===false) {
     //code pour recuperer le push channel dans la base (name, url) avec les pages concernées
-    $pushCh = substr($title->mTextform, strpos($title->mTextform, ": ")+2);
-//    $db = &wfGetDB(DB_SLAVE);
-//        $tables = array("site", "site_cnt", "page");
-//        $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
-//                        "site_name='".$pushCh."'");
-//        $fname = "Database::select";
-//        $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
-//        $options = array("ORDER BY site.site_id");
-//
-//
-//
-//        $output = "";
-//        $result = $db->select($tables, $columns, $conditions, $fname, $options);
-//
-//            $output .= $title->mTextform.' is linked with the pages: ';
-//
-//            //Display the data--display some data differently than others.
-//            while ($row = $db->fetchRow($result)) {
-//                $output .= '[['.$row['page_title'].']]';
-//
-//                $output .= "<td title='yop'>";
-//                $output .= htmlspecialchars($row['site_name']).'&nbsp;';
-//                $output .= "</td>";
-//                $output .= "<td>";
-//                $output .= htmlspecialchars($row['counter']).'&nbsp;';
-//                $output .= "</td>";
-//                $output .= "<td>";
-//                //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
-//                //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
-//                $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
-//                $output .= "</td>";
-//                $output .= '</tr>';
-//            }
-//
-//            $output .= '</table>';
+        $pushCh = substr($title->mTextform, strpos($title->mTextform, ": ")+2);
+    //    $db = &wfGetDB(DB_SLAVE);
+    //        $tables = array("site", "site_cnt", "page");
+    //        $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
+    //                        "site_name='".$pushCh."'");
+    //        $fname = "Database::select";
+    //        $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
+    //        $options = array("ORDER BY site.site_id");
+    //
+    //
+    //
+    //        $output = "";
+    //        $result = $db->select($tables, $columns, $conditions, $fname, $options);
+    //
+    //            $output .= $title->mTextform.' is linked with the pages: ';
+    //
+    //            //Display the data--display some data differently than others.
+    //            while ($row = $db->fetchRow($result)) {
+    //                $output .= '[['.$row['page_title'].']]';
+    //
+    //                $output .= "<td title='yop'>";
+    //                $output .= htmlspecialchars($row['site_name']).'&nbsp;';
+    //                $output .= "</td>";
+    //                $output .= "<td>";
+    //                $output .= htmlspecialchars($row['counter']).'&nbsp;';
+    //                $output .= "</td>";
+    //                $output .= "<td>";
+    //                //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
+    //                //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
+    //                $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
+    //                $output .= "</td>";
+    //                $output .= '</tr>';
+    //            }
+    //
+    //            $output .= '</table>';
 
-//PushChannel1 is linked with page: [[linked::Berlin]]
-//and is composed by: {{#ask: [[is_in::PushChannel1]]}}
-//[[Category:PushChannel]]
+    //PushChannel1 is linked with page: [[linked::Berlin]]
+    //and is composed by: {{#ask: [[is_in::PushChannel1]]}}
+    //[[Category:PushChannel]]
 
 
 
-        
-}
-elseif(!strstr($title->mTextform, "Patch")===false){
-    $yop = "page Patch";
-}
 
-return true;
+    }
+    elseif(!strstr($title->mTextform, "Patch")===false) {
+        $yop = "page Patch";
+    }
+
+    return true;
 }
 
 /**
@@ -119,13 +120,13 @@ return true;
  */
 function onUnknownAction($action, $article) {
     global $wgOut;
-    
+
     $script=javascript($_SERVER['HTTP_REFERER']);
     $wgOut->addHeadItem('script', $script);
+    wfDebugLog('p2p','onUnknowaction');
 
-
-//////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
-    if($_GET['action']=='addpullpage'){
+    //////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
+    if($_GET['action']=='addpullpage') {
 
         $newtext = "Add a new site:
 
@@ -135,9 +136,9 @@ PullFeed Name:   <br>    {{#input:type=text|name=name}}<br>
 {{#input:type=submit|value=ADD}}
 }}";
         //if article doesn't exist insertNewArticle
-        if($article->mTitle->exists()){
-        $article->updateArticle($newtext, $summary="", false, false);
-        }else{
+        if($article->mTitle->exists()) {
+            $article->updateArticle($newtext, $summary="", false, false);
+        }else {
             $article->insertNewArticle($newtext, $summary="", false, false);
         }
         $article->doRedirect();
@@ -146,8 +147,8 @@ PullFeed Name:   <br>    {{#input:type=text|name=name}}<br>
     }
 
 
-/////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
-    elseif($_GET['action']=='addpushpage'){
+    /////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
+    elseif($_GET['action']=='addpushpage') {
         $newtext = "Add a new pushfeed:
 
 {{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pushpage|method=POST|
@@ -162,14 +163,14 @@ Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=k
     }
 
 
-///////PushFeed page////////
-    elseif($_GET['action']=='pushpage'){
-        //$url = $_POST['url'];//pas url mais changesetId
+    ///////PushFeed page////////
+    elseif($_GET['action']=='pushpage') {
+    //$url = $_POST['url'];//pas url mais changesetId
         $name = $_POST['name'];
         $request = $_POST['keyword'];
         $stringReq = utils::encodeRequest($request);//avoid "semantic injection" :))
         //addPushSite($url, $name, $request);
-        
+
 
         $newtext = "PushFeed:
 Name: [[name::PushFeed:".$name."]]
@@ -177,13 +178,13 @@ hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
 Pages concerned:
 {{#ask: ".$request."}}
 ";
-       
+
 
         $title = Title::newFromText($_POST['name'], PUSHFEED);
 
-            $article = new Article($title);
-            $article->doEdit($newtext, $summary="");
-            $article->doRedirect();
+        $article = new Article($title);
+        $article->doEdit($newtext, $summary="");
+        $article->doRedirect();
 
 
         return false;
@@ -197,13 +198,16 @@ Pages concerned:
             $outtext='<p><b>Select only one pushfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
             return false;
-        }elseif($name==""){
+        }elseif($name=="") {
             $outtext='<p><b>No pushfeed selected!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
             return false;
         }
+        
         $name = $name[0];
-       // $name = $_GET['name'];//PushFeed name
+        wfDebugLog( 'p2p', 'name push : '.$name);
+
+        // $name = $_GET['name'];//PushFeed name
         $request = getPushFeedRequest($name);
         $previousCSID = getPreviousCSID($name);
         if($previousCSID==false) {
@@ -222,7 +226,8 @@ Pages concerned:
         }
         
         $pages = getRequestedPages($request);//ce sont des pages et non des patches
-        foreach ($pages as $page){
+        foreach ($pages as $page) {
+           // wfDebugLog( 'p2p', 'page found '.$age);
             $request1 = '[[Patch:+]][[onPage::'.$page.']]';
             $tmpPatches = getRequestedPages($request1);
             $patches = array_merge($patches, $tmpPatches);
@@ -235,16 +240,16 @@ Pages concerned:
                 // not found...
                 $articleName = $CSID;
             }else{
-                $articleName = substr($CSID, $pos+1);
+                $articleName = substr($CSID, 0,$pos+1);
                 $CSID = "ChangeSet:".$articleName;
             }
         $newtext = "ChangeSet:
 changeSetID: [[changeSetID::".$CSID."]]
 inPushFeed: [[inPushFeed::".$name."]]
-previousChangetSet: [[previousChangetSet::".$previousCSID."]]
+previousChangetSet: [[previousChangeSet::".$previousCSID."]]
 ";
-        foreach ($unpublished as $patch){
-        $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
+        foreach ($unpublished as $patch) {
+            $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
         }
 
 
@@ -264,27 +269,34 @@ previousChangetSet: [[previousChangetSet::".$previousCSID."]]
     }
 
 
-//////////PullFeed page////////
-    elseif($_GET['action']=='pullpage'){
+    //////////PullFeed page////////
+    elseif($_GET['action']=='pullpage') {
         $url = $_POST['url'];
         $name = $_POST['name'];
         
         $newtext = "PullFeed:
 
+name: [[name::PullFeed:".$name."]]
 relatedPushFeed: [[relatedPushFeed::".$url."]]
 ";
-        
-            $title = Title::newFromText($_POST['name'], PULLFEED);
-            $article = new Article($title);
-            $article->doEdit($newtext, $summary="");
-            $article->doRedirect();
+
+        $title = Title::newFromText($_POST['name'], PULLFEED);
+        $article = new Article($title);
+        $article->doEdit($newtext, $summary="");
+        $article->doRedirect();
 
 
         return false;
     }
 
-//////////OnPull/////////////
-    elseif($_GET['action']=='onpull'){
+    //////////OnPull/////////////
+    elseif($_GET['action']=='onpull') {
+        //onpull test
+        $pullFeed = $_POST['name'];
+        $CSPush = $_POST['CSPush'];
+        $wikiPush = $_POST['wikiPush'];
+
+        $contentCS = file_get_contents($wikiPush.'/'.$CSPush);
 
     }
 
@@ -294,7 +306,7 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
         if(isset($_POST['wiki'])&& isset ($_POST['title'])&& isset ($_POST['id'])) {
 
             $patchArray = $this->getPatches($_POST['id'], $_POST['title'], $_POST['wiki']);
-            foreach ($patchArray as $patch){
+            foreach ($patchArray as $patch) {
                 $this->integratePatch($patch, $article);
             }$style = ' style="border-bottom: 2px solid #000;"';
             $tableStyle = ' style="float: left; margin-left: 40px;"';
@@ -305,7 +317,7 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
             $conditions = '';
             $fname = "Database::select";
             $options = array(
-            "ORDER BY" => "site_id",
+                "ORDER BY" => "site_id",
             );
             if ($page_limit > 0) {
                 $options["LIMIT"] = $page_limit;
@@ -313,9 +325,9 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
             if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
                 $output .= '<p>Error accessing list.</p>';
             } else if($db->numRows($result) == 0) {
-                $output .= '<p>No remote site.</p>';
-            } else {
-                $output .= '
+                    $output .= '<p>No remote site.</p>';
+                } else {
+                    $output .= '
 <FORM METHOD="POST" ACTION="">
 <table'.$tableStyle.' border>
   <tr>
@@ -329,21 +341,21 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
     <th><input type="submit" value="Remove"></th>
     <input type="hidden" name="ppc" value="true">
   </tr>';
-                while ($row = $db->fetchRow($result)) {
-                    $i = $i + 1;
-                    $output .= '
+                    while ($row = $db->fetchRow($result)) {
+                        $i = $i + 1;
+                        $output .= '
   <tr>
     <td>'.$row["site_id"].'</td>
     <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
     <td colspan="3" align="center"><input type="checkbox" name="push['.$i.']"/></td>
   </tr>';
-                }
-                $output .= '
+                    }
+                    $output .= '
 
 
 </table>$id
 </FORM>';
-            }
+                }
 
         }
 
@@ -360,7 +372,7 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
         $db = &wfGetDB(DB_SLAVE);
         $tables = array("site", "site_cnt", "page");
         $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
-                        "page.page_title='".$_GET['title']."'");
+            "page.page_title='".$_GET['title']."'");
         $fname = "Database::select";
         $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
         $options = array("ORDER BY site.site_id");
@@ -369,38 +381,38 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
         if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
             $output .= '<p>Error accessing database.</p>';
         } else if($db->numRows($result) == 0) {
-            $output .= '<p>This page is up to date.</p>';
-        } else {
-            $style = ' style="border-bottom:2px solid #000; text-align:left;"';
-            $output .= '<table border cellspacing="0" cellpadding="5"><tr>';
+                $output .= '<p>This page is up to date.</p>';
+            } else {
+                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
+                $output .= '<table border cellspacing="0" cellpadding="5"><tr>';
 
 
 
-            $output .= '<th'.$style.'>Remote site</th><th'.$style.'>Info</th><th'.$style.'>Action</th>';
+                $output .= '<th'.$style.'>Remote site</th><th'.$style.'>Info</th><th'.$style.'>Action</th>';
 
 
-            $output .= '</tr>';
-
-            //Display the data--display some data differently than others.
-            while ($row = $db->fetchRow($result)) {
-                $output .= '<tr>';
-
-                $output .= "<td title='yop'>";
-                $output .= htmlspecialchars($row['site_name']).'&nbsp;';
-                $output .= "</td>";
-                $output .= "<td>";
-                $output .= htmlspecialchars($row['counter']).'&nbsp;';
-                $output .= "</td>";
-                $output .= "<td>";
-                //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
-                //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
-                $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
-                $output .= "</td>";
                 $output .= '</tr>';
-            }
 
-            $output .= '</table>';
-        }
+                //Display the data--display some data differently than others.
+                while ($row = $db->fetchRow($result)) {
+                    $output .= '<tr>';
+
+                    $output .= "<td title='yop'>";
+                    $output .= htmlspecialchars($row['site_name']).'&nbsp;';
+                    $output .= "</td>";
+                    $output .= "<td>";
+                    $output .= htmlspecialchars($row['counter']).'&nbsp;';
+                    $output .= "</td>";
+                    $output .= "<td>";
+                    //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
+                    //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
+                    $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
+                    $output .= "</td>";
+                    $output .= '</tr>';
+                }
+
+                $output .= '</table>';
+            }
 
 
         $wgOut->addHTML($output);
@@ -563,7 +575,7 @@ function updatePushFeed($name, $CSID){
     $pageContent = $result;
         if($result=="")return false;
     }else{//no occurence of [[hasPushHead:: , we add
-        $pageContent.= ' hasPushHead: [[hasPushHead::ChangeSet: '.$CSID.']]';
+        $pageContent.= ' hasPushHead: [[hasPushHead::ChangeSet:'.$CSID.']]';
     }
     //save update
     $article = new Article($title);
@@ -585,11 +597,10 @@ function updatePushFeed($name, $CSID){
         1st Edit
 */
 /******************************************************************************/
-function attemptSave($editpage)
-{
+function attemptSave($editpage) {
     $ns = $editpage->mTitle->getNamespace();
     if( ($ns == PATCH) || ($ns == PUSHFEED) || ($ns == PULLFEED) || ($ns == CHANGESET))return true;
-    
+
     $pc = new persistentClock();
     $pc->load();
 
@@ -599,12 +610,12 @@ function attemptSave($editpage)
 
     $dbr = wfGetDB( DB_SLAVE );
     $lastRevision = Revision::loadFromTitle($dbr, $editpage->mTitle);
-    if(is_null($lastRevision)){
+    if(is_null($lastRevision)) {
         $conctext = "";
         $rev_id = 0;
         $firstRev = 1;
     }
-    else{
+    else {
         $conctext= $lastRevision->getText();//V1 conc
         $rev_id = $lastRevision->getId();
     }
@@ -616,18 +627,18 @@ function attemptSave($editpage)
 
     //get the revision with the edittime==>V0$_SERVER['PHP_SELF']
     $rev = Revision::loadFromTimestamp($dbr, $editpage->mTitle, $editpage->edittime);
-    if(is_null($rev)){
+    if(is_null($rev)) {
         $text = "";
         $rev_id1=0;
         $firstRev = 1;
     }
-    else{
+    else {
         $text = $rev->getText();//VO
         $rev_id1 = $rev->getId();
     }
 
 
-    if($conctext!=$text){//if last revision is not V0, there is editing conflict
+    if($conctext!=$text) {//if last revision is not V0, there is editing conflict
 
         $blobInfo1 = BlobInfo::loadBlobInfo($rev_id1);
         $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev, $pc);
@@ -640,17 +651,17 @@ function attemptSave($editpage)
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
         //integration: diffs between VO and V2 into V1
-        foreach ($listPos as $operation){
+        foreach ($listPos as $operation) {
             $blobInfo->integrateBlob($operation, $pc);
         }
-    }else{//no edition conflict
+    }else {//no edition conflict
         $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev, $pc);
         $tmp = serialize($diffs);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
         $patch->store();//stores the patch in the DB
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
-        
+
     }
     $revId = $blobInfo->getNewArticleRevId();
 
@@ -666,8 +677,8 @@ function attemptSave($editpage)
     return true;
 }
 
-function javascript($url){
-$output = '
+function javascript($url) {
+    $output = '
 <SCRIPT language="Javascript">
 function processAdd ('.$url.'){
 		var xhr_object = null;
@@ -696,5 +707,5 @@ function processAdd ('.$url.'){
 }
 
 </SCRIPT>';
-return $output;
+    return $output;
 }
