@@ -245,7 +245,7 @@ class LogootPosition {
         foreach ($this->mPosition as $id){
             $string.=$id->toString()." ";
         }
-        $string.=$this->mClock." ".$this->mVisibility;
+        //$string.=$this->mClock." ".$this->mVisibility;
         return $string;
     }
 

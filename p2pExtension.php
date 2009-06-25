@@ -601,8 +601,8 @@ function attemptSave($editpage) {
     $ns = $editpage->mTitle->getNamespace();
     if( ($ns == PATCH) || ($ns == PUSHFEED) || ($ns == PULLFEED) || ($ns == CHANGESET))return true;
 
-    $pc = new persistentClock();
-    $pc->load();
+//    $pc = new persistentClock();
+//    $pc->load();
 
 
     $firstRev = 0;
@@ -641,7 +641,7 @@ function attemptSave($editpage) {
     if($conctext!=$text) {//if last revision is not V0, there is editing conflict
 
         $blobInfo1 = BlobInfo::loadBlobInfo($rev_id1);
-        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev, $pc);
+        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev/*, $pc*/);
 
         //creation Patch P2
         $tmp = serialize($listPos);
@@ -652,10 +652,10 @@ function attemptSave($editpage) {
 
         //integration: diffs between VO and V2 into V1
         foreach ($listPos as $operation) {
-            $blobInfo->integrateBlob($operation, $pc);
+            $blobInfo->integrateBlob($operation/*, $pc*/);
         }
     }else {//no edition conflict
-        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev, $pc);
+        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev/*, $pc*/);
         $tmp = serialize($diffs);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
@@ -671,8 +671,8 @@ function attemptSave($editpage) {
     $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
 
 
-    $pc->store();
-    unset($pc);
+//    $pc->store();
+//    unset($pc);
     $editpage->textbox1 = $blobInfo->getTextImage();
     return true;
 }

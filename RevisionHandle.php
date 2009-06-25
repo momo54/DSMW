@@ -149,7 +149,7 @@ function attemptSave($editpage)
         //$rev_id1 = $rev->getId();
         $blobInfo1 = BlobInfo::loadBlobInfo($rev_id1);//blob de la version sur
         //laquelle generer les positions
-        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev, $pc);
+        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev/*, $pc*/);
 
 
 
@@ -169,7 +169,7 @@ function attemptSave($editpage)
             $blobInfo->integrateBlob($operation, $pc);
         }
     }else{//no edition conflict
-        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev, $pc);
+        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev/*, $pc*/);
 
 
         //creation patch sans qu'il y ait concurrence

@@ -381,14 +381,14 @@ $step = gmp_div_q($slot, $N);
  *  the operation (insert or delete) and it is executed (integrated to
  * the BlobInfo (the model)
  */
-    function integrateBlob(/*$listPos*/$operation, $clock){
+    function integrateBlob(/*$listPos*/$operation/*, $clock*/){
 
         //clock setting
-        $clock->incrementClock();
-        $tmpPos = $operation->getLogootPosition();
-       
-        $tmpPos->setClock($clock->getValue());
-        $operation->setLogootPosition($tmpPos);
+//        $clock->incrementClock();
+//        $tmpPos = $operation->getLogootPosition();
+//
+//        $tmpPos->setClock($clock->getValue());
+//        $operation->setLogootPosition($tmpPos);
 
         
 
@@ -457,7 +457,7 @@ $step = gmp_div_q($slot, $N);
  * (BlobInfo) and so we have to update (immediat integration) this model after
  * each operation (that we get from the difference engine)
  */
-    function handleDiff($oldtext, $newtext, $firstRev, $clock)
+    function handleDiff($oldtext, $newtext, $firstRev/*, $clock*/)
     {
         $blobInfo = $this;
         global $wgContLang;
@@ -505,7 +505,7 @@ $step = gmp_div_q($slot, $N);
 
 
                         $LogootIns = new LogootIns($lineNb, $position, $lineins);
-                        $this->integrateBlob($LogootIns, $clock);
+                        $this->integrateBlob($LogootIns/*, $clock*/);
                         
                         $listPos[] = $LogootIns;
 
@@ -519,7 +519,7 @@ $step = gmp_div_q($slot, $N);
                         //$diffElements[]=$linedel;
                         if(!is_null($position)){
                             $LogootDel = new LogootDel($position, $linedel);
-                            $this->integrateBlob($LogootDel, $clock);
+                            $this->integrateBlob($LogootDel/*, $clock*/);
                             $listPos[] = $LogootDel;
                         }
                         $counter = $counter - 1;
@@ -535,7 +535,7 @@ $step = gmp_div_q($slot, $N);
                         $position = $blobInfo->getPosition($lineNb3);
                         if(!is_null($position)){
                             $LogootDel1 = new LogootDel($position, $linedel1);
-                            $this->integrateBlob($LogootDel1, $clock);
+                            $this->integrateBlob($LogootDel1/*, $clock*/);
                             $listPos[] = $LogootDel1;
                         }
                         $counter = $counter - 1;
@@ -562,7 +562,7 @@ $step = gmp_div_q($slot, $N);
                         }
 
                         $LogootIns1 = new LogootIns($lineNb4, $position, $lineins1);
-                        $this->integrateBlob($LogootIns1, $clock);
+                        $this->integrateBlob($LogootIns1/*, $clock*/);
                         $listPos[] = $LogootIns1;
 
                         $counter = $counter + 1;
