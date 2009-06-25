@@ -136,8 +136,8 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
     }
 
     function testPosIntegration(){
-        $pc = new persistentClock();
-        $pc->load();
+//        $pc = new persistentClock();
+//        $pc->load();
         $blob = new BlobInfo;
         $oldtext = "";
         $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
@@ -145,7 +145,7 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
         fclose($fp);
 
 
-        $diffs = $blob->handleDiff($oldtext, $actualtext, $firstRev=1, $pc);
+        $diffs = $blob->handleDiff($oldtext, $actualtext, $firstRev=1/*, $pc*/);
         $listPositions = $blob->getBlobInfo();
 
 
@@ -160,38 +160,38 @@ class ConflictTest extends PHPUnit_Framework_TestCase {
         //le texte du fichier fait 129 lignes!!
         $this->assertEquals(114, count($listPositions));
 
-        $pc->store();
-        unset($pc);
+//        $pc->store();
+//        unset($pc);
         unset ($blob);
     }
 
     function testConcIntegration(){
-       $pc = new persistentClock();
-        $pc->load();
+//       $pc = new persistentClock();
+//        $pc->load();
         $blobInfo = new BlobInfo;
         $fp = fopen(dirname( __FILE__ )."/LogootTests/text2.txt", "r");
         $conctext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text2.txt"));
         fclose($fp);
         //$blobInfo->setTextImage($conctext);
-        $listPos = $blobInfo->handleDiff($oldtext/*V0*/, $conctext/*V2*/, $firstRev=1, $pc);
+        $listPos = $blobInfo->handleDiff($oldtext/*V0*/, $conctext/*V2*/, $firstRev=1/*, $pc*/);
         $blobInfo1 = new BlobInfo;
         $oldtext = "";
         $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
         $actualtext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text1.txt"));
         fclose($fp);
 
-        $listPos = $blobInfo1->handleDiff($oldtext/*V0*/, $actualtext/*V2*/, $firstRev=1, $pc);
+        $listPos = $blobInfo1->handleDiff($oldtext/*V0*/, $actualtext/*V2*/, $firstRev=1/*, $pc*/);
         //integration des diffs entre VO et V2 dans V1
         foreach ($listPos as $operation){
-            $blobInfo->integrateBlob($operation, $pc);
+            $blobInfo->integrateBlob($operation/*, $pc*/);
         }
 
         $listPositions = $blobInfo->getBlobInfo();
         //text3 fait 27lignes et text2 fait 10lignes
         $this->assertEquals(124, count($listPositions));
 
-         $pc->store();
-        unset($pc);
+//         $pc->store();
+//        unset($pc);
     }
 
 //    function testApiPatch(){
