@@ -198,6 +198,11 @@ function getLastPatchId($pageName, $url=''){
         $pos = strpos($str, '!');
         if($pos !== false) $string1[$key] = substr($str, $pos+1);
         if ($string1[$key]=="") unset ($string1[$key]);
+        $pos1 = strpos($string1[$key], ';');
+        if($pos1 !== false){
+            $res = explode(';', $string1[$key]);
+            $string1 = array_merge($string1, $res);
+        }
     }
     /*$string1 is the list of the patches witch are previouses */
 
