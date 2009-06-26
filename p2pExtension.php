@@ -9,7 +9,7 @@ $wgP2PExtensionIP = dirname( __FILE__ );
 
 
 $wgHooks['UnknownAction'][] = 'onUnknownAction';
-$wgHooks['MediaWikiPerformAction'][] = 'performAction';
+//$wgHooks['MediaWikiPerformAction'][] = 'performAction';
 
 $wgHooks['EditPage::attemptSave'][] = 'attemptSave';
 $wgHooks['EditPageBeforeConflictDiff'][] = 'conflict';
@@ -53,60 +53,10 @@ function conflict(&$editor, &$out) {
     return true;
 }
 
-function performAction($output, $article, $title, $user, $request, $wiki) {
-    if($wiki->params['action']!='view') return true;
-    if(!strstr($title->mTextform, "PushChannel")===false) {
-    //code pour recuperer le push channel dans la base (name, url) avec les pages concernées
-        $pushCh = substr($title->mTextform, strpos($title->mTextform, ": ")+2);
-    //    $db = &wfGetDB(DB_SLAVE);
-    //        $tables = array("site", "site_cnt", "page");
-    //        $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
-    //                        "site_name='".$pushCh."'");
-    //        $fname = "Database::select";
-    //        $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
-    //        $options = array("ORDER BY site.site_id");
-    //
-    //
-    //
-    //        $output = "";
-    //        $result = $db->select($tables, $columns, $conditions, $fname, $options);
-    //
-    //            $output .= $title->mTextform.' is linked with the pages: ';
-    //
-    //            //Display the data--display some data differently than others.
-    //            while ($row = $db->fetchRow($result)) {
-    //                $output .= '[['.$row['page_title'].']]';
-    //
-    //                $output .= "<td title='yop'>";
-    //                $output .= htmlspecialchars($row['site_name']).'&nbsp;';
-    //                $output .= "</td>";
-    //                $output .= "<td>";
-    //                $output .= htmlspecialchars($row['counter']).'&nbsp;';
-    //                $output .= "</td>";
-    //                $output .= "<td>";
-    //                //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
-    //                //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
-    //                $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
-    //                $output .= "</td>";
-    //                $output .= '</tr>';
-    //            }
-    //
-    //            $output .= '</table>';
-
-    //PushChannel1 is linked with page: [[linked::Berlin]]
-    //and is composed by: {{#ask: [[is_in::PushChannel1]]}}
-    //[[Category:PushChannel]]
-
-
-
-
-    }
-    elseif(!strstr($title->mTextform, "Patch")===false) {
-        $yop = "page Patch";
-    }
-
-    return true;
-}
+//function performAction($output, $article, $title, $user, $request, $wiki) {
+//    if($wiki->params['action']!='view') return true;
+//    return true;
+//}
 
 /**
  *MW Hook used to redirect to page creation (pushfeed, pullfeed, changeset),
@@ -131,8 +81,9 @@ function onUnknownAction($action, $article) {
         $newtext = "Add a new site:
 
 {{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pullpage|method=POST|
-PushFeed Url:<br>        {{#input:type=text|name=url}}<br>
-PullFeed Name:   <br>    {{#input:type=text|name=name}}<br>
+Server Url:<br>        {{#input:type=text|name=url}}<br>
+PushFeed Name:<br>        {{#input:type=text|name=pushname}}<br>
+PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
 {{#input:type=submit|value=ADD}}
 }}";
         //if article doesn't exist insertNewArticle
@@ -272,15 +223,17 @@ previousChangetSet: [[previousChangeSet::".$previousCSID."]]
     //////////PullFeed page////////
     elseif($_GET['action']=='pullpage') {
         $url = $_POST['url'];
-        $name = $_POST['name'];
+        $pushname = $_POST['pushname'];
+        $pullname = $_POST['pullname'];
         
         $newtext = "PullFeed:
 
-name: [[name::PullFeed:".$name."]]
-relatedPushFeed: [[relatedPushFeed::".$url."]]
+name: [[name::PullFeed:".$pullname."]]
+pushFeedServer: [[pushFeedServer::".$url."]]
+pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 ";
 
-        $title = Title::newFromText($_POST['name'], PULLFEED);
+        $title = Title::newFromText($pullname, PULLFEED);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
         $article->doRedirect();
@@ -301,124 +254,125 @@ relatedPushFeed: [[relatedPushFeed::".$url."]]
     }
 
 
-    elseif($action == "admin") {
-
-        if(isset($_POST['wiki'])&& isset ($_POST['title'])&& isset ($_POST['id'])) {
-
-            $patchArray = $this->getPatches($_POST['id'], $_POST['title'], $_POST['wiki']);
-            foreach ($patchArray as $patch) {
-                $this->integratePatch($patch, $article);
-            }$style = ' style="border-bottom: 2px solid #000;"';
-            $tableStyle = ' style="float: left; margin-left: 40px;"';
-            $output = "";
-
-            $tables = array("site");
-            $columns = array("site_id", "site_url", "site_name");
-            $conditions = '';
-            $fname = "Database::select";
-            $options = array(
-                "ORDER BY" => "site_id",
-            );
-            if ($page_limit > 0) {
-                $options["LIMIT"] = $page_limit;
-            }
-            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-                $output .= '<p>Error accessing list.</p>';
-            } else if($db->numRows($result) == 0) {
-                    $output .= '<p>No remote site.</p>';
-                } else {
-                    $output .= '
-<FORM METHOD="POST" ACTION="">
-<table'.$tableStyle.' border>
-  <tr>
-    <th colspan="5"'.$style.'>'.$db->numRows($result).' Remote Sites</th>
-  </tr>
-  <tr>
-    <th colspan="2" >Site</th>
-
-    <th><input type="submit" value="Push"></th>
-    <th><input type="submit" value="Pull"></th>
-    <th><input type="submit" value="Remove"></th>
-    <input type="hidden" name="ppc" value="true">
-  </tr>';
-                    while ($row = $db->fetchRow($result)) {
-                        $i = $i + 1;
-                        $output .= '
-  <tr>
-    <td>'.$row["site_id"].'</td>
-    <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
-    <td colspan="3" align="center"><input type="checkbox" name="push['.$i.']"/></td>
-  </tr>';
-                    }
-                    $output .= '
-
-
-</table>$id
-</FORM>';
-                }
-
-        }
-
-
-        $page_title=$_GET['title'];
-
-
-        $wgOut->setPagetitle($page_title.": Administration page");
-
-        //adding javascript to page header
-        $file = dirname($_SERVER['PHP_SELF']).'/extensions/p2pExtension/specialPage/SPFunctions.js';
-        $wgOut->addScriptFile($file);
-
-        $db = &wfGetDB(DB_SLAVE);
-        $tables = array("site", "site_cnt", "page");
-        $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
-            "page.page_title='".$_GET['title']."'");
-        $fname = "Database::select";
-        $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
-        $options = array("ORDER BY site.site_id");
-
-        $output = "";
-        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-            $output .= '<p>Error accessing database.</p>';
-        } else if($db->numRows($result) == 0) {
-                $output .= '<p>This page is up to date.</p>';
-            } else {
-                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
-                $output .= '<table border cellspacing="0" cellpadding="5"><tr>';
-
-
-
-                $output .= '<th'.$style.'>Remote site</th><th'.$style.'>Info</th><th'.$style.'>Action</th>';
-
-
-                $output .= '</tr>';
-
-                //Display the data--display some data differently than others.
-                while ($row = $db->fetchRow($result)) {
-                    $output .= '<tr>';
-
-                    $output .= "<td title='yop'>";
-                    $output .= htmlspecialchars($row['site_name']).'&nbsp;';
-                    $output .= "</td>";
-                    $output .= "<td>";
-                    $output .= htmlspecialchars($row['counter']).'&nbsp;';
-                    $output .= "</td>";
-                    $output .= "<td>";
-                    //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
-                    //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
-                    $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
-                    $output .= "</td>";
-                    $output .= '</tr>';
-                }
-
-                $output .= '</table>';
-            }
-
-
-        $wgOut->addHTML($output);
-
-        return false;
-    } else {
+//    elseif($action == "admin") {
+//
+//        if(isset($_POST['wiki'])&& isset ($_POST['title'])&& isset ($_POST['id'])) {
+//
+//            $patchArray = $this->getPatches($_POST['id'], $_POST['title'], $_POST['wiki']);
+//            foreach ($patchArray as $patch) {
+//                $this->integratePatch($patch, $article);
+//            }$style = ' style="border-bottom: 2px solid #000;"';
+//            $tableStyle = ' style="float: left; margin-left: 40px;"';
+//            $output = "";
+//
+//            $tables = array("site");
+//            $columns = array("site_id", "site_url", "site_name");
+//            $conditions = '';
+//            $fname = "Database::select";
+//            $options = array(
+//                "ORDER BY" => "site_id",
+//            );
+//            if ($page_limit > 0) {
+//                $options["LIMIT"] = $page_limit;
+//            }
+//            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+//                $output .= '<p>Error accessing list.</p>';
+//            } else if($db->numRows($result) == 0) {
+//                    $output .= '<p>No remote site.</p>';
+//                } else {
+//                    $output .= '
+//<FORM METHOD="POST" ACTION="">
+//<table'.$tableStyle.' border>
+//  <tr>
+//    <th colspan="5"'.$style.'>'.$db->numRows($result).' Remote Sites</th>
+//  </tr>
+//  <tr>
+//    <th colspan="2" >Site</th>
+//
+//    <th><input type="submit" value="Push"></th>
+//    <th><input type="submit" value="Pull"></th>
+//    <th><input type="submit" value="Remove"></th>
+//    <input type="hidden" name="ppc" value="true">
+//  </tr>';
+//                    while ($row = $db->fetchRow($result)) {
+//                        $i = $i + 1;
+//                        $output .= '
+//  <tr>
+//    <td>'.$row["site_id"].'</td>
+//    <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
+//    <td colspan="3" align="center"><input type="checkbox" name="push['.$i.']"/></td>
+//  </tr>';
+//                    }
+//                    $output .= '
+//
+//
+//</table>$id
+//</FORM>';
+//                }
+//
+//        }
+//
+//
+//        $page_title=$_GET['title'];
+//
+//
+//        $wgOut->setPagetitle($page_title.": Administration page");
+//
+//        //adding javascript to page header
+//        $file = dirname($_SERVER['PHP_SELF']).'/extensions/p2pExtension/specialPage/SPFunctions.js';
+//        $wgOut->addScriptFile($file);
+//
+//        $db = &wfGetDB(DB_SLAVE);
+//        $tables = array("site", "site_cnt", "page");
+//        $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
+//            "page.page_title='".$_GET['title']."'");
+//        $fname = "Database::select";
+//        $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
+//        $options = array("ORDER BY site.site_id");
+//
+//        $output = "";
+//        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+//            $output .= '<p>Error accessing database.</p>';
+//        } else if($db->numRows($result) == 0) {
+//                $output .= '<p>This page is up to date.</p>';
+//            } else {
+//                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
+//                $output .= '<table border cellspacing="0" cellpadding="5"><tr>';
+//
+//
+//
+//                $output .= '<th'.$style.'>Remote site</th><th'.$style.'>Info</th><th'.$style.'>Action</th>';
+//
+//
+//                $output .= '</tr>';
+//
+//                //Display the data--display some data differently than others.
+//                while ($row = $db->fetchRow($result)) {
+//                    $output .= '<tr>';
+//
+//                    $output .= "<td title='yop'>";
+//                    $output .= htmlspecialchars($row['site_name']).'&nbsp;';
+//                    $output .= "</td>";
+//                    $output .= "<td>";
+//                    $output .= htmlspecialchars($row['counter']).'&nbsp;';
+//                    $output .= "</td>";
+//                    $output .= "<td>";
+//                    //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
+//                    //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
+//                    $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
+//                    $output .= "</td>";
+//                    $output .= '</tr>';
+//                }
+//
+//                $output .= '</table>';
+//            }
+//
+//
+//        $wgOut->addHTML($output);
+//
+//        return false;
+   // }
+    else {
         return true;
     }
 
@@ -444,14 +398,7 @@ function getRequestedPages($request){
         if($page=="") {
             unset ($res[$key]);
         }else {
-        //$page = strtr($page, "\"", "\0");
             $res[$key] = str_replace("\"", "", $page);
-            //            $pos = strrpos($page, ":");//NS removing
-            //            if ($pos === false) {
-            //                // not found...
-            //            }else{
-            //                $page = substr($page, $pos+1);http://localhost/www/mediawiki-1.14.0/index.php?action=onpush&push[]=Pushfeed:YOP
-            //            }
             $res[$key] = str_replace(',', '', $page);
             $pos = strpos($page, ':');
             $count = 1;
@@ -498,16 +445,9 @@ function getPreviousCSID($pfName){
     $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
     $string = file_get_contents($url);
     if ($string=="") return false;
-    //    $pos = strrpos($string, ":");
-    //    if ($pos === false) {
-    //        // not found...
-    //    }else{
-    //        $string = substr($string, $pos+1);
-    //    }
     $string = explode(",", $string);
     $string = $string[0];
     $string = str_replace(',', '', $string);
-    //    $string = strtr($string, "\"", "\0");
     $string = str_replace("\"", "", $string);
     return $string;
 }
@@ -584,6 +524,71 @@ function updatePushFeed($name, $CSID){
     return true;
 }
 
+/**
+ *
+ * @param <String> $changeSetId
+ */
+function integrate($changeSetId){
+    //recup liste des patchesID de ce CS (le tout sera deja en local)
+    //foreach patch recuperer les operations
+      //foreach operation
+      //les transformer en objet LogootOp
+      //logootIntegrate(op, titre article recuperé du patch)
+      //end foreach operation
+    //end foreach patch
+}
+
+function getPatchIdList($changeSetId){
+    /*todo
+     *
+     */
+    return $patchIdList;
+}
+
+function getOperations($patchId){
+    /*todo
+     *
+     */
+    return $operations;
+}
+
+function operationToLogootOp($op){
+    /*todo
+     *
+     */
+    return $logootOp;
+}
+
+/**
+ *Integrates the operation(LogootOp) into the article via the logoot algorithm
+ * 
+ * @param <Object> $operation
+ * @param <String or Object> $article 
+ */
+function logootIntegrate($operation, $article){
+
+        if(is_string($article)){
+            $db = wfGetDB( DB_SLAVE );
+            $pageid = $this->getPageIdWithTitle($article);
+            $lastRev = Revision::loadFromPageId($db, $pageid);
+            $rev_id = $lastRev->getId();
+
+            $title = Title::newFromText($article);
+            $article = new Article($title);
+        }
+        else{
+        $rev_id = $article->getRevIdFetched();
+        }
+        $blobInfo = BlobInfo::loadBlobInfo($rev_id);
+
+        $blobInfo->integrateBlob($operation);
+
+        $revId = $blobInfo->getNewArticleRevId();
+        $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
+
+
+        $article->doEdit($blobInfo->getTextImage(), $summary="");
+    }
 
 /******************************************************************************/
 /*
@@ -625,7 +630,7 @@ function attemptSave($editpage) {
 
 
 
-    //get the revision with the edittime==>V0$_SERVER['PHP_SELF']
+    //get the revision with the edittime==>V0
     $rev = Revision::loadFromTimestamp($dbr, $editpage->mTitle, $editpage->edittime);
     if(is_null($rev)) {
         $text = "";

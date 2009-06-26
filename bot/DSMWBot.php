@@ -31,7 +31,9 @@ $args = array();
 // Property array: key=property page and value=type
 $propArray = array("Property:changeSetID"=>"String",
                    "Property:hasSemanticQuery"=>"String",
-                   "Property:patchID"=>"String"
+                   "Property:patchID"=>"String",
+                   "Property:pushFeedServer"=>"URL",
+                   "Property:pushFeedName"=>"String"
                    );
          //"Property:hasOperation"=>"String", "String", "String", "String"!!!!!
 foreach ($propArray as $source=>$type){
