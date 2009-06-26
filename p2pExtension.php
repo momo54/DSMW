@@ -33,10 +33,11 @@ $wgAutoloadClasses['LogootDel'] = "$wgP2PExtensionIP/logootop/LogootDel.php";
 $wgAutoloadClasses['Patch'] = "$wgP2PExtensionIP/patch/Patch.php";
 $wgAutoloadClasses['persistentClock'] = "$wgP2PExtensionIP/clockEngine/persistentClock.php";
 $wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
+$wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeSet.php";
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 //global $wgAPIMetaModules;
-$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch');
+$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
 
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");

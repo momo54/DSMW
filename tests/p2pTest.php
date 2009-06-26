@@ -5,6 +5,8 @@ require_once 'p2pBot.php';
 require_once 'BasicBot.php';
 include_once 'p2pAssert.php';
 require_once '../../..//includes/GlobalFunctions.php';
+require_once '../patch/Patch.php';
+require_once '../files/utils.php';
 
 $wgDebugLogGroups  = array(
     'p2p'=>"/tmp/p2p.log",
@@ -54,7 +56,7 @@ class p2pTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    public function testbotappend() {
+   /* public function testbotappend() {
         $pageName = "Paris";
         $content='content page Paris
 [[Category:city]]';
@@ -71,6 +73,13 @@ toto");
     public function testCreatePage() {
         $pageName = "Paris";
         $content='content page Paris
+[[Category:city]]';
+        $this->p2pBot1->createPage($pageName,$content);
+        assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
+        assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content);
+
+        $pageName = "Nancy";
+        $content='content page Nancy
 [[Category:city]]';
         $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
@@ -108,26 +117,21 @@ toto' ;
 
         $op = null;
         $clock += 1;
-        $pageName = "Paris";
-        $contentParis = 'content page Paris';
-        $op[$pageName][]['insert'] = $contentParis;
-        $this->p2pBot1->createPage($pageName, $content);
+        $op['Paris'][]['insert'] = 'content page Paris';
+        $this->p2pBot1->createPage('Paris', 'content page Paris');
 
         $patchId = 'localhost/wiki1'.$clock;
         $clock += 1;
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Patch:'.$patchId);
-        assertPatch($this->p2pBot1->bot->wikiServer,$patchId1,$clock,$pageName,$op,'None');
+        assertPatch($this->p2pBot1->bot->wikiServer,$patchId,$clock,'Paris',$op,'None');
 
         $clock += 1;
         $patchId3 = 'localhost/wiki1'.$clock;
         $op = null;
         $this->p2pBot1->editPage($pageName,'titi');
         $op[$pageName][]['insert'] = 'titi';
-        $contentNancy .= '
-titi';
         $clock += 1;
         assertPatch($this->p2pBot1->bot->wikiServer,$patchId3,$clock,$pageName,$op,$patchId2);
-
     }
 
     public function testCreatePush() {
@@ -136,7 +140,7 @@ titi';
 
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:PushCity]]','-3Fname/-3FhasSemanticQuery');
         $this->assertEquals('PushFeed:PushCity',$pushFound[0]);
-        $this->assertEquals(convertRequest('[[Category:city]]'),substr($pushFound[1],0,-1));
+        $this->assertEquals(utils::encodeRequest('[[Category:city]]'),substr($pushFound[1],0,-1));
 
 
         $this->p2pBot1->createPush('PushTest1', '[[Category:toto]]');
@@ -144,7 +148,7 @@ titi';
 
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:PushTest1]]','-3Fname/-3FhasSemanticQuery');
         $this->assertEquals('PushFeed:PushTest1',$pushFound[0]);
-        $this->assertEquals(convertRequest('[[Category:toto]]'),substr($pushFound[1],0,-1));
+        $this->assertEquals(utils::encodeRequest('[[Category:toto]]'),substr($pushFound[1],0,-1));
 
 
         $this->p2pBot1->createPush('PushTest2', '[[Category:city]]');
@@ -152,40 +156,48 @@ titi';
 
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:PushTest2]]','-3Fname/-3FhasSemanticQuery');
         $this->assertEquals('PushFeed:PushTest2',$pushFound[0]);
-        $this->assertEquals(convertRequest('[[Category:city]]'),substr($pushFound[1],0,-1));
+        $this->assertEquals(utils::encodeRequest('[[Category:city]]'),substr($pushFound[1],0,-1));
 
     }
 
     public function testPush() {
-    //create page on wiki1
-        $pageName = "Nancy";
-        $content='content page Nancy
-[[Category:city]]';
-        $this->p2pBot1->createPage($pageName,$content);
-
-        //create push on wiki1
+    //create push on wiki1
         $pushName = 'PushCity';
         $pushRequest = '[[Category:city]]';
         $res = $this->p2pBot1->createPush($pushName, $pushRequest);
 
-
         $res = $this->p2pBot1->push('PushFeed:'.$pushName);
+        $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
+        $this->assertEquals('',substr($pushFound[0],0,-1));
+
+        $res = $this->p2pBot1->createPage('Nancy','content nancy [[Category:city]]');
+        $res = $this->p2pBot1->createPage('Paris','content Paris [[Category:city]]');
+        $res = $this->p2pBot1->push('PushFeed:'.$pushName);
+
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
 
         $CSIDFound = substr($pushFound[0],0,-1);
-        $this->assertNotNull($CSIDFound);
         assertPageExist($this->p2pBot1->bot->wikiServer,$CSIDFound);
 
         $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
-        $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet');
+        $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet/-3FhasPatch');
         $this->assertEquals(strtolower('PushFeed:'.$pushName),strtolower($CSFound[1]));
-        $this->assertEquals('None',substr($CSFound[2],0,-1));
+        $this->assertEquals('None',$CSFound[2]);
 
-        //patchId1 = getLastPatchId(Nancy);
-        //jusqu'à previouspatch = none
+        $patch = new Patch('', '', '', '');
+        $lastPatchNancy = $patch->getLastPatchId('Nancy', $this->p2pBot1->bot->wikiServer);
+        $lastPatchParis = $patch->getLastPatchId('Paris', $this->p2pBot1->bot->wikiServer);
+        $patchCS = split(',',substr($CSFound[3],0,-1));
+        $this->assertTrue(count($patchCS)==2);
+
+        $assert1 = strtolower($lastPatchNancy) == strtolower($patchCS[0]) || strtolower($lastPatchNancy) == strtolower($patchCS[1]);
+        $assert2 = strtolower($lastPatchParis) == strtolower($patchCS[0]) || strtolower($lastPatchParis) == strtolower($patchCS[1]);
+        $this->assertTrue($assert1 && $assert2);
+
 
         //edit page
-        $this->p2pBot1->editPage($pageName,'toto');
+        $this->p2pBot1->editPage('Nancy','toto');
+        $this->p2pBot1->editPage('Nancy','titi');
         $res = $this->p2pBot1->push('PushFeed:'.$pushName);
 
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
@@ -196,11 +208,25 @@ titi';
         assertPageExist($this->p2pBot1->bot->wikiServer,$CSIDFound2);
 
         $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
-        $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet');
+        $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet/-3FhasPatch');
         $this->assertEquals(strtolower('PushFeed:'.$pushName),strtolower($CSFound[1]));
-        $this->assertEquals($previousCS,substr($CSFound[2],0,-1));
+        $this->assertEquals($previousCS,$CSFound[2]);
 
         $contentCS = getContentPage($this->p2pBot1->bot->wikiServer,$CSIDFound);
+        $previousLastPatchNancy = $lastPatchNancy;
+        $lastPatchNancy = $patch->getLastPatchId('Nancy',$this->p2pBot1->bot->wikiServer);
+        $patchCS = split(',',substr($CSFound[3],0,-1));
+        $this->assertTrue(count($patchCS)==2);
+        $assert1 = strtolower($lastPatchNancy) == strtolower($patchCS[0]) || strtolower($lastPatchNancy) == strtolower($patchCS[1]);
+        $patchId = substr($lastPatchNancy,strlen('patch:'));
+        $prevPatch = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[patchID::'.$patchId.']]','-3Fprevious');
+        $prevPatch = substr($prevPatch[0],0,-1);
+        $assert2 = strtolower($prevPatch) == strtolower($patchCS[0]) || strtolower($prevPatch) == strtolower($patchCS[1]);
+        $patchId = substr($prevPatch,strlen('patch:'));
+        $prevPatch = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[patchID::'.$patchId.']]','-3Fprevious');
+        $prevPatch = substr($prevPatch[0],0,-1);
+        $this->assertEquals(strtolower($previousLastPatchNancy),strtolower($prevPatch));
+
         //patchId2 = getlastPatchId(Nancy);
         //jusqu'à previouspatch = patchId1
 
@@ -209,29 +235,16 @@ titi';
         $this->assertEquals($CSIDFound,substr($pushFound[0],0,-1));
         assertContentEquals($this->p2pBot1->bot->wikiServer,$CSIDFound, $contentCS);
 
-        $this->p2pBot1->createPage('Paris','content page Paris [[Category:city]]');
+        /*$this->p2pBot1->createPage('Paris','content page Paris [[Category:city]]');
         $this->p2pBot1->createPage('toto','toto');
 
         $this->p2pBot1->push('PushFeed:'.$pushName);
 
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
-
-        $previousCS = $CSIDFound;
-        $CSIDFound = substr($pushFound[0],0,-1);
-        $this->assertNotNull($CSIDFound);
-        assertPageExist($this->p2pBot1->bot->wikiServer,$CSIDFound);
-
-        $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
-        $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet');
-        $this->assertEquals(strtolower('PushFeed:'.$pushName),strtolower($CSFound[1]));
-        $this->assertEquals($previousCS,substr($CSFound[2],0,-1));
-
-    //patchId3 = getlastPatchId(Nancy);
-    //jusqu'à previouspatch = patchId3
-    //patchId4 = getlastPatchId(Nancy);
-    //jusqu'à previouspatch = none
+        $this->assertEquals($CSIDFound,substr($pushFound[0],0,-1));
+        assertContentEquals($this->p2pBot1->bot->wikiServer,$CSIDFound, $contentCS);
     }
-
+*/
 
     public function testCreatePull() {
         $pullName = 'pullCity';
@@ -246,19 +259,89 @@ titi';
     }
 
 
-    public function testGetChangeSet(){
-        
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
+    public function testGetChangeSet() {
+        $pageName = "ChangeSet:localhost/wiki12";
+        $content='ChangeSet:
+changeSetID: [[changeSetID::localhost/wiki12]]
+inPushFeed: [[inPushFeed::PushFeed:PushCity]]
+previousChangetSet: [[previousChangetSet::none]]
+ hasPatch: [[hasPatch::"Patch:Berlin1"]] hasPatch: [[hasPatch::"Patch:Paris0"]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        $pageName = 'PushFeed:PushCity';
+        $content = 'PushFeed:
+Name: [[name::CityPush2]]
+hasSemanticQuery: [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
+Pages concerned:
+{{#ask: [[Category:city]]}} hasPushHead: [[hasPushHead::ChangeSet:localhost/mediawiki12]]';
+        $this->p2pBot1->createPage($pageName,$content);
+
+        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'api.php?action=query&pushName=PushCity&changeSet=none');
+
+        $CSPatch = split(',',substr($cs[0],0,-1));
+
+        $this->assertTrue(count($CSPath)==2);
+        $this->assertEquals('Patch:Berlin1',$CSPatch[0]);
+        $this->assertEquals('Patch:Paris0',$CSPatch[1]);
+
+        $pageName = "ChangeSet:localhost/wiki13";
+        $content='ChangeSet:
+changeSetID: [[changeSetID::localhost/wiki13]]
+inPushFeed: [[inPushFeed::PushFeed:PushCity]]
+previousChangetSet: [[previousChangetSet::localhost/wiki12]]
+ hasPatch: [[hasPatch::"Patch:Berlin2"]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        $pageName = 'PushFeed:PushCity';
+        $content = 'PushFeed:
+Name: [[name::CityPush2]]
+hasSemanticQuery: [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
+Pages concerned:
+{{#ask: [[Category:city]]}} hasPushHead: [[hasPushHead::ChangeSet:localhost/mediawiki12]]';
+        $this->p2pBot1->createPage($pageName,$content);
+
+        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'api.php?action=getChangeSet&pushName=PushCity&changeSet=none');
+
+        $CSPatch = split(',',substr($cs[0],0,-1));
+
+        $this->assertTrue(count($CSPath)==1);
+        $this->assertEquals('Patch:Berlin2',$CSPatch[0]);
     }
 
-    public function testPull() {
+
+    /*public function testIntegratedPatch() {
+        $pageName = "Patch:localhost/wiki11";
+        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1901]]
+ onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
+Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
+previous: [[previous::none]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        $pageName = "Patch:localhost/wiki12";
+        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1901]]
+ onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
+Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
+previous: [[previous::none]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        $pageName = "ChangeSet:localhost/wiki12";
+        $content='ChangeSet:
+changeSetID: [[changeSetID::localhost/mediawiki12]]
+inPushFeed: [[inPushFeed::PushFeed:PushCity]]
+previousChangetSet: [[previousChangetSet::none]]
+ hasPatch: [[hasPatch::"Patch:localhost/wiki11"]] hasPatch: [[hasPatch::"Patch:localhost/wiki12"]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        Path::integrate($pageName);
+
+    }*/
+
+    /*public function testPull() {
         $pushFeed = 'http://localhsot/wiki1/PushFeed:PushCity';
         $this->p2pBot2->createPull('PullCity', $pushFeed);
 
         $this->p2pBot2->pull('PullCity');
-    }
+    }*/
     /*public function testPull(){
         
     }*/
@@ -277,46 +360,25 @@ titi';
 
         $res = $this->p2pBot1->push('PushFeed:'.$pushName);
 
-        $content = getContentPage($this->p2pBot1->bot->wikiServer, 'PullFeed:'.$pushName);
-        $res = $this->p2pBot1->push('PushFeed:'.$pushName);;
-        assertContentEquals($this->p2pBot1->bot->wikiServer, 'PullFeed:'.$pushName, $content);
-
-
         $pullName = 'pullCity';
         $pushFeed = 'http://localhost/wiki1/PushFeed:'.$pushName;
         $res = $this->p2pBot2->createPull($pullName, $pushFeed);
-        // assert nouvelle page crée avec le contenu etc
 
         $res =  $this->p2pBot2->Pull($pullName);
-        assertPullUpdated($this->p2pBot2->bot->wikiServer,$this->p2pBot1->bot->wikiServer,'PushFeed:'.$pushName,$pullName);
+
         // assert cs from pushincluded
-        // assert page paris exist
+        assertCSFromPushIncluded($this->p2pBot1->bot->wikiServer, $pushName, $this->p2pBot2->bot->wikiServer, $pullName);
+
         // asssert patch is present
+
+        // assert page paris exist
+        assertPageExist($this->p2pBot1->bot->wikiServer, $pageName);
+
         // assert that wiki1/paris == wiki2/paris
-
-        $content = getContentPage($this->p2pBot2->wikiServer, 'PullFeed:pullCity');
-        $res =  $this->p2pBot2->Pull('pullCity');
-        assertContentEquals($this->p2pBot2->wikiServer, 'PullFeed:pullCity', $content);
-
-        $this->p2pBot2->append($pageName,'toto');
-        assertPageUpdated($this->p2pBot2->bot->wikiServer,$pageName,'toto');
-
-        $res = $this->p2pBot2->createPush($pushName, $pushRequest);
-        assertPageExist($this->p2pBot2->bot->wikiServer,'PushFeed:'.$pushName);
-        assertPushCreated($this->p2pBot2->bot->wikiServer, $pushName, $pushRequest);
-
-        $res = $this->p2pBot2->Push('pushCity');
-        assertPushUpdated($this->p2pBot2->bot->wikiServer,$pushName,$pushRequest,'none');
-
-        $res = $this->p2pBot1->createPull('pullCity', 'http://localhost/wiki2/push:pushcity');
-        assertPageExist($this->p2pBot1->bot->wikiServer,'PushFeed:pullCity');
-        assertPullCreated($this->p2pBot1->bot->wikiServer, 'pullCity', $pushRequest);
-
-        $res=$this->p2pBot1->Pull('pullCity');
-    // assert...
-    // assert that wiki1/paris == wiki2/paris
-
-
+        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
+        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
+        $this->assertEquals($contentWiki1, $contentWiki2);
     }
 }
 ?>

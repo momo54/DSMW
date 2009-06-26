@@ -1,5 +1,6 @@
 <?php
 require_once 'PHPUnit/Framework/Assert.php';
+require_once '../files/utils.php';
 
 function assertPageExist($server,$pageName) {
     $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
@@ -79,7 +80,10 @@ function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
     $patch = getSemanticRequest($server,'[[patchID::'.$patchId,'-3FonPage/-3FhasOperation/-3Fprevious');
 
     PHPUnit_Framework_Assert::assertEquals($pageName,$patch[0]);
-    PHPUnit_Framework_Assert::assertEquals($previousPatch,substr($patch[2],0,-1));
+    if(strtolower(substr($patch[2],0,strlen('Patch:')))=='patch:') {
+        $patch[2] = substr($patch[2],strlen('patch:'));
+    }
+    PHPUnit_Framework_Assert::assertEquals(strtolower($previousPatch),strtolower(substr($patch[2],0,-1)));
 
     $opFound = split(',',$patch[1]);
     PHPUnit_Framework_Assert::assertTrue(count($op[$pageName])==count($opFound));
@@ -87,12 +91,12 @@ function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
     for ($j = 0 ; $j < count($opFound) ; $j++) {
         $opi = split(';', $opFound[$j]);
         PHPUnit_Framework_Assert::assertEquals(strtolower($patchName.($clock)), strtolower($opi[0]));
-        PHPUnit_Framework_Assert::assertEquals($op[$pageName][$j][strtolower($opi[1])],reConvertRequest($opi[3]));
+        PHPUnit_Framework_Assert::assertEquals($op[$pageName][$j][strtolower($opi[1])],utils::decodeRequest($opi[3]));
         $clock = $clock + 1;
     }
 }
 
-function assertPullUpdated($server,$wikiPush,$pushFeed,$pullName) {
+/*function assertPullUpdated($server,$wikiPush,$pushFeed,$pullName) {
     $pullFound = getSemanticRequest($server,'[[name::PullFeed:'.$pullName.']][[relatedPushFeed::'.$pushFeed.']]','-3Fname/-3FrelatedPushFeed/-3FhasPullHead');
 
     PHPUnit_Framework_Assert::assertEquals(strtolower('PullFeed:'.$pullName),strtolower($pullFound[0]));
@@ -118,6 +122,15 @@ function assertPullUpdated($server,$wikiPush,$pushFeed,$pullName) {
         $b = getSemanticRequest($wikiPush,'[[patchID::'.$patchId.']]','-3FonPage/-3FhasOperation');
         PHPUnit_Framework_Assert::assertEquals($a, $b);
     }
+}*/
+
+function assertCSFromPushIncluded($serverPush,$pushNane,$serverPull,$pullName) {
+    $pushhead = getSemanticRequest($serverPush, '[[name::PushFeed:'.$pushName, '-3FhasPushHead');
+    $pushhead = substr($pushhead[0],0,-1);
+    $pullhead = getSemanticRequest($serverPull, '[[name::PullFeed:'.$pullName, '-3FhasPullHead');
+    $pullhead = substr($pullhead[0],0,-1);
+    PHPUnit_Framework_Assert::assertEquals($pushhead, $pullhead);
+    assertPageExist($serverPull,$pullhead);
 }
 
 function getContentPage($server,$pageName) {
@@ -131,7 +144,7 @@ function getContentPage($server,$pageName) {
 }
 
 function getSemanticRequest($server,$request,$param,$sep='!') {
-    $request = convertRequest($request);
+    $request = utils::encodeRequest($request);
     $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
     $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100');
     $array = split($sep, $php);
@@ -142,7 +155,7 @@ function getSemanticRequest($server,$request,$param,$sep='!') {
     return $arrayRes;
 }
 
-function convertRequest($request) {
+/*function convertRequest($request) {
     $req = str_replace(
         array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),
         array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'), $request);
@@ -154,6 +167,6 @@ function reConvertRequest($request) {
         array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F'),
         array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?'),$request);
     return $req;
-}
+}*/
 
 ?>

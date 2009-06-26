@@ -22,12 +22,13 @@ require_once 'patch/Patch.php';
 
 
 require_once 'api/ApiQueryPatch.php';
+require_once 'api/ApiQueryChangeSet.php';
 
 //$wgHooks['ArticleSaveComplete'][] = 'articleSaveComplete';
 //$wgHooks['ArticleSave'][] = 'articleSave';
 global $wgAPIMetaModules;
 $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch');
-
+$wgApiQueryMetaModules = array('changeSet' => 'ApiQueryChangeSet');
 $wgHooks['EditPage::attemptSave'][] = 'attemptSave';
 $wgHooks['EditPageBeforeConflictDiff'][] = 'conflict';
 $wgHooks['SkinTemplateTabs'][] = 'fnMyHook';
