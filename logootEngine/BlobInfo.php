@@ -2,7 +2,8 @@
 
 
 /**
- *A blobInfo is the logootPosition array corresponding to this revision
+ *A blobInfo is the logootPosition array and the text lines array
+ * corresponding to a specified revision
  *
  * @author mullejea
  */
@@ -15,6 +16,12 @@ class BlobInfo {
 
     }
 
+/**
+ * returns the model (logootPositions + text lines)
+ * either load from DB if it exists or new object (BlobInfo)
+ * @param <Integer> $rev_id
+ * @return <Object> BlobInfo object
+ */
     public static function loadBlobInfo($rev_id) {
         if($rev_id!=0){
             return self::getBlobInfoDB($rev_id);
@@ -40,7 +47,12 @@ class BlobInfo {
         return $this->mTextImage;
     }
 
-    //to add a position to the blobInfo (the model)
+
+    /**
+     * to add a position to the blobInfo (the model)
+     * @param <Integer> $lineNumber
+     * @param <Object> $position
+     */
     function add($lineNumber, $position){
 
         $listIds = $this->mBlobInfo;
@@ -57,7 +69,11 @@ class BlobInfo {
         $this->setBlobInfo($listIds);
     }
 
-    //to add a line to the blobInfo (the model)
+    /**
+     * to add a line to the blobInfo (the model)
+     * @param <Integer> $lineNumber
+     * @param <Object> $line
+     */
     function addLine($lineNumber, $line){
 
         $listLines = $this->mTextImage;
@@ -74,19 +90,29 @@ class BlobInfo {
         $this->setBlobInfoText($listLines);
     }
 
-    //to delete a position to the blobInfo (the model)
+    /**
+     * to delete a position to the blobInfo (the model)
+     * @param <Integer> $lineNb
+     */
     function delete($lineNb){
         $this->mBlobInfo = $this->array_delete_key($this->mBlobInfo, $lineNb);
         $this->keyShifting($lineNb);
     }
 
-    //to delete a line in the blobInfo (the model)
+    /**
+     * to delete a line in the blobInfo (the model)
+     * @param <Integr> $lineNb
+     */
     function deleteLine($lineNb){
         $this->mTextImage = $this->array_delete_key($this->mTextImage, $lineNb);
         $this->textKeyShifting($lineNb);
     }
 
-    //to get the previous position
+    /**
+     * to get the previous position (logootPosition)
+     * @param <Integer> $lineNumber
+     * @return <Object> LogootPosition
+     */
     function getPrevPosition($lineNumber){
         $listIds = $this->mBlobInfo;
         $exists = false;
@@ -124,12 +150,20 @@ class BlobInfo {
         }
     }
 
-    //to get a position
+    /**
+     * to get a position
+     * @param <Integer> $lineNumber
+     * @return <Object> logootPosition
+     */
     function getPosition($lineNumber){
         $listIds = $this->mBlobInfo;
         return $listIds[$lineNumber];
     }
 
+    /**
+     * Size of the logootPosition array
+     * @return <Integer>
+     */
     function size(){
         return count($this->mBlobInfo);
     }
@@ -142,7 +176,12 @@ class BlobInfo {
     //        return $temp;
     //    }
 
-    //used to remove an element (with the given key) of the array
+    /**
+     * used to remove an element (with the given key) of the array
+     * @param <array> $array
+     * @param <Integer> $search
+     * @return <array> array after element deletion
+     */
     private function array_delete_key($array,$search) {
         $temp = array();
         foreach($array as $key => $value) {
@@ -151,7 +190,11 @@ class BlobInfo {
         return $temp;
     }
 
-    //used to shift the array elements after deletion
+    /**
+     * used to shift the array elements after deletion
+     * it only concerns the logootPosition array
+     * @param <Integer> $lineNb
+     */
     private function keyShifting($lineNb){
         $listIds = $this->mBlobInfo;
         $tmp = array();
@@ -167,7 +210,11 @@ class BlobInfo {
         $this->setBlobInfo($tmp);
     }
 
-    //used to shift the array elements after deletion
+    /**
+     * used to shift the array elements after deletion
+     * it only concerns the text array
+     * @param <Integer> $lineNb
+     */
     private function textKeyShifting($lineNb){
         $listLines = $this->mTextImage;
         $tmp = array();
@@ -185,11 +232,15 @@ class BlobInfo {
 
     }
 
-/*generation of a position, logoot algorithm*/
+/**
+ * generation of a position, logoot algorithm
+ * @param <Object> $start is the previous logootPosition
+ * @param <Object> $end is the next logootPosition
+ * @param <Integer> $N number of positions generated (should be 1 in our case)
+ * @param <Object> $sid session id 
+ * @return <Object> a logootPosition between $start and $end
+ */
     function getNPositionID($start, $end, $N, $sid) {
-
-       
-
         //$clock = 0;
         $result = array();
         $Id_Max = LogootId::IdMax();
@@ -275,21 +326,21 @@ $step = gmp_div_q($slot, $N);
             $p->set($i, gmp_strval(gmp_add($p->get($i)->getInt(), $lstep)), $sid/*,$clock*/);
 
         }
-
-         
         return $result;
     }
 
-
-/*adapted binary search
+/**
+ * adapted binary search
  * $arr is the positions'array of the document (this blobInfo)
  * "$position" is ressearched in this $arr, the function returns:
  * ->the position in the array if it is found,
  * ->'-1' if $position is before the first element,
  * ->'-2' if $position is after the last element or
  * -> an array with both positions in the array surrounding $position
+ * @param <Object> $position LogootPosition
+ * @param <function> $fct
+ * @return <array or Integer>
  */
-
     function dichoSearch1($position,  $fct = 'dichoComp1')
     {
 
@@ -346,7 +397,12 @@ $step = gmp_div_q($slot, $N);
         }
     }
 
-    //utility function used in the binary search
+    /**
+     * utility function used in the binary search
+     * @param <Object> $position1 LogootPosition
+     * @param <Object> $position2 LogootPosition
+     * @return <Integer> -1, 0 or 1
+     */
     function dichoComp1($position1, $position2)
     {
        
@@ -377,9 +433,11 @@ $step = gmp_div_q($slot, $N);
         }
     }
 
-/* the binary search function 'dichosearch' returns the place to execute
+/**
+ * the binary search function 'dichosearch' returns the place to execute
  *  the operation (insert or delete) and it is executed (integrated to
  * the BlobInfo (the model)
+ * @param <Object> $operation logootOperation (insert or delete)
  */
     function integrateBlob(/*$listPos*/$operation/*, $clock*/){
 
@@ -446,7 +504,8 @@ $step = gmp_div_q($slot, $N);
 
     }
 
-/**Calculate the diff between two texts
+/**
+ *Calculate the diff between two texts
  * Returns a list of operations applied on this blobinfo(document model)
  * For each operation (insert or delete), an operation object is created
  * an applied via the 'integrateBlob' function call. These objects are
@@ -456,6 +515,11 @@ $step = gmp_div_q($slot, $N);
  * a new position (LogootPosition) is based on the positions of the model
  * (BlobInfo) and so we have to update (immediat integration) this model after
  * each operation (that we get from the difference engine)
+ * @global <Object> $wgContLang
+ * @param <String> $oldtext
+ * @param <String> $newtext
+ * @param <Integer> $firstRev if it's the first revision
+ * @return <array> list of logootOperation
  */
     function handleDiff($oldtext, $newtext, $firstRev/*, $clock*/)
     {
@@ -576,7 +640,10 @@ $step = gmp_div_q($slot, $N);
         return $listPos;
     }
 
-
+/**
+ * transforms the text array into a string
+ * @return <String>
+ */
     function getTextImage(){
 
         $tmp = $this->mTextImage;
@@ -592,6 +659,10 @@ $step = gmp_div_q($slot, $N);
         return $textImage;
     }
 
+/**
+ * sets the text array attribute (mTextImage) from a string
+ * @param <String> $textImage
+ */
     function setTextImage($textImage){
         if(!$textImage==""){
 
@@ -608,6 +679,12 @@ $step = gmp_div_q($slot, $N);
         }
     }
 
+/**
+ * to get a random value between $min and $max
+ * @param <gmp_ressource> $min
+ * @param <gmp_ressource> $max
+ * @return <gmp_ressource> random value
+ */
     function random ($min,$max) {
         $min = gmp_add($min, gmp_init("1"));
         $rdm = gmp_add($min, gmp_mod(gmp_random(2), gmp_sub($max, $min)));
@@ -618,7 +695,13 @@ $step = gmp_div_q($slot, $N);
 
    
 /*******************Database access functions************************/
-    //integrate BlobInfo to DB
+    /**
+     * integrate BlobInfo to DB
+     * @param <Integer> $rev_id
+     * @param <String> $sessionId
+     * @param <Object> $blobCB (should have been a causal barrier object but
+     * not used yet)
+     */
     function integrate($rev_id, $sessionId, $blobCB){
         
         $blobInfo1 = serialize($this);
@@ -636,9 +719,11 @@ $step = gmp_div_q($slot, $N);
         wfProfileOut( __METHOD__ );
     }
 
-/*
+/**
  * To get the blobInfo of the given revision
  * --> A blobInfo is the logootPosition array corresponding to this revision
+ * @param <Integer> $rev_id
+ * @return <Object> BlobInfo object
  */
     static function getBlobInfoDB($rev_id){
 
@@ -653,9 +738,11 @@ $step = gmp_div_q($slot, $N);
         return $blobInfo1;
     }
 
-/*Our model is stored in the DB just before Mediawiki creates
- * the new revision that why we have to get the last existing revision ID
+/**
+ * Our model is stored in the DB just before Mediawiki creates
+ * the new revision that's why we have to get the last existing revision ID
  * and the new will be lastId+1 ...
+ * @return <Integer> last revision id + 1
  */
     function getNewArticleRevId(){
         wfProfileIn( __METHOD__ );
