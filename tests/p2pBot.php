@@ -75,9 +75,10 @@ class p2pBot {
         }
     }
 
-    function createPull($pullName,$pushFeed) {
-        $post_vars['url'] = $pushFeed;
-        $post_vars['name'] = $pullName;
+    function createPull($pullName,$url, $pushName) {
+        $post_vars['pullname'] = $pullName;
+        $post_vars['url'] = $url;
+        $post_vars['pushname'] = $pushName;
         $this->maxredirs = 0;
         if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=pullpage', $post_vars ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
