@@ -98,7 +98,7 @@ $i=0;
         
         
             $output .= '
-<FORM METHOD="GET" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPull">
+<FORM METHOD="POST" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPull">
 <table'.$tableStyle.' >
   <tr>
     <th colspan="5"'.$style.'>PULL:
@@ -146,8 +146,6 @@ $i=0;
         $req = "[[PushFeed:+]]";
        
             $pushFeeds = $this->getRequestedPages($req);
-        
-
         
             $output .= '
 <FORM METHOD="POST" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPush">

@@ -77,7 +77,7 @@ function onUnknownAction($action, $article) {
     wfDebugLog('p2p','onUnknowaction');
 
     //////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
-    if($_GET['action']=='addpullpage') {
+    if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
 
         $newtext = "Add a new site:
 
@@ -100,7 +100,7 @@ PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
 
 
     /////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
-    elseif($_GET['action']=='addpushpage') {
+    elseif(isset ($_GET['action']) && $_GET['action']=='addpushpage') {
         $newtext = "Add a new pushfeed:
 
 {{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pushpage|method=POST|
@@ -116,7 +116,7 @@ Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=k
 
 
     ///////PushFeed page////////
-    elseif($_GET['action']=='pushpage') {
+    elseif(isset ($_GET['action']) && $_GET['action']=='pushpage') {
     //$url = $_POST['url'];//pas url mais changesetId
         $name = $_POST['name'];
         $request = $_POST['keyword'];
@@ -142,7 +142,7 @@ Pages concerned:
         return false;
     }
 ///////ChangeSet page////////
-    elseif($_POST['action']=='onpush'){
+    elseif(isset ($_POST['action']) && $_POST['action']=='onpush'){
         $patches = array();
         $tmpPatches = array();
         $name = $_POST['push'];
@@ -222,7 +222,7 @@ previousChangetSet: [[previousChangeSet::".$previousCSID."]]
 
 
     //////////PullFeed page////////
-    elseif($_GET['action']=='pullpage') {
+    elseif(isset ($_GET['action']) && $_GET['action']=='pullpage') {
         $url = $_POST['url'];
         $pushname = $_POST['pushname'];
         $pullname = $_POST['pullname'];
@@ -244,14 +244,42 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
     }
 
     //////////OnPull/////////////
-    elseif($_GET['action']=='onpull') {
-        //onpull test
-        $pullFeed = $_POST['name'];
-        $CSPush = $_POST['CSPush'];
-        $wikiPush = $_POST['wikiPush'];
+    elseif(isset ($_POST['action']) && $_POST['action']=='onpull') {
+        $name = $_POST['pull'];
+        if(count($name)>1) {
+            $outtext='<p><b>Select only one pullfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
+            $wgOut->addHTML($outtext);
+            return false;
+        }elseif($name=="") {
+            $outtext='<p><b>No pullfeed selected!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
+            $wgOut->addHTML($outtext);
+            return false;
+        }
 
-        $contentCS = file_get_contents($wikiPush.'/'.$CSPush);
+        $name = $name[0];//with NS
+        //
+        //on recup le nom du pullfeed avec ns
 
+       
+         $previousCSID = getPreviousPulledCSID($name);
+        if($previousCSID==false) {
+            $previousCSID = "none";
+          }
+         $pullHead = getHasPullHead($name);
+         if($pullHead==false){
+         $pullHead = "none";
+         }
+
+         $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=ChangeSet:localhost/wiki12&format=xml');
+         /* while (get($pullHead(avec ns))!=null){ recup CS avec NS
+         * if changeSet (article) !exists{
+         *          -cree et save changeset en local avec meme id
+         *          -integrate($csid) avec NS
+         *          -updatePullFeed(pfname avec NS, csid)
+         *          }
+         * }
+         */
+         return false;
     }
 
 
@@ -432,7 +460,7 @@ function getPushFeedRequest($pfName){
 }
 
 /**
- *Gets the previous changeSet ID
+ *Gets the previous changeSet ID (in the push action sequence)
  * @global <String> $wgServerName
  * @global <String> $wgScriptPath
  * @param <String> $pfName PushFeed name
@@ -526,37 +554,145 @@ function updatePushFeed($name, $CSID){
 }
 
 /**
- *
- * @param <String> $changeSetId
+ * A ChangeSet has patches which has operations
+ * this function is used to integrate these operations
+ * It's a local changeSet (downloaded from a remote site)
+ * @param <String> $changeSetId with NS
  */
 function integrate($changeSetId){
-    //recup liste des patchesID de ce CS (le tout sera deja en local)
-    //foreach patch recuperer les operations
-      //foreach operation
-      //les transformer en objet LogootOp
-      //logootIntegrate(op, titre article recuperé du patch)
-      //end foreach operation
-    //end foreach patch
+    $patchIdList = getPatchIdList($changeSetId);
+    foreach ($patchIdList as $patchId){
+        $articleTitle = getArticleTitleFromPatch($patchId);
+        $operationList = getOperations($patchId);
+        foreach ($operationList as $operation){
+            $operation = operationToLogootOp($operation);
+            if ($operation!=false && is_object($operation)){
+                logootIntegrate($operation, $articleTitle);
+            }
+        }
+    }
 }
 
+/**
+ * used to get an patchId list contained in the changeSet that have the id:
+ * $changeSetId
+ *
+ * @global <Object> $wgServerName
+ * @global <Object> $wgScriptPath
+ * @param <String> $changeSetId with NS
+ * @return <array> a PatchId list
+ */
 function getPatchIdList($changeSetId){
-    /*todo
-     *
-     */
+    global $wgServerName, $wgScriptPath;
+   $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+   $req = '[[changeSetID::'.$changeSetId.']]';
+   $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
+    $string = file_get_contents($url);
+    if ($string=="") return false;
+     $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+     $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine==""){
+            unset($res[$key]);
+        }
+    }
+    $patchIdList = array_unique($res);
     return $patchIdList;
 }
 
+/**
+ *
+ * @global <Object> $wgServerName
+ * @global <Object> $wgScriptPath
+ * @param <String> $patchId
+ * @return <array> an operations list
+ */
 function getOperations($patchId){
-    /*todo
-     *
-     */
+    global $wgServerName, $wgScriptPath;
+   $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+   $req = '[[patchID::'.$patchId.']]';
+   $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FhasOperation/headers=hide/format=csv/sep=,/limit=100";
+    $string = file_get_contents($url);
+    if ($string=="") return false;
+     $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+     $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'Patch:')!==false || $resultLine==""){
+            unset($res[$key]);
+        }
+    }
+    $operations = array_unique($res);
     return $operations;
 }
 
-function operationToLogootOp($op){
-    /*todo
-     *
-     */
+/**
+ *
+ * @global <Object> $wgServerName
+ * @global <Object> $wgScriptPath
+ * @param <String> $patchId
+ * @return <String> article title;
+ */
+function getArticleTitleFromPatch($patchId){
+    global $wgServerName, $wgScriptPath;
+   $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+   $req = '[[patchID::'.$patchId.']]';
+   $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FonPage/headers=hide/format=csv/sep=,/limit=100";
+    $string = file_get_contents($url);
+    if ($string=="") return false;
+     $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+     $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'Patch:')!==false || $resultLine==""){
+            unset($res[$key]);
+        }
+    }
+    $article = array_unique($res);
+    return $article;
+}
+
+/**
+ *transforms a string operation from a patch page into a logoot operation
+ * insertion or deletion
+ * returns false if there is a problem with the type of the operation
+ *
+ * @param <String> $operation
+ * @return <Object> logootOp
+ */
+function operationToLogootOp($operation){
+    $idArrray = array();
+    $res = explode(';', $operation);
+    foreach ($res as $key=>$attr) {
+        $res[$key] = trim($attr, " ");
+    }
+
+    $position = $res[2];
+    $position = str_ireplace('(', '', $position);
+    $position = str_ireplace(')', '', $position);
+    $res1 = explode(' ', $position);
+    foreach ($res1 as $id) {
+        $id1 = explode(':', $id);
+        $idArrray = new LogootId($id1[0], $id1[1]);
+    }
+    $logootPos = new LogootPosition($idArrray);
+
+    if($res[1]=="Insert") {
+        $logootOp = new LogootIns('', $logootPos, $res[3]);
+    }
+    elseif($res[1]=="Delete") {
+        $logootOp = new LogootDel($logootPos, $res[3]);
+    }
+    else {
+        $logootOp = false;
+    }
     return $logootOp;
 }
 
@@ -590,6 +726,92 @@ function logootIntegrate($operation, $article){
 
         $article->doEdit($blobInfo->getTextImage(), $summary="");
     }
+
+/**
+ *
+ *
+ * @global <Object> $wgServerName
+ * @global <Object> $wgScriptPath
+ * @param <String> $pfName pullfeed name
+ * @return <String> ChanSetId of the last changeset pulled
+ */
+    function getPreviousPulledCSID($pfName){
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $req = '[[ChangeSet:+]] [[inPullFeed::'.$pfName.']]';
+    $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
+    $string = file_get_contents($url);
+    if ($string=="") return false;
+    $string = explode(",", $string);
+    $string = $string[0];
+    $string = str_replace(',', '', $string);
+    $string = str_replace("\"", "", $string);
+    return $string;
+}
+
+function getHasPullHead($pfName){//name with ns
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
+    $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FhasPullHead/headers=hide/order=desc/format=csv/limit=1";
+     $string = file_get_contents($url);
+    if ($string=="") return false;
+     $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+     $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'PullFeed:')!==false || $resultLine==""){
+            unset($res[$key]);
+        }
+    }
+    if (empty ($res)) return false;
+    else return $res;
+}
+
+/**
+ *In a pullfeed page, the value of [[hasPullHead::]] has to be updated with the
+ *ChangeSetId of the last pulled ChangeSet
+ *
+ * @param <String> $name Pullfeed name (with namespace)
+ * @param <String> $CSID ChangeSetID (without namespace)
+ * @return <boolean> returns true if the update is successful
+ */
+function updatePullFeed($name, $CSID){
+    //split NS and name
+    preg_match( "/^(.+?)_*:_*(.*)$/S", $name, $m );
+    $articleName = $m[2];
+
+    //get PushFeed by name
+    $title = Title::newFromText($articleName, PULLFEED);
+    $dbr = wfGetDB( DB_SLAVE );
+    $revision = Revision::loadFromTitle($dbr, $title);
+    $pageContent = $revision->getText();
+
+    //get hasPushHead Value if exists
+    $start = "[[hasPullHead::";
+    $val1 = strpos( $pageContent, $start );
+    if ($val1!==false){//if there is an occurence of [[hasPushHead::
+    $startVal = $val1 + strlen( $start );
+    $end = "]]";
+    $endVal = strpos( $pageContent, $end, $startVal );
+    $value = substr( $pageContent, $startVal, $endVal - $startVal );
+
+    //update hasPullHead Value
+    $result = str_replace($value, "ChangeSet:".$CSID, $pageContent);
+    $pageContent = $result;
+        if($result=="")return false;
+    }else{//no occurence of [[hasPushHead:: , we add
+        $pageContent.= ' hasPullHead: [[hasPullHead::ChangeSet:'.$CSID.']]';
+    }
+    //save update
+    $article = new Article($title);
+    $article->doEdit($pageContent, $summary="");
+
+    return true;
+}
 
 /******************************************************************************/
 /*

@@ -64,7 +64,7 @@ class LogootId {
     }
 
     public function toString(){
-        return "( ".gmp_strval($this->mInt).":".$this->mSessionId." )";
+        return "(".gmp_strval($this->mInt).":".$this->mSessionId.")";
     }
 
     public function __clone(){
