@@ -74,7 +74,6 @@ previousChangetSet: [[previousChangeSet::'.$previousCS.']]
         $title = Title::newFromText($CSID, CHANGESET);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
-        $article->doRedirect();
     }
 
     
