@@ -257,20 +257,30 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }
 
         $name = $name[0];//with NS
-        //
-        //on recup le nom du pullfeed avec ns
 
-       
-         $previousCSID = getPreviousPulledCSID($name);
+        $previousCSID = getPreviousPulledCSID($name);
         if($previousCSID==false) {
             $previousCSID = "none";
-          }
-         $pullHead = getHasPullHead($name);
-         if($pullHead==false){
-         $pullHead = "none";
-         }
+        }
+        $pullHead = getHasPullHead($name);
+        if($pullHead==false) {
+            $pullHead = "none";
+        }
+        $relatedPushServer = getPushURL($name);
+        $namePush = getPushName($name);
+        //split NS and name
+        preg_match( "/^(.+?)_*:_*(.*)$/S", $namePush, $m );
+        $nameWithoutNS = $m[2];
+         
 
-         $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=ChangeSet:localhost/wiki12&format=xml');
+
+        $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+        $dom = new DOMDocument();
+        $dom->loadXML($cs);
+
+        $changeSet = $dom->getElementsByTagName('changeSet');
+
+        
          /* while (get($pullHead(avec ns))!=null){ recup CS avec NS
          * if changeSet (article) !exists{
          *          -cree et save changeset en local avec meme id
@@ -279,7 +289,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
          *          }
          * }
          */
-         return false;
+        return false;
     }
 
 
@@ -750,7 +760,7 @@ function logootIntegrate($operation, $article){
     return $string;
 }
 
-function getHasPullHead($pfName){//name with ns
+function getHasPullHead($pfName){//pullfeed name with ns
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
@@ -768,9 +778,50 @@ function getHasPullHead($pfName){//name with ns
         }
     }
     if (empty ($res)) return false;
-    else return $res;
+    else return $res[1];
 }
 
+function getPushName($name){//pullfeed name with NS
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
+    $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FhpushFeedName/headers=hide/order=desc/format=csv/limit=1";
+     $string = file_get_contents($url);
+    if ($string=="") return false;
+     $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+     $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'PullFeed:')!==false || $resultLine==""){
+            unset($res[$key]);
+        }
+    }
+    if (empty ($res)) return false;
+    else return $res[1];
+}
+
+function getPushURL($name){//pullfeed name with NS
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
+    $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FhpushFeedServer/headers=hide/order=desc/format=csv/limit=1";
+     $string = file_get_contents($url);
+    if ($string=="") return false;
+     $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+     $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine){
+        if(strpos($resultLine, 'PullFeed:')!==false || $resultLine==""){
+            unset($res[$key]);
+        }
+    }
+    if (empty ($res)) return false;
+    else return $res[1];
+}
 /**
  *In a pullfeed page, the value of [[hasPullHead::]] has to be updated with the
  *ChangeSetId of the last pulled ChangeSet
