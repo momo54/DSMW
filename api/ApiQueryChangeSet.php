@@ -30,28 +30,30 @@ class ApiQueryChangeSet extends ApiQueryBase {
         global $wgServerName, $wgScriptPath;
 
         $params = $this->extractRequestParams();
-       // $request = $this->encodeRequest('[[inPushFeed::'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
-       $request = $this->encodeRequest('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangetSet::'.$params['changeSet'].']]');
+        // $request = $this->encodeRequest('[[inPushFeed::'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
+        $request = $this->encodeRequest('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
         //$request = '-5B-5BinPushFeed::PushFeed:Pushcity-5D-5D-5B-5BpreviousChangetSet::localhost-2Fwiki14-5D-5D';
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FhasPatch/format=csv/sep=!';
         $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FchangeSetID/-3FhasPatch/format=csv/sep=!');
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 
-       // $data = $data[1];
+        // $data = $data[1];
         $data = split('!',$data);
         $CSID = $data[1];
 
-//        $result->setIndexedTagName($data[0], 'cs');
-//        $result->addValue('query', $this->getModuleName(), $data[0]);
-
-        $data = split(',',$data[2]);
-        $result->setIndexedTagName($data, 'patch');
-        //$result->addValue((array ('query', $this->getModuleName(),$CSID)));
-        $result->addValue(array('query',$this->getModuleName()),'id',$CSID);
-        $result->addValue('query', $this->getModuleName(), $data);
-        
-     }
+        //        $result->setIndexedTagName($data[0], 'cs');
+        //        $result->addValue('query', $this->getModuleName(), $data[0]);
+        if($CSID) {
+            $data = split(',',$data[2]);
+            $result->setIndexedTagName($data, 'patch');
+            //$result->addValue((array ('query', $this->getModuleName(),$CSID)));
+            $result->addValue(array('query',$this->getModuleName()),'id',$CSID);
+            $result->addValue('query', $this->getModuleName(), $data);
+        }else{
+            $result->addValue(array('query',$this->getModuleName()),'url',$url);
+        }
+    }
 
     public function getAllowedParams() {
         global $wgRestrictionTypes, $wgRestrictionLevels;

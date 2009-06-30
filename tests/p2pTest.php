@@ -265,7 +265,7 @@ toto' ;
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki12]]
 inPushFeed: [[inPushFeed::PushFeed:PushCity]]
-previousChangetSet: [[previousChangetSet::none]]
+previousChangetSet: [[previousChangeSet::none]]
  hasPatch: [[hasPatch::"Patch:Berlin1"]] hasPatch: [[hasPatch::"Patch:Paris0"]]';
         $this->p2pBot1->createPage($pageName, $content);
 
@@ -303,7 +303,7 @@ Pages concerned:
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki13]]
 inPushFeed: [[inPushFeed::PushFeed:PushCity]]
-previousChangetSet: [[previousChangetSet::ChangeSet:localhost/wiki12]]
+previousChangetSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
  hasPatch: [[hasPatch::"Patch:Berlin2"]]';
         $this->p2pBot1->createPage($pageName, $content);
 
