@@ -56,7 +56,7 @@ class p2pTest extends PHPUnit_Framework_TestCase {
     }
 
 
-/*    public function testbotappend() {
+  /*  public function testbotappend() {
         $pageName = "Paris";
         $content='content page Paris
 [[Category:city]]';
@@ -236,8 +236,8 @@ toto' ;
         //assertContentEquals($this->p2pBot1->bot->wikiServer, $CSIDFound, $contentCS);
         assertContentEquals($this->p2pBot1->bot->wikiServer,$CSIDFound, $contentCS);
 
-        /*$this->p2pBot1->createPage('Paris','content page Paris [[Category:city]]');
-        $this->p2pBot1->createPage('toto','toto');
+        //$this->p2pBot1->createPage('Paris','content page Paris [[Category:city]]');
+        //$this->p2pBot1->createPage('toto','toto');
 
         $this->p2pBot1->push('PushFeed:'.$pushName);
 
@@ -258,8 +258,8 @@ toto' ;
 
         $this->assertEquals('',substr($pullFound[0],0,-1));
     }
-
 */
+
     public function testGetChangeSet() {
         $pageName = "ChangeSet:localhost/wiki12";
         $content='ChangeSet:
@@ -282,13 +282,13 @@ Pages concerned:
         $dom = new DOMDocument();
         $dom->loadXML($cs);
         $changeSet = $dom->getElementsByTagName('changeSet');
-        foreach($changeSet as $cs){
+        foreach($changeSet as $cs) {
             if ($cs->hasAttribute("id")) {
                 $CSID = $cs->getAttribute('id');
             }
         }
 
-        $this->assertEquals('ChangeSet:Localhost/wiki12',$CSID);
+        $this->assertEquals('Localhost/wiki12',$CSID);
 
         $listePatch = $dom->getElementsByTagName('patch');
 
@@ -313,13 +313,13 @@ previousChangetSet: [[previousChangetSet::ChangeSet:localhost/wiki12]]
         $dom->loadXML($cs);
 
         $changeSet = $dom->getElementsByTagName('changeSet');
-        foreach($changeSet as $cs){
+        foreach($changeSet as $cs) {
             if ($cs->hasAttribute("id")) {
                 $CSID = $cs->getAttribute('id');
             }
         }
 
-        $this->assertEquals('ChangeSet:Localhost/wiki13',$CSID);
+        $this->assertEquals('Localhost/wiki13',$CSID);
         $listePatch = $dom->getElementsByTagName('patch');
 
         $patch = null;
@@ -328,6 +328,26 @@ previousChangetSet: [[previousChangetSet::ChangeSet:localhost/wiki12]]
 
         $this->assertTrue(count($patch)==1);
         $this->assertEquals('Patch:Berlin2',substr($patch[0],0,-1));
+
+        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=ChangeSet:localhost/wiki13&format=xml');
+
+        $dom = new DOMDocument();
+        $dom->loadXML($cs);
+        $changeSet = $dom->getElementsByTagName('changeSet');
+        $CSID = null;
+        foreach($changeSet as $cs) {
+            if ($cs->hasAttribute("id")) {
+                $CSID = $cs->getAttribute('id');
+            }
+        }
+
+        $this->assertEquals(null, $CSID);
+
+        $patch = null;
+        $listePatch = $dom->getElementsByTagName('patch');
+        foreach($listePatch as $pays)
+            $patch[] = $pays->firstChild->nodeValue;
+        $this->assertEquals(null, $patch);
     }
 
     /*public function testPull() {
