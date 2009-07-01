@@ -37,6 +37,7 @@ class ApiQueryPatch extends ApiQueryBase {
 
         $data = split('!',$data);
         if($data[1]) {
+            substr($data[3],0,-1);
             $op = split(',',$data[3]);
             $result->setIndexedTagName($op, 'operation');
             //$result->addValue((array ('query', $this->getModuleName(),$CSID)));

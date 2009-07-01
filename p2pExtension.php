@@ -274,7 +274,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
 
         $url = $relatedPushServer.'api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-        $cs = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
+        $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
         $dom = new DOMDocument();
         $dom->loadXML($cs);
 
@@ -292,13 +292,13 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 $patchs = $dom->getElementsByTagName('patch');
                 foreach($patchs as $p)
                     $listPatch[] = $p->firstChild->nodeValue;
-               // $CSID = substr($CSID,strlen('changeSet:'));
+                // $CSID = substr($CSID,strlen('changeSet:'));
                 utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
 
-            //integrate CSID
+                //integrate CSID
                 //integrate($CSID);
-
-                //updatePullFeed($name, $CSID);
+                integrate($CSID, $listPatch,$relatedPushServer);
+            //updatePullFeed($name, $CSID);
 
             }
 
@@ -604,17 +604,39 @@ function updatePushFeed($name, $CSID) {
  * It's a local changeSet (downloaded from a remote site)
  * @param <String> $changeSetId with NS
  */
-function integrate($changeSetId,$patchIdList) {
-    $patchIdList = getPatchIdList($changeSetId);
-    $lastPatch = utils::getLastPatchId($pageName);
+function integrate($changeSetId,$patchIdList,$relatedPushServer) {
+// $patchIdList = getPatchIdList($changeSetId);
+//  $lastPatch = utils::getLastPatchId($pageName);
     foreach ($patchIdList as $patchId) {
-        //recuperation patch via api, creation (sauvegarde en local)
-        $articleTitle = getArticleTitleFromPatch($patchId);
-        $operationList = getOperations($patchId);
-        foreach ($operationList as $operation) {
+    //recuperation patch via api, creation (sauvegarde en local)
+        $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='.substr($patchId,strlen('patch:')).'&format=xml';
+        $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
+
+        $dom = new DOMDocument();
+        $dom->loadXML($patch);
+
+        $patchs = $dom->getElementsByTagName('patch');
+        //        $patchID = null;
+        foreach($patchs as $p) {
+            if ($p->hasAttribute("onPage")) {
+                $onPage = $p->getAttribute('onPage');
+            }
+            if ($p->hasAttribute("previous")) {
+                $previousPatch = $p->getAttribute('previous');
+            }
+        }
+
+        $op = $dom->getElementsByTagName('operation');
+        foreach($op as $o)
+            $operations[] = $o->firstChild->nodeValue;
+        $lastPatch = utils::getLastPatchId($onPage);
+
+        utils::createPatch($patchId, $onPage, $lastPatch, $operations);
+
+        foreach ($operations as $operation) {
             $operation = operationToLogootOp($operation);
             if ($operation!=false && is_object($operation)) {
-                logootIntegrate($operation, $articleTitle);
+                logootIntegrate($operation, $onPage);
             }
         }
     }
@@ -715,7 +737,7 @@ function getArticleTitleFromPatch($patchId) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-    $idArrray = array();
+   
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
@@ -729,7 +751,7 @@ function operationToLogootOp($operation) {
         $id1 = explode(':', $id);
         $idArrray = new LogootId($id1[0], $id1[1]);
     }
-    $logootPos = new LogootPosition($idArrray);
+    $logootPos = new LogootPosition(array($idArrray));
 
     if($res[1]=="Insert") {
         $logootOp = new LogootIns('', $logootPos, $res[3]);
@@ -753,7 +775,11 @@ function logootIntegrate($operation, $article) {
 
     if(is_string($article)) {
         $db = wfGetDB( DB_SLAVE );
-        $pageid = $this->getPageIdWithTitle($article);
+        
+        $dbr = wfGetDB( DB_SLAVE );
+        $pageid = $dbr->selectField('page','page_id', array(
+        'page_title'=>$article));
+
         $lastRev = Revision::loadFromPageId($db, $pageid);
         $rev_id = $lastRev->getId();
 
