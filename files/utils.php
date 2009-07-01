@@ -68,7 +68,7 @@ inPushFeed: [[inPullFeed::'.$inPullFeed.']]
 previousChangetSet: [[previousChangeSet::'.$previousCS.']]
 ';
         foreach ($listPatch as $patch) {
-            $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
+            $newtext .=" hasPatch: [[hasPatch::".$patch."]]";
         }
 
         $title = Title::newFromText($CSID, CHANGESET);

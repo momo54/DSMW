@@ -30,11 +30,10 @@ class ApiQueryChangeSet extends ApiQueryBase {
         global $wgServerName, $wgScriptPath;
 
         $params = $this->extractRequestParams();
-        // $request = $this->encodeRequest('[[inPushFeed::'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
         $request = $this->encodeRequest('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
         //$request = '-5B-5BinPushFeed::PushFeed:Pushcity-5D-5D-5B-5BpreviousChangetSet::localhost-2Fwiki14-5D-5D';
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FhasPatch/format=csv/sep=!';
-        $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FchangeSetID/-3FhasPatch/format=csv/sep=!');
+        $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FchangeSetID/-3FhasPatch/headers=hide/format=csv/sep=!');
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 
@@ -50,9 +49,9 @@ class ApiQueryChangeSet extends ApiQueryBase {
             //$result->addValue((array ('query', $this->getModuleName(),$CSID)));
             $result->addValue(array('query',$this->getModuleName()),'id',$CSID);
             $result->addValue('query', $this->getModuleName(), $data);
-        }else{
+        }/*else{
             $result->addValue(array('query',$this->getModuleName()),'url',$url);
-        }
+        }*/
     }
 
     public function getAllowedParams() {
@@ -89,7 +88,7 @@ class ApiQueryChangeSet extends ApiQueryBase {
 
     protected function getExamples() {
         return array(
-        'api.php?action=query&meta=changeSet&cspushName=push&cschangeSet=localhost/wiki12',
+        'api.php?action=query&meta=changeSet&cspushName=push&cschangeSet=localhost/wiki12&format=xml',
         );
     }
 
