@@ -273,7 +273,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         $nameWithoutNS = $m[2];
 
 
-        $url = $relatedPushServer.'api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+        //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
         $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
         $dom = new DOMDocument();
         $dom->loadXML($cs);
@@ -774,14 +774,15 @@ function operationToLogootOp($operation) {
 function logootIntegrate($operation, $article) {
 
     if(is_string($article)) {
-        $db = wfGetDB( DB_SLAVE );
+        //$db = wfGetDB( DB_SLAVE );
         
         $dbr = wfGetDB( DB_SLAVE );
         $pageid = $dbr->selectField('page','page_id', array(
         'page_title'=>$article));
 
-        $lastRev = Revision::loadFromPageId($db, $pageid);
-        $rev_id = $lastRev->getId();
+        $lastRev = Revision::loadFromPageId($dbr, $pageid);
+        if(is_null($lastRev)) $rev_id = 0;
+        else $rev_id = $lastRev->getId();
 
         $title = Title::newFromText($article);
         $article = new Article($title);

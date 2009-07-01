@@ -8,7 +8,7 @@ define ('INT_MIN', "0");
  *
  * @author mullejea
  */
-class Test_1  extends PHPUnit_Framework_TestCase{
+class logootTest  extends PHPUnit_Framework_TestCase{
 
     function testIdCompareTo(){
         $id1 = new LogootId("10000", "10000");
