@@ -96,7 +96,7 @@ class Patch {
     public function storePage($pageName){
 
         //$pageName = $this->getPageTitleWithId($this->mPageId);
-        $previous = $this->getLastPatchId($pageName);
+        $previous = utils::getLastPatchId($pageName);
         if($previous==false) {
             $previous = "none";
             //$ID = $pageName."_0";
@@ -171,45 +171,45 @@ class Patch {
 //    return $string;
 //}
 
-function getLastPatchId($pageName, $url=''){
-    global $wgServerName, $wgScriptPath;
-    $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
-    $req = utils::encodeRequest($req);
-    if($url=='')    $url = 'http://'.$wgServerName.$wgScriptPath;
-    $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
-    $string = file_get_contents($url1);//patches list
-    $string = strtolower($string);
-    if ($string=="") return false;
-    $string = explode("\n", $string);
-    foreach ($string as $key=>$str1){
-        if ($str1=="") unset ($string[$key]);
-        $pos = strpos($str1, '!');
-        if($pos !== false) $string[$key] = 'patch:'.substr($str1, $pos+1);
-        //else $string[$key] = 'Patch:'.$str1;
-    }
-/*$string is the list of the patches */
-
-    $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
-    $string1 = file_get_contents($url2);//previous list
-    $string1 = strtolower($string1);
-    if ($string1=="") return false;
-    $string1 = explode("\n", $string1);
-    foreach ($string1 as $key=>$str){
-        $pos = strpos($str, '!');
-        if($pos !== false) $string1[$key] = substr($str, $pos+1);
-        if ($string1[$key]=="") unset ($string1[$key]);
-        $pos1 = strpos($string1[$key], ';');
-        if($pos1 !== false){
-            $res = explode(';', $string1[$key]);
-            $string1 = array_merge($string1, $res);
-        }
-    }
-    /*$string1 is the list of the patches witch are previouses */
-
-    $result = array_diff($string, $string1);
-    if (count($result)>1) return $result;
-    else return array_shift($result);
-}
+//function getLastPatchId($pageName, $url=''){
+//    global $wgServerName, $wgScriptPath;
+//    $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
+//    $req = utils::encodeRequest($req);
+//    if($url=='')    $url = 'http://'.$wgServerName.$wgScriptPath;
+//    $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
+//    $string = file_get_contents($url1);//patches list
+//    $string = strtolower($string);
+//    if ($string=="") return false;
+//    $string = explode("\n", $string);
+//    foreach ($string as $key=>$str1){
+//        if ($str1=="") unset ($string[$key]);
+//        $pos = strpos($str1, '!');
+//        if($pos !== false) $string[$key] = 'patch:'.substr($str1, $pos+1);
+//        //else $string[$key] = 'Patch:'.$str1;
+//    }
+///*$string is the list of the patches */
+//
+//    $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
+//    $string1 = file_get_contents($url2);//previous list
+//    $string1 = strtolower($string1);
+//    if ($string1=="") return false;
+//    $string1 = explode("\n", $string1);
+//    foreach ($string1 as $key=>$str){
+//        $pos = strpos($str, '!');
+//        if($pos !== false) $string1[$key] = substr($str, $pos+1);
+//        if ($string1[$key]=="") unset ($string1[$key]);
+//        $pos1 = strpos($string1[$key], ';');
+//        if($pos1 !== false){
+//            $res = explode(';', $string1[$key]);
+//            $string1 = array_merge($string1, $res);
+//        }
+//    }
+//    /*$string1 is the list of the patches witch are previouses */
+//
+//    $result = array_diff($string, $string1);
+//    if (count($result)>1) return $result;
+//    else return array_shift($result);
+//}
 
 function getPageTitleWithId($id){//returns false if the article doesn't exist yet
         $dbr = wfGetDB( DB_SLAVE );

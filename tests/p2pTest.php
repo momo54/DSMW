@@ -184,9 +184,9 @@ toto' ;
         $this->assertEquals(strtolower('PushFeed:'.$pushName),strtolower($CSFound[1]));
         $this->assertEquals('None',$CSFound[2]);
 
-        $patch = new Patch('', '', '', '');
-        $lastPatchNancy = $patch->getLastPatchId('Nancy', $this->p2pBot1->bot->wikiServer);
-        $lastPatchParis = $patch->getLastPatchId('Paris', $this->p2pBot1->bot->wikiServer);
+        //$patch = new Patch('', '', '', '');
+        $lastPatchNancy = utils::getLastPatchId('Nancy', $this->p2pBot1->bot->wikiServer);
+        $lastPatchParis = utils::getLastPatchId('Paris', $this->p2pBot1->bot->wikiServer);
         $patchCS = split(',',substr($CSFound[3],0,-1));
         $this->assertTrue(count($patchCS)==2);
 
@@ -214,7 +214,7 @@ toto' ;
 
         $contentCS = getContentPage($this->p2pBot1->bot->wikiServer,$CSIDFound);
         $previousLastPatchNancy = $lastPatchNancy;
-        $lastPatchNancy = $patch->getLastPatchId('Nancy',$this->p2pBot1->bot->wikiServer);
+        $lastPatchNancy = utils::getLastPatchId('Nancy',$this->p2pBot1->bot->wikiServer);
         $patchCS = split(',',substr($CSFound[3],0,-1));
         $this->assertTrue(count($patchCS)==2);
         $assert1 = strtolower($lastPatchNancy) == strtolower($patchCS[0]) || strtolower($lastPatchNancy) == strtolower($patchCS[1]);
@@ -227,7 +227,7 @@ toto' ;
         $prevPatch = substr($prevPatch[0],0,-1);
         $this->assertEquals(strtolower($previousLastPatchNancy),strtolower($prevPatch));
 
-        //patchId2 = getlastPatchId(Nancy);
+        //patchId2 = utils::getlastPatchId(Nancy);
         //jusqu'à previouspatch = patchId1
 
         $this->p2pBot1->push('PushFeed:'.$pushName);
@@ -265,7 +265,7 @@ toto' ;
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki12]]
 inPushFeed: [[inPushFeed::PushFeed:PushCity]]
-previousChangetSet: [[previousChangeSet::none]]
+previousChangeSet: [[previousChangeSet::none]]
  hasPatch: [[hasPatch::"Patch:Berlin1"]] hasPatch: [[hasPatch::"Patch:Paris0"]]';
         $this->p2pBot1->createPage($pageName, $content);
 
@@ -303,7 +303,7 @@ Pages concerned:
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki13]]
 inPushFeed: [[inPushFeed::PushFeed:PushCity]]
-previousChangetSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
+previousChangeSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
  hasPatch: [[hasPatch::"Patch:Berlin2"]]';
         $this->p2pBot1->createPage($pageName, $content);
 

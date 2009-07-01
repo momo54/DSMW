@@ -273,8 +273,8 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         $nameWithoutNS = $m[2];
 
 
-        $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-        $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+        $url = $relatedPushServer.'api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+        $cs = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
         $dom = new DOMDocument();
         $dom->loadXML($cs);
 
@@ -296,9 +296,9 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
 
             //integrate CSID
-                integrate($CSID);
+                //integrate($CSID);
 
-                updatePullFeed($name, $CSID);
+                //updatePullFeed($name, $CSID);
 
             }
 
@@ -606,7 +606,9 @@ function updatePushFeed($name, $CSID) {
  */
 function integrate($changeSetId,$patchIdList) {
     $patchIdList = getPatchIdList($changeSetId);
+    $lastPatch = utils::getLastPatchId($pageName);
     foreach ($patchIdList as $patchId) {
+        //recuperation patch via api, creation (sauvegarde en local)
         $articleTitle = getArticleTitleFromPatch($patchId);
         $operationList = getOperations($patchId);
         foreach ($operationList as $operation) {
@@ -819,7 +821,7 @@ function getHasPullHead($pfName) {//pullfeed name with ns
 function getPushName($name) {//pullfeed name with NS
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
+    $req = '[[PullFeed:+]] [[name::'.$name.']]';
     $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FpushFeedName/headers=hide/order=desc/format=csv/limit=1";
     $string = file_get_contents($url);
@@ -840,7 +842,7 @@ function getPushName($name) {//pullfeed name with NS
 function getPushURL($name) {//pullfeed name with NS
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
+    $req = '[[PullFeed:+]] [[name::'.$name.']]';
     $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FpushFeedServer/headers=hide/order=desc/format=csv/limit=1";
     $string = file_get_contents($url);
