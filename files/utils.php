@@ -67,7 +67,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     static function createChangeSetPull($CSID,$inPullFeed,$previousCS,$listPatch) {
         $newtext = 'ChangeSet:
 changeSetID: [[changeSetID::'.$CSID.']]
-inPushFeed: [[inPullFeed::'.$inPullFeed.']]
+inPullFeed: [[inPullFeed::'.$inPullFeed.']]
 previousChangeSet: [[previousChangeSet::'.$previousCS.']]
 ';
         foreach ($listPatch as $patch) {
@@ -85,11 +85,17 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         foreach ($operations as $op) {
             $text .= 'hasOperation [[hasOperation::'.$op.']] ';
         }
-
-        foreach($previousPatch as $prev){
-            $text .= 'previous : [[previous::Patch:'.$prev.']] ';
+        if (is_array($previousPatch)){
+            $text.=' previous: [[previous::';
+            foreach ($previousPatch as $prev){
+                $text.=$prev.';';
+            }
+            $text.=']]';
         }
-      //  $text .= 'previous : [[previous::Patch:'.$previousPatch.']]';
+        else{
+        $text.=' previous: [[previous::'.$previousPatch.']]';
+        }
+     
         $title = Title::newFromText($patchId, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary="");
@@ -132,7 +138,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
 
         $result = array_diff($string, $string1);
         if (count($result)>1) return $result;
-        else array_shift($result);
+        else return array_shift($result);
     }
 
 

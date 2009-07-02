@@ -223,7 +223,7 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
 
     //////////PullFeed page////////
     elseif(isset ($_GET['action']) && $_GET['action']=='pullpage') {
-        $url = $_POST['url'];
+        $url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
         $pushname = $_POST['pushname'];
         $pullname = $_POST['pullname'];
 
@@ -295,11 +295,9 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 // $CSID = substr($CSID,strlen('changeSet:'));
                 utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
 
-                //integrate CSID
-                //integrate($CSID);
+                
                 integrate($CSID, $listPatch,$relatedPushServer);
                 updatePullFeed($name, $CSID);
-            //updatePullFeed($name, $CSID);
 
             }
 
@@ -631,6 +629,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
         foreach($op as $o)
             $operations[] = $o->firstChild->nodeValue;
         $lastPatch = utils::getLastPatchId($onPage);
+        if ($lastPatch==false) $lastPatch='none';
 
         utils::createPatch($patchId, $onPage, $lastPatch, $operations);
 
@@ -753,6 +752,10 @@ function operationToLogootOp($operation) {
         $idArrray = new LogootId($id1[0], $id1[1]);
     }
     $logootPos = new LogootPosition(array($idArrray));
+
+if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false){
+                $res[3] = utils::decodeRequest($res[3]);
+            }
 
     if($res[1]=="Insert") {
         $logootOp = new LogootIns('', $logootPos, $res[3]);
