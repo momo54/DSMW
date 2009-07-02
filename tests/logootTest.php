@@ -1,6 +1,11 @@
 <?php
-require_once 'LogootTests/LogootId.php';
-require_once 'LogootTests/LogootPosition.php';
+//require_once 'LogootTests/LogootId.php';
+//require_once 'LogootTests/LogootPosition.php';
+require_once '../logootEngine/LogootId.php';
+require_once '../logootEngine/LogootPosition.php';
+require_once '../logootEngine/BlobInfo.php';
+require_once '../logootop/LogootIns.php';
+require_once '../logootop/LogootDel.php';
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
 /**
@@ -76,6 +81,41 @@ class logootTest  extends PHPUnit_Framework_TestCase{
         $pos1 = new LogootPosition(array(LogootId::IdMin(), LogootId::IdMin(),
                 LogootId::IdMin()));
         $this->assertEquals('0', $pos->nEquals($pos1));
+    }
+
+    function testInsert(){
+        $blobInfo = BlobInfo::loadBlobInfo(0);
+        //setup the first and the last lines
+        $start = new LogootPosition(array(LogootId::IdMin(), LogootId::IdMin()));
+        $end = new LogootPosition(array(LogootId::IdMax(), LogootId::IdMax()));
+        
+        //insert1
+        $positions = $blobInfo->getNPositionID($start, $end, gmp_init("1"), $sid=session_id());
+        $position1 = $positions[0];
+        $insert1 = LogootIns(1, $position1, 'X');
+        
+        
+        //insert2
+        $start = $blobInfo->getPrevPosition(1);
+        $end = $blobInfo->getNextPosition(1);
+        $positions = $blobInfo->getNPositionID($start, $end, gmp_init("1"), $sid=session_id());
+        $position2 = $positions[0];
+        $insert2 = LogootIns(1, $position2, 'Y');
+
+
+        //insert3
+        $start = $blobInfo->getPrevPosition(1);
+        $end = $blobInfo->getNextPosition(1);
+        $positions = $blobInfo->getNPositionID($start, $end, gmp_init("1"), $sid=session_id());
+        $position3 = $positions[0];
+        $insert3 = LogootIns(1, $position3, 'Z');
+
+
+        $blobInfo->integrateBlob($insert1);
+        $blobInfo->integrateBlob($insert2);
+        $blobInfo->integrateBlob($insert3);
+
+        //assert
     }
 }
 ?>
