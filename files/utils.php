@@ -40,9 +40,12 @@ class utils {
         return $request;
     }
 
-    static function pageExist($server,$pageName) {
-        $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
+    static function pageExist($pageName) {
+        global $wgServerName, $wgScriptPath;
+        $url = 'http://'.$wgServerName.$wgScriptPath;
+        $rev = file_get_contents($url.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
         $rev =  unserialize($rev);
+        return count($rev['query']['pages'][-1])==0;
     //PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
     }
 
@@ -62,7 +65,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     }
 
     static function createChangeSetPull($CSID,$inPullFeed,$previousCS,$listPatch) {
-        $newtest = 'ChangeSet:
+        $newtext = 'ChangeSet:
 changeSetID: [[changeSetID::'.$CSID.']]
 inPushFeed: [[inPullFeed::'.$inPullFeed.']]
 previousChangeSet: [[previousChangeSet::'.$previousCS.']]

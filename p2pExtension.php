@@ -287,7 +287,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }
 
         while($CSID!=null) {
-            if(!utils::pageExist($_SERVER['HTTP_REFERER'], $CSID)) {
+            if(!utils::pageExist($CSID)) {
                 $listPatch = null;
                 $patchs = $dom->getElementsByTagName('patch');
                 foreach($patchs as $p)
@@ -298,6 +298,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 //integrate CSID
                 //integrate($CSID);
                 integrate($CSID, $listPatch,$relatedPushServer);
+                updatePullFeed($name, $CSID);
             //updatePullFeed($name, $CSID);
 
             }
