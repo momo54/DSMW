@@ -101,10 +101,10 @@ class p2pBot {
     }
 
     function pull($pullName) {
-        $post_vars['name'] = $pullName;
-
+        $post_vars['pull[]'] = $pullName;
+        $post_vars['action'] = 'onpull';
         $tihs->maxredirs = 0;
-        if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php?action=onpull',$post_vars) ) {
+        if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code)

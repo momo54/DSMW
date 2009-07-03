@@ -650,7 +650,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
  * @global <Object> $wgScriptPath
  * @param <String> $changeSetId with NS
  * @return <array> a PatchId list
- */
+ *
 function getPatchIdList($changeSetId) {
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -671,14 +671,14 @@ function getPatchIdList($changeSetId) {
     $patchIdList = array_unique($res);
     return $patchIdList;
 }
-
+*
 /**
  *
  * @global <Object> $wgServerName
  * @global <Object> $wgScriptPath
  * @param <String> $patchId
  * @return <array> an operations list
- */
+ *
 function getOperations($patchId) {
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -699,6 +699,8 @@ function getOperations($patchId) {
     $operations = array_unique($res);
     return $operations;
 }
+ *
+ 
 
 /**
  *
@@ -706,7 +708,7 @@ function getOperations($patchId) {
  * @global <Object> $wgScriptPath
  * @param <String> $patchId
  * @return <String> article title;
- */
+ *
 function getArticleTitleFromPatch($patchId) {
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -727,7 +729,7 @@ function getArticleTitleFromPatch($patchId) {
     $article = array_unique($res);
     return $article;
 }
-
+*/
 /**
  *transforms a string operation from a patch page into a logoot operation
  * insertion or deletion

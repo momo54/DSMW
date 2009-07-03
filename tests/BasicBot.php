@@ -175,7 +175,9 @@ class BasicBot extends Snoopy{
 		if ($this->wikiConnected) 		// no need to repeat all this if it's already been done.
 			return true;
 		if (file_exists($this->wikiCookies) && (filemtime($this->wikiCookies) > (time() - COOKIETIME)) ){ // check cookie freshness
-			include_once($this->wikiCookies); 	// load cookies from cache
+                        $cookiesCache = null;
+                        include_once($this->wikiCookies); 	// load cookies from cache
+                        if(!$cookiesCache) return $this->wikiLogin();
 			$this->cookies = $cookiesCache;
 			$this->wikiConnected = true;
 			return $this->wikiConnected; // we have the cookies, proceed with whatever you want to do.
