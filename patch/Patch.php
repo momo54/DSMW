@@ -76,22 +76,22 @@ class Patch {
 
 
     /*******************Database access functions************************/
-    public function store(){
-         $operations = serialize($this->mOperations);
-         $this->mId = $this->getNextPatchId();
-        wfProfileIn( __METHOD__ );
-        $dbw = wfGetDB( DB_MASTER );
-        $dbw->insert( 'patchs', array(
-            'id'        => $this->mId,
-            'patch_id'        => $this->mPatchId,
-            'operations'    => $operations,
-            'is_active'     => $this->mActive,
-            'rev_id'  => $this->mRevId,
-            'page_id'  => $this->mPageId,
-            ), __METHOD__ );
-
-        wfProfileOut( __METHOD__ );
-    }
+//    public function store(){
+//         $operations = serialize($this->mOperations);
+//         $this->mId = $this->getNextPatchId();
+//        wfProfileIn( __METHOD__ );
+//        $dbw = wfGetDB( DB_MASTER );
+//        $dbw->insert( 'patchs', array(
+//            'id'        => $this->mId,
+//            'patch_id'        => $this->mPatchId,
+//            'operations'    => $operations,
+//            'is_active'     => $this->mActive,
+//            'rev_id'  => $this->mRevId,
+//            'page_id'  => $this->mPageId,
+//            ), __METHOD__ );
+//
+//        wfProfileOut( __METHOD__ );
+//    }
 
     public function storePage($pageName){
 
@@ -211,55 +211,55 @@ class Patch {
 //    else return array_shift($result);
 //}
 
-function getPageTitleWithId($id){//returns false if the article doesn't exist yet
-        $dbr = wfGetDB( DB_SLAVE );
-        $title = $dbr->selectField('page','page_title', array(
-        'page_id'=>$id));
-        return $title;
-    }
+//function getPageTitleWithId($id){//returns false if the article doesn't exist yet
+//        $dbr = wfGetDB( DB_SLAVE );
+//        $title = $dbr->selectField('page','page_title', array(
+//        'page_id'=>$id));
+//        return $title;
+//    }
 
 //function getNextPatchId(){
 //
 //}
 
-    public function load($id){
-        $db = wfGetDB( DB_SLAVE );
-        $fields = array(
-            'patch_id',
-			'operations',
-			'is_active',
-			'rev_id',
-            'page_id');
-        $conditions = array( "id=$id") ;
-        $res = $db->select(
-			array( 'patchs' ),
-			$fields,
-			$conditions,
-			__METHOD__ );
-        $res1 = $db->resultObject( $res );
+//    public function load($id){
+//        $db = wfGetDB( DB_SLAVE );
+//        $fields = array(
+//            'patch_id',
+//			'operations',
+//			'is_active',
+//			'rev_id',
+//            'page_id');
+//        $conditions = array( "id=$id") ;
+//        $res = $db->select(
+//			array( 'patchs' ),
+//			$fields,
+//			$conditions,
+//			__METHOD__ );
+//        $res1 = $db->resultObject( $res );
+//
+//        if( $res1 ) {
+//			$row = $res1->fetchObject();
+//			$res1->free();
+//			if( $row ) {
+//				$ret1 = new Patch( $row->patch_id, unserialize($row->operations), $row->rev_id, $row->page_id );
+//
+//				return $ret1;
+//			}
+//		}
+//		$ret1 = null;
+//		return $ret1;
+//    }
 
-        if( $res1 ) {
-			$row = $res1->fetchObject();
-			$res1->free();
-			if( $row ) {
-				$ret1 = new Patch( $row->patch_id, unserialize($row->operations), $row->rev_id, $row->page_id );
-               
-				return $ret1;
-			}
-		}
-		$ret1 = null;
-		return $ret1;
-    }
-
-    private function getNextPatchId(){
-         wfProfileIn( __METHOD__ );
-        $dbr = wfGetDB( DB_SLAVE );
-        $lastid = $dbr->selectField('patchs','MAX(id)', array(
-        'page_id'=>$this->mPageId));
-
-        wfProfileOut( __METHOD__ );
-
-        return $lastid + 1;
-    }
+//    private function getNextPatchId(){
+//         wfProfileIn( __METHOD__ );
+//        $dbr = wfGetDB( DB_SLAVE );
+//        $lastid = $dbr->selectField('patchs','MAX(id)', array(
+//        'page_id'=>$this->mPageId));
+//
+//        wfProfileOut( __METHOD__ );
+//
+//        return $lastid + 1;
+//    }
 }
 ?>

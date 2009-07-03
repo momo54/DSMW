@@ -37,7 +37,7 @@ $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeS
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 //global $wgAPIMetaModules;
-$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+$wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
 
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
@@ -161,7 +161,8 @@ Pages concerned:
 
         // $name = $_GET['name'];//PushFeed name
         $request = getPushFeedRequest($name);
-        $previousCSID = getPreviousCSID($name);
+//        $previousCSID = getPreviousCSID($name);
+        $previousCSID = getHasPushHead($name);
         if($previousCSID==false) {
             $previousCSID = "none";
         //$CSID = $name."_0";
@@ -258,13 +259,13 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
         $name = $name[0];//with NS
 
-        $previousCSID = getPreviousPulledCSID($name);
+//        $previousCSID = getPreviousPulledCSID($name);
+//        if($previousCSID==false) {
+//            $previousCSID = "none";
+//        }
+        $previousCSID = getHasPullHead($name);
         if($previousCSID==false) {
             $previousCSID = "none";
-        }
-        $pullHead = getHasPullHead($name);
-        if($pullHead==false) {
-            $pullHead = "none";
         }
         $relatedPushServer = getPushURL($name);
         $namePush = getPushName($name);
@@ -315,14 +316,10 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             }
         }
 
-         /* while (get($pullHead(avec ns))!=null){ recup CS avec NS
-         * if changeSet (article) !exists{
-         *          -cree et save changeset en local avec meme id
-         *          -integrate($csid) avec NS
-         *          -updatePullFeed(pfname avec NS, csid)
-         *          }
-         * }
-         */
+        $title = Title::newFromText($CSID, CHANGESET);
+        $article = new Article($title);
+        $article->doRedirect();
+         
         return false;
     }
 
@@ -510,20 +507,20 @@ function getPushFeedRequest($pfName) {
  * @param <String> $pfName PushFeed name
  * @return <String> previous changeSet ID
  */
-function getPreviousCSID($pfName) {
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfName.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = explode(",", $string);
-    $string = $string[0];
-    $string = str_replace(',', '', $string);
-    $string = str_replace("\"", "", $string);
-    return $string;
-}
+//function getPreviousCSID($pfName) {
+//    global $wgServerName, $wgScriptPath;
+//    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+//    $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfName.']]';
+//    $req = utils::encodeRequest($req);
+//    $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
+//    $string = file_get_contents($url);
+//    if ($string=="") return false;
+//    $string = explode(",", $string);
+//    $string = $string[0];
+//    $string = str_replace(',', '', $string);
+//    $string = str_replace("\"", "", $string);
+//    return $string;
+//}
 
 /**
  * Gets the published patches
@@ -815,20 +812,20 @@ function logootIntegrate($operation, $article) {
  * @param <String> $pfName pullfeed name
  * @return <String> ChanSetId of the last changeset pulled
  */
-function getPreviousPulledCSID($pfName) {
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[ChangeSet:+]] [[inPullFeed::'.$pfName.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = explode(",", $string);
-    $string = $string[0];
-    $string = str_replace(',', '', $string);
-    $string = str_replace("\"", "", $string);
-    return $string;
-}
+//function getPreviousPulledCSID($pfName) {
+//    global $wgServerName, $wgScriptPath;
+//    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+//    $req = '[[ChangeSet:+]] [[inPullFeed::'.$pfName.']]';
+//    $req = utils::encodeRequest($req);
+//    $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
+//    $string = file_get_contents($url);
+//    if ($string=="") return false;
+//    $string = explode(",", $string);
+//    $string = $string[0];
+//    $string = str_replace(',', '', $string);
+//    $string = str_replace("\"", "", $string);
+//    return $string;
+//}
 
 function getHasPullHead($pfName) {//pullfeed name with ns
     global $wgServerName, $wgScriptPath;
@@ -844,6 +841,27 @@ function getHasPullHead($pfName) {//pullfeed name with ns
 
     foreach ($res as $key=>$resultLine) {
         if(strpos($resultLine, 'PullFeed:')!==false || $resultLine=="") {
+            unset($res[$key]);
+        }
+    }
+    if (empty ($res)) return false;
+    else return $res[1];
+}
+
+function getHasPushHead($pfName) {//pushfeed name with ns
+    global $wgServerName, $wgScriptPath;
+    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $req = '[[PushFeed:+]] [[name::'.$pfName.']]';
+    $req = utils::encodeRequest($req);
+    $url = $url."/Special:Ask/".$req."/-3FhasPushHead/headers=hide/order=desc/format=csv/limit=1";
+    $string = file_get_contents($url);
+    if ($string=="") return false;
+    $string = str_replace("\n", ",", $string);
+    $string = str_replace("\"", "", $string);
+    $res = explode(",", $string);
+
+    foreach ($res as $key=>$resultLine) {
+        if(strpos($resultLine, 'PushFeed:')!==false || $resultLine=="") {
             unset($res[$key]);
         }
     }
@@ -996,7 +1014,7 @@ function attemptSave($editpage) {
         $tmp = serialize($listPos);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $listPos, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-        $patch->store();//stores the patch in the DB
+        //$patch->store();//stores the patch in the DB
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
         //integration: diffs between VO and V2 into V1
@@ -1008,7 +1026,7 @@ function attemptSave($editpage) {
         $tmp = serialize($diffs);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-        $patch->store();//stores the patch in the DB
+        //$patch->store();//stores the patch in the DB
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
     }

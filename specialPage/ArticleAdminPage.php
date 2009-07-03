@@ -431,68 +431,75 @@ $output .='
 //        return false;
 //    }
 
+//function getDistantPatchesCount($feed){
+//
+//}
+//
+//function getLocalPatchesCount($feed){
+//
+//}
 
-    function getPatches($from_id, $title, $wiki){
-        //http://localhost/www/mediawiki-1.13.2/api.php?action=query&meta=patch&paid=2&palimit=2
-        //$wiki='http://localhost/www/mediawiki-1.13.2/';
-        //javascript "waiting..." ??
-        //increment du counter, si 10 patch recuperer, counter=counter+10 puis stocker dans db
-        //file_get_contents return false si erreur
-        $cnt = 0;
-        $success = $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php&pafromid='
-            .$from_id.'&papage_title='.$title);
-        $array=$php = unserialize($php);
-        $array = array_shift($array);
-        $array = array_shift($array);
-        $patchArr = array();
-        foreach ($array as $patchDistant){
-            $pageId = $this->getPageIdWithTitle($title);
-            $patch = new Patch($patchDistant['patch_id'],
-                unserialize($patchDistant['operations']),
-                $patchDistant['rev_id'], $pageId);
-            $patchArr[] = $patch;
-            $cnt = $cnt + 1;// nb of patches
-        }
-        if($success!=false){
-            $tmpCnt = $this->getPatchCounter($wiki, $title);//get cnt from db, increment it and save it
-            $tmpCnt = $tmpCnt + $cnt;
-            $this->setPatchCounter($wiki, $title, $tmpCnt);
-        }
-        return $patchArr;
-    }
+//    function getPatches($from_id, $title, $wiki){
+//        //http://localhost/www/mediawiki-1.13.2/api.php?action=query&meta=patch&paid=2&palimit=2
+//        //$wiki='http://localhost/www/mediawiki-1.13.2/';
+//        //javascript "waiting..." ??
+//        //increment du counter, si 10 patch recuperer, counter=counter+10 puis stocker dans db
+//        //file_get_contents return false si erreur
+//        $cnt = 0;
+//        $success = $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php&pafromid='
+//            .$from_id.'&papage_title='.$title);
+//        $array=$php = unserialize($php);
+//        $array = array_shift($array);
+//        $array = array_shift($array);
+//        $patchArr = array();
+//        foreach ($array as $patchDistant){
+//            $pageId = $this->getPageIdWithTitle($title);
+//            $patch = new Patch($patchDistant['patch_id'],
+//                unserialize($patchDistant['operations']),
+//                $patchDistant['rev_id'], $pageId);
+//            $patchArr[] = $patch;
+//            $cnt = $cnt + 1;// nb of patches
+//        }
+//        if($success!=false){
+//            $tmpCnt = $this->getPatchCounter($wiki, $title);//get cnt from db, increment it and save it
+//            $tmpCnt = $tmpCnt + $cnt;
+//            $this->setPatchCounter($wiki, $title, $tmpCnt);
+//        }
+//        return $patchArr;
+//    }
 
-    function integratePatch($patch, $article){
-        global $wgUser, $wgTitle;
-
-        
-
-        if(is_string($article)){
-            $db = wfGetDB( DB_SLAVE );
-            $pageid = $this->getPageIdWithTitle($article);
-            $lastRev = Revision::loadFromPageId($db, $pageid);
-            $rev_id = $lastRev->getId();
-        }
-        else{
-        $rev_id = $article->getRevIdFetched();
-        }
-        $blobInfo = BlobInfo::loadBlobInfo($rev_id);
-
-        $listOp = $patch->getOperations();
-        foreach ($listOp as $operation){
-            $blobInfo->integrateBlob($operation);
-        }
-        $revId = $blobInfo->getNewArticleRevId();
-        $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
-       
-
-
-        //est-ce qu'il faut sauvegarder en local ce patch ou est-il créé dans le hook
-        // 'attemptSave'. S'il est créé dans le hook, comment se passe partie "feed"
-        $article->updateArticle($blobInfo->getTextImage(), $article->getComment(),
-            $article->getMinorEdit(), $wgUser->isWatched($wgTitle));
-//        $titleobj = Title::newFromText( wfMsgNoDB( "mainpage" ) );
-//			$article = new Article( $titleobj );
-    }
+//    function integratePatch($patch, $article){
+//        global $wgUser, $wgTitle;
+//
+//
+//
+//        if(is_string($article)){
+//            $db = wfGetDB( DB_SLAVE );
+//            $pageid = $this->getPageIdWithTitle($article);
+//            $lastRev = Revision::loadFromPageId($db, $pageid);
+//            $rev_id = $lastRev->getId();
+//        }
+//        else{
+//        $rev_id = $article->getRevIdFetched();
+//        }
+//        $blobInfo = BlobInfo::loadBlobInfo($rev_id);
+//
+//        $listOp = $patch->getOperations();
+//        foreach ($listOp as $operation){
+//            $blobInfo->integrateBlob($operation);
+//        }
+//        $revId = $blobInfo->getNewArticleRevId();
+//        $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
+//
+//
+//
+//        //est-ce qu'il faut sauvegarder en local ce patch ou est-il créé dans le hook
+//        // 'attemptSave'. S'il est créé dans le hook, comment se passe partie "feed"
+//        $article->updateArticle($blobInfo->getTextImage(), $article->getComment(),
+//            $article->getMinorEdit(), $wgUser->isWatched($wgTitle));
+////        $titleobj = Title::newFromText( wfMsgNoDB( "mainpage" ) );
+////			$article = new Article( $titleobj );
+//    }
 
     function getPageIdWithTitle($title){
         $dbr = wfGetDB( DB_SLAVE );
@@ -501,25 +508,25 @@ $output .='
         return $id;
     }
 
-    function getPatchCounter($wiki, $title){
-        $siteId = $this->getSiteIdWithURL($wiki);
-        $dbr = wfGetDB( DB_SLAVE );
-        $counter = $dbr->selectField(array('site_cnt'),'counter', array(
-        'page_title'=>$title, 'site_id'=>$siteId));
-        return $counter;
-    }
-    function setPatchCounter($wiki, $title, $cnt){
-        $siteId = $this->getSiteIdWithURL($wiki);
-        $db = wfGetDB( DB_MASTER );
-        $res = $db->update('site_cnt', array('counter' => $cnt), array( "page_title"=>$title, "site_id"=>$siteId) );
-    }
+//    function getPatchCounter($wiki, $title){
+//        $siteId = $this->getSiteIdWithURL($wiki);
+//        $dbr = wfGetDB( DB_SLAVE );
+//        $counter = $dbr->selectField(array('site_cnt'),'counter', array(
+//        'page_title'=>$title, 'site_id'=>$siteId));
+//        return $counter;
+//    }
+//    function setPatchCounter($wiki, $title, $cnt){
+//        $siteId = $this->getSiteIdWithURL($wiki);
+//        $db = wfGetDB( DB_MASTER );
+//        $res = $db->update('site_cnt', array('counter' => $cnt), array( "page_title"=>$title, "site_id"=>$siteId) );
+//    }
 
-    function getSiteIdWithURL($url){
-        $dbr = wfGetDB( DB_SLAVE );
-        $id = $dbr->selectField('site','site_id', array(
-        'site_url'=>$url));
-        return $id;
-    }
+//    function getSiteIdWithURL($url){
+//        $dbr = wfGetDB( DB_SLAVE );
+//        $id = $dbr->selectField('site','site_id', array(
+//        'site_url'=>$url));
+//        return $id;
+//    }
 
     function getPageSearchResult($wiki, $search){
         $pageTitleArray = array();
@@ -530,49 +537,49 @@ $output .='
         return $pageTitleArray;
     }
 
-    function getAwarenessData($wiki){
-        $data = array();
-        $pageTitleArray=array();
-        $pagecount=0;
-        $patchcount=0;
-        $counter=0;
-
-
-         $db = wfGetDB(DB_SLAVE);
-        $tables = array("site", "site_cnt");
-        $conditions = array("site.site_id = site_cnt.site_id", 'site_url'=>$wiki);
-        $fname = "Database::select";
-        $columns = array("page_title", "counter");
-        $options = "";
-        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-            return false;
-        } else if($db->numRows($result) == 0) {
-            return false;
-        } else {
-            while ($row = $db->fetchRow($result)) {
-                $pageTitleArray[] = $row['page_title'];
-                $counter = $counter + $row['counter'];
-            }
-        }
-
-        $pagecount = count($pageTitleArray);
-
-        foreach ($pageTitleArray as $title){
-            $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php&pafromid=0&papage_title='.$title);
-            if($php!=false){
-            $array=$php = unserialize($php);
-            $array = array_shift($array);
-            $array = array_shift($array);
-            $patchcount = $patchcount + count($array);
-            }else{
-                $patchcount = 0;
-            }
-        }
-        $data['pageCount']=$pagecount;
-        $data['patchCount']=$patchcount;
-        $data['localPatchCount']=$counter;
-        return $data;
-    }
+//    function getAwarenessData($wiki){
+//        $data = array();
+//        $pageTitleArray=array();
+//        $pagecount=0;
+//        $patchcount=0;
+//        $counter=0;
+//
+//
+//         $db = wfGetDB(DB_SLAVE);
+//        $tables = array("site", "site_cnt");
+//        $conditions = array("site.site_id = site_cnt.site_id", 'site_url'=>$wiki);
+//        $fname = "Database::select";
+//        $columns = array("page_title", "counter");
+//        $options = "";
+//        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+//            return false;
+//        } else if($db->numRows($result) == 0) {
+//            return false;
+//        } else {
+//            while ($row = $db->fetchRow($result)) {
+//                $pageTitleArray[] = $row['page_title'];
+//                $counter = $counter + $row['counter'];
+//            }
+//        }
+//
+//        $pagecount = count($pageTitleArray);
+//
+//        foreach ($pageTitleArray as $title){
+//            $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php&pafromid=0&papage_title='.$title);
+//            if($php!=false){
+//            $array=$php = unserialize($php);
+//            $array = array_shift($array);
+//            $array = array_shift($array);
+//            $patchcount = $patchcount + count($array);
+//            }else{
+//                $patchcount = 0;
+//            }
+//        }
+//        $data['pageCount']=$pagecount;
+//        $data['patchCount']=$patchcount;
+//        $data['localPatchCount']=$counter;
+//        return $data;
+//    }
 
 //    function addSite($wiki, $name, $search){
 //        //siteAuthorized??

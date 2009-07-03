@@ -464,8 +464,8 @@ $step = gmp_div_q($slot, $N);
        
 
 /* explode into lines*/
-        $ota = explode( "\n", $wgContLang->segmentForDiff( $oldtext ) );
-        $nta = explode( "\n", $wgContLang->segmentForDiff( $newtext ) );
+        $ota = explode( "\n", $oldtext  );
+        $nta = explode( "\n",  $newtext );
         $tmp = $nta;
         $counter = 0;
 
