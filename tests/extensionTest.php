@@ -139,7 +139,7 @@ previous: [[previous::none]]';
         $this->p2pBot1->createPage($pageName,$content);
 
 
-        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:Localhost/wiki2&format=xml');
+        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:localhost/wiki111&format=xml');
 
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
@@ -147,7 +147,7 @@ previous: [[previous::none]]';
 
         foreach($patchs as $p) {
             $a = $p->getAttribute('id');
-            $this->assertEquals('Patch:Localhost/wiki2', $p->getAttribute('id'));
+            $this->assertEquals('patch:localhost/wiki111', strtolower($p->getAttribute('id')));
             $a = $p->getAttribute('onPage');
             $this->assertEquals('Paris', $p->getAttribute('onPage'));
             $a = $p->getAttribute('previous');
@@ -156,10 +156,11 @@ previous: [[previous::none]]';
 
         $listeOp = $dom->getElementsByTagName('operation');
 
+        $op = null;
         foreach($listeOp as $o)
             $op[] = $o->firstChild->nodeValue;
         $this->assertTrue(count($op)==1);
-        $this->assertEquals('Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris',$op[0]);
+        $this->assertEquals(str_replace(" ", "",'Localhost/wiki121; Insert; (15555995255933583146:900c17ebee311fb6dd00970d26727577); content page Paris'),str_replace(" ","", $op[0]));
 
         $pageName = 'ChangeSet:localhost/wiki3';
         $content = '[[changeSetID::localhost/wiki3]] [[inPullFeed::pulltoto]]
@@ -223,7 +224,7 @@ Pages concerned:
             }
         }
 
-        $this->assertEquals('Localhost/wiki12',$CSID);
+        $this->assertEquals('localhost/wiki12',strtolower($CSID));
 
         $listePatch = $dom->getElementsByTagName('patch');
 
@@ -254,7 +255,7 @@ previousChangeSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
             }
         }
 
-        $this->assertEquals('Localhost/wiki13',$CSID);
+        $this->assertEquals('localhost/wiki13',strtolower($CSID));
         $listePatch = $dom->getElementsByTagName('patch');
 
         $patch = null;
