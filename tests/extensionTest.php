@@ -128,13 +128,18 @@ previous: [[previous::none]]';
     }
 
     function testGetPatch() {
-        $pageName = 'Patch:localhost/wiki111';
+        $pageName = 'ChangeSet:localhost/wiki1';
+        $content = '[[changeSetID::localhost/wiki1]] [[inPullFeed::pulltoto]]
+            [[previousChangeSet::none]] [[hasPatch::Patch:localhost/wiki2]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        $pageName = 'Patch:localhost/wiki2';
         $content = '[[patchID::'.$pageName.']] [[onPage::Paris]] [[previous::none]]
         [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
         $this->p2pBot1->createPage($pageName,$content);
 
 
-        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:Localhost/wiki111&format=xml');
+        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:Localhost/wiki2&format=xml');
 
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
@@ -142,7 +147,7 @@ previous: [[previous::none]]';
 
         foreach($patchs as $p) {
             $a = $p->getAttribute('id');
-            $this->assertEquals('Patch:Localhost/wiki111', $p->getAttribute('id'));
+            $this->assertEquals('Patch:Localhost/wiki2', $p->getAttribute('id'));
             $a = $p->getAttribute('onPage');
             $this->assertEquals('Paris', $p->getAttribute('onPage'));
             $a = $p->getAttribute('previous');
@@ -151,6 +156,38 @@ previous: [[previous::none]]';
 
         $listeOp = $dom->getElementsByTagName('operation');
 
+        foreach($listeOp as $o)
+            $op[] = $o->firstChild->nodeValue;
+        $this->assertTrue(count($op)==1);
+        $this->assertEquals('Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris',$op[0]);
+
+        $pageName = 'ChangeSet:localhost/wiki3';
+        $content = '[[changeSetID::localhost/wiki3]] [[inPullFeed::pulltoto]]
+            [[previousChangeSet::changeSetID::localhost/wiki1]] [[hasPatch::Patch:localhost/wiki4]]';
+        $this->p2pBot1->createPage($pageName, $content);
+
+        $pageName = 'Patch:localhost/wiki4';
+        $content = '[[patchID::'.$pageName.']] [[onPage::Paris]] [[previous::none]]
+        [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
+        $this->p2pBot1->createPage($pageName,$content);
+
+        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:Localhost/wiki4&format=xml');
+
+        $dom = new DOMDocument();
+        $dom->loadXML($patchXML);
+        $patchs = $dom->getElementsByTagName('patch');
+
+        foreach($patchs as $p) {
+            $a = $p->getAttribute('id');
+            $this->assertEquals('Patch:Localhost/wiki4', $p->getAttribute('id'));
+            $a = $p->getAttribute('onPage');
+            $this->assertEquals('Paris', $p->getAttribute('onPage'));
+            $a = $p->getAttribute('previous');
+            $this->assertEquals('None', substr($p->getAttribute('previous'),0,-1));
+        }
+
+        $listeOp = $dom->getElementsByTagName('operation');
+        $op = null;
         foreach($listeOp as $o)
             $op[] = $o->firstChild->nodeValue;
         $this->assertTrue(count($op)==1);
