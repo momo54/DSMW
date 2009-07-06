@@ -8,9 +8,6 @@ require_once '../../..//includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
 
-$wgDebugLogGroups  = array(
-    'p2p'=>"/tmp/p2p.log",
-);
 
 /**
  * Description of pushPullTest
@@ -23,12 +20,7 @@ class pushPullTest extends PHPUnit_Framework_TestCase {
     var $p2pBot2;
     var $p2pBot3;
 
-    public static function main() {
-        require_once 'PHPUnit/TextUI/TestRunner.php';
 
-        $suite  = new PHPUnit_Framework_TestSuite('pushPullTest');
-        $result = PHPUnit_TextUI_TestRunner::run($suite);
-    }
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -36,7 +28,12 @@ class pushPullTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
+        global $wgDebugLogGroups;
+        $wgDebugLogGroups  = array(
+            'p2p'=>"/tmp/p2p.log",
+        );
         exec('./initWikiTest.sh');
+        exec('rm cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
@@ -231,5 +228,43 @@ toto' ;
         $this->assertEquals('',substr($pullFound[0],0,-1));
     }
 
+    public function testPull() {
+        $pushName = 'pushCity';
+        $pushContent = 'PushFeed:
+[[name::pushCity]]
+[[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
+[[hasPushHead::ChangeSet:testCS1Pull]]';
+       $this->assertTrue($this->p2pBot1->createPage('PushFeed:'.$pushName,$pushContent),'result push='.$this->p2pBot1->bot->results);
+
+        $CSName = 'testCS1Pull';
+        $CSContent = '[[changeSetID::TestCS1Pull]]
+[[inPushFeed::PushFeed:pushCity]]
+[[previousChangeSet::none]]
+[[hasPatch::Patch:testPatch1]]';
+        exec('rm cache/*');
+        $this->assertTrue($this->p2pBot1->createPage('ChangeSet:'.$CSName,$CSContent),'result cs='.$this->p2pBot1->bot->results);
+
+        $patchName = 'testPatch1';
+        $patchContent = 'Patch: patchID: [[patchID::testPatch1]]
+ onPage: [[onPage::Paris]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
+        exec('rm cache/*');
+        $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),'result patch='.$this->p2pBot1->bot->results);
+
+        $pullName = 'pullCityonWiki1';
+        $pullContent = '[[name::PullFeed:pullCityonWiki1]]
+[[pushFeedServer::http://localhost/wiki1]]
+[[pushFeedName::PushFeed:'.$pushName.']] [[hasPullHead::none]]';
+        exec('rm cache/*');
+        $this->assertTrue($this->p2pBot2->createPage('PullFeed:'.$pullName,$pullContent),'result pull='.$this->p2pBot2->bot->results);
+        
+        $this->p2pBot2->pull('PullFeed:'.$pullName);
+
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:'.$CSName);
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Patch:'.$patchName);
+
+        $pullHead = getSemanticRequest($this->p2pBot2->bot->wikiServer,'[[name::PullFeed:'.$pullName.']]','-3FhasPullHead');
+        $this->assertEquals(strtolower('ChangeSet:'.$CSName),strtolower(substr($pullHead[0],0,-1)));
+
+    }
 }
 ?>

@@ -6,7 +6,7 @@ require_once '../../..//includes/GlobalFunctions.php';
 require_once 'extensionTest.php';
 require_once 'pushPullTest.php';
 require_once 'p2pBotTest.php';
-require_once 'logootTest.php';
+//require_once 'logootTest.php';
 
 //PHPUnit_Util_Filter::addFileToFilter(__FILE__);
 
@@ -28,7 +28,7 @@ class AllTests {
         $suite->addTestSuite('extensionTest');
         $suite->addTestSuite('pushPullTest');
         $suite->addTestSuite('p2pBotTest');
-        $suite->addTestSuite('logootTest');
+        //$suite->addTestSuite('logootTest');
         return $suite;
     }
 }

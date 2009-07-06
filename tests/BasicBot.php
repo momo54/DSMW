@@ -69,7 +69,7 @@ define('ALTPREFIX','/w'); // no trailing slash. The prefix on valid links that v
 define('CACHE', $abspath.'/cache/'); // a path where we can store cache files to. SHOULD EXIST and be writeable by the server. Stored for longer than files in TEMP.
 define('TEMP',$abspath.'/temp/'); // a path where we can store temp files to. SHOULD EXIST and be writeable by the server. Can be the same as CACHE if you want.
 define('COOKIETIME', 3600); // how many seconds should we hold our login cookies before refreshing them? Defaults to 3600 seconds = 1 hour.
-define('DELAY', 5); // default number of seconds that bots wait between requests to the wiki. Check your wiki's policies. Set to at least 30 if you aren't sure.
+define('DELAY', 30); // default number of seconds that bots wait between requests to the wiki. Check your wiki's policies. Set to at least 30 if you aren't sure.
 
 // if you want, you can put your default userid, username, and password into a separate file. I do it just so I don't accidentally upload a copy of this with my username and password inside :)
 if (file_exists('username.php'))

@@ -16,38 +16,38 @@ class BlobInfo {
     }
 
     public static function loadBlobInfo($rev_id) {
-        if($rev_id!=0){
+        if($rev_id!=0) {
             return self::getBlobInfoDB($rev_id);
         }
-        else{
+        else {
             return new BlobInfo();
         }
     }
 
-    function getBlobInfo(){
+    function getBlobInfo() {
         return $this->mBlobInfo;
     }
 
-    function setBlobInfo($blobInfo){
+    function setBlobInfo($blobInfo) {
         $this->mBlobInfo = $blobInfo;
     }
 
-    function setBlobInfoText($textImage){
+    function setBlobInfoText($textImage) {
         $this->mTextImage = $textImage;
     }
 
-    function getBlobInfoText(){
+    function getBlobInfoText() {
         return $this->mTextImage;
     }
 
     //to add a position to the blobInfo (the model)
-    function add($lineNumber, $position){
+    function add($lineNumber, $position) {
 
         $listIds = $this->mBlobInfo;
         //position shifting
         $nbLines = count($listIds);
-        
-        for($i=$nbLines+1; $i>$lineNumber; $i--){
+
+        for($i=$nbLines+1; $i>$lineNumber; $i--) {
             $listIds[$i] = $listIds[$i-1];
         }
         unset ($listIds[$lineNumber]);
@@ -58,13 +58,13 @@ class BlobInfo {
     }
 
     //to add a line to the blobInfo (the model)
-    function addLine($lineNumber, $line){
+    function addLine($lineNumber, $line) {
 
         $listLines = $this->mTextImage;
         //position shifting
         $nbLines = count($listLines);
-       
-        for($i=$nbLines+1; $i>$lineNumber; $i--){
+
+        for($i=$nbLines+1; $i>$lineNumber; $i--) {
             $listLines[$i] = $listLines[$i-1];
         }
         unset ($listLines[$lineNumber]);
@@ -75,26 +75,26 @@ class BlobInfo {
     }
 
     //to delete a position to the blobInfo (the model)
-    function delete($lineNb){
+    function delete($lineNb) {
         $this->mBlobInfo = $this->array_delete_key($this->mBlobInfo, $lineNb);
         $this->keyShifting($lineNb);
     }
 
     //to delete a line in the blobInfo (the model)
-    function deleteLine($lineNb){
+    function deleteLine($lineNb) {
         $this->mTextImage = $this->array_delete_key($this->mTextImage, $lineNb);
         $this->textKeyShifting($lineNb);
     }
 
     //to get the previous position
-    function getPrevPosition($lineNumber){
+    function getPrevPosition($lineNumber) {
         $listIds = $this->mBlobInfo;
         $exists = false;
         $predecessor;
 
 
-        for($i=$lineNumber-1; $i>0; $i--){
-            if(isset ($listIds[$i])){
+        for($i=$lineNumber-1; $i>0; $i--) {
+            if(isset ($listIds[$i])) {
                 $exists = true;
                 $predecessor = $i;
                 break;
@@ -102,35 +102,35 @@ class BlobInfo {
         }
 
         //if there is a predecessor
-        if($exists==true){
+        if($exists==true) {
             return $listIds[$predecessor];
         }
-        else{
+        else {
             $posMin = new LogootPosition(array(LogootId::IdMin()));
             return $posMin;
         }
     }
 
     //to get the next position
-    function getNextPosition($lineNumber){
+    function getNextPosition($lineNumber) {
         $listIds = $this->mBlobInfo;
 
-        if(isset ($listIds[$lineNumber])){
+        if(isset ($listIds[$lineNumber])) {
             return $listIds[$lineNumber];
         }
-        else{
+        else {
             $posMax = new LogootPosition(array(LogootId::IdMax()));
             return $posMax;
         }
     }
 
     //to get a position
-    function getPosition($lineNumber){
+    function getPosition($lineNumber) {
         $listIds = $this->mBlobInfo;
         return $listIds[$lineNumber];
     }
 
-    function size(){
+    function size() {
         return count($this->mBlobInfo);
     }
 
@@ -152,14 +152,14 @@ class BlobInfo {
     }
 
     //used to shift the array elements after deletion
-    private function keyShifting($lineNb){
+    private function keyShifting($lineNb) {
         $listIds = $this->mBlobInfo;
         $tmp = array();
-        foreach ($listIds as $key=>$value){
-            if($key>$lineNb){
+        foreach ($listIds as $key=>$value) {
+            if($key>$lineNb) {
                 $tmp[$key-1]=$value;
             }
-            else{
+            else {
                 $tmp[$key]=$value;
             }
         }
@@ -168,14 +168,14 @@ class BlobInfo {
     }
 
     //used to shift the array elements after deletion
-    private function textKeyShifting($lineNb){
+    private function textKeyShifting($lineNb) {
         $listLines = $this->mTextImage;
         $tmp = array();
-        foreach ($listLines as $key=>$value){
-            if($key>$lineNb){
+        foreach ($listLines as $key=>$value) {
+            if($key>$lineNb) {
                 $tmp[$key-1]=$value;
             }
-            else{
+            else {
                 $tmp[$key]=$value;
             }
         }
@@ -188,9 +188,9 @@ class BlobInfo {
 /*generation of a position, logoot algorithm*/
     function getNPositionID($start, $end, $N, $sid) {
 
-       
 
-        //$clock = 0;
+
+    //$clock = 0;
         $result = array();
         $Id_Max = LogootId::IdMax();
         $Id_Min = LogootId::IdMin();
@@ -208,13 +208,13 @@ class BlobInfo {
             $inf = gmp_init($start->get($i)->getInt());
 
             if($isInf==true)
-            $sup = gmp_init(INT_MAX);
+                $sup = gmp_init(INT_MAX);
             else
-            $sup = gmp_init($end->get($i)->getInt());
+                $sup = gmp_init($end->get($i)->getInt());
 
             if (gmp_cmp(gmp_sub(gmp_sub($sup, $inf), gmp_init("1")), $N)>0) {
-                //				inf = start.get(i).getInteger();
-                //				sup = end.get(i).getInteger();
+            //				inf = start.get(i).getInteger();
+            //				sup = end.get(i).getInteger();
                 break;
             }
 
@@ -223,19 +223,19 @@ class BlobInfo {
             $i++;
 
             if ($i == $start->size())
-            $start->add($Id_Min);
+                $start->add($Id_Min);
 
             if ($i == $end->size())
-            $end->add($Id_Max);
+                $end->add($Id_Max);
 
             if(gmp_cmp($inf, $sup)<0)$isInf=true;
 
         }
 
-$binf = gmp_add($inf, gmp_init("1"));
-$bsup = gmp_sub($sup, gmp_init("1"));
-$slot = gmp_sub($bsup, $binf);
-$step = gmp_div_q($slot, $N);
+        $binf = gmp_add($inf, gmp_init("1"));
+        $bsup = gmp_sub($sup, gmp_init("1"));
+        $slot = gmp_sub($bsup, $binf);
+        $step = gmp_div_q($slot, $N);
 
         $old = clone $currentPosition;
 
@@ -249,7 +249,7 @@ $step = gmp_div_q($slot, $N);
             $result[]=$r;//result est une arraylist<Position>
             return $result;
         } else
-        $lstep = $step;
+            $lstep = $step;
 
         if (gmp_cmp($lstep, gmp_init("0")) == 0) {
             $lstep = gmp_init("1");
@@ -263,20 +263,20 @@ $step = gmp_div_q($slot, $N);
             if (!gmp_cmp($lstep, gmp_init("1")) == 0) {
 
                 $add = $this->random(gmp_init($p->get($i)->getInt()),
-                                    gmp_add(gmp_init($p->get($i)->getInt()), $lstep));
+                    gmp_add(gmp_init($p->get($i)->getInt()), $lstep));
 
                 $r->set($i, gmp_strval($add), $sid/*, $clock*/);
             } else
-            $r->add1($i, gmp_init("1"), $sid/*, $clock*/);
+                $r->add1($i, gmp_init("1"), $sid/*, $clock*/);
 
-           
+
             $result[]=clone $r;//voir
             $old = clone $r;
             $p->set($i, gmp_strval(gmp_add($p->get($i)->getInt(), $lstep)), $sid/*,$clock*/);
 
         }
 
-         
+
         return $result;
     }
 
@@ -290,41 +290,36 @@ $step = gmp_div_q($slot, $N);
  * -> an array with both positions in the array surrounding $position
  */
 
-    function dichoSearch1($position,  $fct = 'dichoComp1')
-    {
+    function dichoSearch1($position,  $fct = 'dichoComp1') {
 
         $arr = $this->mBlobInfo;
-        if(count($arr)==0){
+        if(count($arr)==0) {
             return -1;
-        }else{
+        }else {
             $gauche = 1;
             $droite = count($arr);
             $centre = round(($droite+$gauche)/2);
 
-            if(count($arr)>2){
-                while($centre != $droite && $centre != $gauche )
-                {
+            if(count($arr)>2) {
+                while($centre != $droite && $centre != $gauche ) {
 
-                    if($this->$fct($position, $arr[$centre]) == -1)
-                    {
+                    if($this->$fct($position, $arr[$centre]) == -1) {
                         $droite = $centre;
                         $centre = floor(($droite+$gauche)/2);
                     }
-                    if($this->$fct($position, $arr[$centre]) == 1)
-                    {
+                    if($this->$fct($position, $arr[$centre]) == 1) {
                         $gauche = $centre;
                         $centre = round(($droite+$gauche)/2);
                     }
-                    if($this->$fct($position, $arr[$centre]) == 0)
-                    {
+                    if($this->$fct($position, $arr[$centre]) == 0) {
                         return $centre;
                     }
 
                 }
-            }else{/*with an array<=2*/
+            }else {/*with an array<=2*/
                 if($this->$fct($position, $arr[$gauche]) == 0) return $gauche;
                 elseif($this->$fct($position, $arr[$droite]) == 0)
-                                                               return $droite;
+                    return $droite;
             }
 
             // if there is no occurence
@@ -335,43 +330,42 @@ $step = gmp_div_q($slot, $N);
             $lastElementKey = key($arr);
 
             if($this->$fct($position, $arr[$firstElementKey]) == -1)
-            return -1; /* if the value is less than the first element of
+                return -1; /* if the value is less than the first element of
                               the array*/
             elseif($this->$fct($position, $arr[$lastElementKey]) == 1)
-            return -2;/* if the value is greater than the last element of
+                return -2;/* if the value is greater than the last element of
                               the array*/
             else  /*else we return the values surrounding the ressearched
                     value */
-            return array(0=>$gauche, 1=>$droite);
+                return array(0=>$gauche, 1=>$droite);
         }
     }
 
     //utility function used in the binary search
-    function dichoComp1($position1, $position2)
-    {
-       
-        //if both positions are 1 vector Ids
-        if($position1->size()==1 && $position2->size()==1){
+    function dichoComp1($position1, $position2) {
+
+    //if both positions are 1 vector Ids
+        if($position1->size()==1 && $position2->size()==1) {
             $tab1= $position1->getThisPosition();
             $tab2= $position2->getThisPosition();
-            if($position1->lessThan($tab1[0], $tab2[0])){
+            if($position1->lessThan($tab1[0], $tab2[0])) {
                 return -1;
             }
-            if($position1->greaterThan($tab1[0], $tab2[0])){
+            if($position1->greaterThan($tab1[0], $tab2[0])) {
                 return 1;
             }
-            if($position1->equals($tab1[0], $tab2[0])){
+            if($position1->equals($tab1[0], $tab2[0])) {
                 return 0;
             }
         }
-        else{//else if both logootIds are n vectors Ids
-            if($position1->nLessThan($position2)){
+        else {//else if both logootIds are n vectors Ids
+            if($position1->nLessThan($position2)) {
                 return -1;
             }
-            if($position1->nGreaterThan($position2)){
+            if($position1->nGreaterThan($position2)) {
                 return 1;
             }
-            if($position1->nEquals($position2)){
+            if($position1->nEquals($position2)) {
                 return 0;
             }
         }
@@ -381,21 +375,21 @@ $step = gmp_div_q($slot, $N);
  *  the operation (insert or delete) and it is executed (integrated to
  * the BlobInfo (the model)
  */
-    function integrateBlob(/*$listPos*/$operation/*, $clock*/){
+    function integrateBlob(/*$listPos*/$operation/*, $clock*/) {
 
-        //clock setting
-//        $clock->incrementClock();
-//        $tmpPos = $operation->getLogootPosition();
-//
-//        $tmpPos->setClock($clock->getValue());
-//        $operation->setLogootPosition($tmpPos);
+    //clock setting
+    //        $clock->incrementClock();
+    //        $tmpPos = $operation->getLogootPosition();
+    //
+    //        $tmpPos->setClock($clock->getValue());
+    //        $operation->setLogootPosition($tmpPos);
 
-        
 
-        if($operation instanceof LogootIns){
+
+        if($operation instanceof LogootIns) {
             $result = $this->dichoSearch1($operation->getLogootPosition());
 
-            if(is_array($result)){
+            if(is_array($result)) {
         /* position array begins at key '1' which corresponds with line1
          * Lines array begins at key '0' as a normal array, because there is
          * no need to make it corresponding with line numbers
@@ -405,25 +399,25 @@ $step = gmp_div_q($slot, $N);
                 $this->add($result[1], $operation->getLogootPosition());
                 $this->addLine($result[1], $operation->getLineContent());
 
-            }else{
-                if($result==-1){/* if the value is less than the first element of
+            }else {
+                if($result==-1) {/* if the value is less than the first element of
                               the array*/
 
                     $this->add('1', $operation->getLogootPosition());
                     $this->addLine('1', $operation->getLineContent());
 
                 }
-                elseif($result==-2){/* if the value is greater than the last element of
+                elseif($result==-2) {/* if the value is greater than the last element of
                               the array*/
                     $line = $this->size();
                     $this->add($line+1, $operation->getLogootPosition());
                     $this->addLine($line+1, $operation->getLineContent());
 
                 }
-                else{/*the value is found in the array. It should not be, because
+                else {/*the value is found in the array. It should not be, because
          * the logootid has to be unique
          */
-                 
+
                     print '<h2>Logoot algorithm error,
                                 position exists yet!</h2>';
                 }
@@ -432,12 +426,12 @@ $step = gmp_div_q($slot, $N);
         }
         elseif ($operation instanceof LogootDel) {
             $result = $this->dichoSearch1($operation->getLogootPosition());
-            if(is_numeric($result)){
+            if(is_numeric($result)) {
                 $this->delete($result);
                 $this->deleteLine($result);
 
             }
-            else{
+            else {
                 print '<h2>Logoot algorithm error, did not
                             find the line to delete</h2>';
             }
@@ -457,11 +451,10 @@ $step = gmp_div_q($slot, $N);
  * (BlobInfo) and so we have to update (immediat integration) this model after
  * each operation (that we get from the difference engine)
  */
-    function handleDiff($oldtext, $newtext, $firstRev/*, $clock*/)
-    {
+    function handleDiff($oldtext, $newtext, $firstRev/*, $clock*/) {
         $blobInfo = $this;
         global $wgContLang;
-       
+
 
 /* explode into lines*/
         $ota = explode( "\n", $oldtext  );
@@ -475,24 +468,24 @@ $step = gmp_div_q($slot, $N);
         $diffs = new Diff1( $ota, $nta );
 
 /* convert 4 operations into 2 operations*/
-        foreach($diffs->edits as $operation){
+        foreach($diffs->edits as $operation) {
             switch ($operation->type) {
                 case "add":
                     $adds = $operation->closing;
                     ksort($adds, SORT_NUMERIC);
 
-                    foreach($adds as $key=>$lineins){
+                    foreach($adds as $key=>$lineins) {
 
                         $lineNb = $key;
 
-                        if($firstRev==1){
+                        if($firstRev==1) {
                             $posMin = new LogootPosition(array(LogootId::IdMin()));
                             $posMax = new LogootPosition(array(LogootId::IdMax()));
                             $positions = $blobInfo->getNPositionID($posMin, $posMax, gmp_init("1"), $sid=session_id());
                             $position = $positions[0];
                             $firstRev = 0;
                         }
-                        else{
+                        else {
                             $start = $blobInfo->getPrevPosition($lineNb);
                             $end = $blobInfo->getNextPosition($lineNb);
                             $positions = $blobInfo->getNPositionID($start, $end, gmp_init("1"), $sid=session_id());
@@ -501,23 +494,23 @@ $step = gmp_div_q($slot, $N);
 
 
 
-       
+
 
 
                         $LogootIns = new LogootIns($lineNb, $position, $lineins);
                         $this->integrateBlob($LogootIns/*, $clock*/);
-                        
+
                         $listPos[] = $LogootIns;
 
                         $counter = $counter + 1;
                     }
                     break;
                 case "delete":
-                    foreach($operation->orig as $key2=>$linedel){
+                    foreach($operation->orig as $key2=>$linedel) {
                         $lineNb2 = $key2 + $counter;
                         $position = $blobInfo->getPosition($lineNb2);
                         //$diffElements[]=$linedel;
-                        if(!is_null($position)){
+                        if(!is_null($position)) {
                             $LogootDel = new LogootDel($position, $linedel);
                             $this->integrateBlob($LogootDel/*, $clock*/);
                             $listPos[] = $LogootDel;
@@ -529,11 +522,11 @@ $step = gmp_div_q($slot, $N);
                 case "copy":
                     break;
                 case "change":
-                    foreach($operation->orig as $key3=>$linedel1){
+                    foreach($operation->orig as $key3=>$linedel1) {
                         $lineNb3 = $key3 + $counter;
 
                         $position = $blobInfo->getPosition($lineNb3);
-                        if(!is_null($position)){
+                        if(!is_null($position)) {
                             $LogootDel1 = new LogootDel($position, $linedel1);
                             $this->integrateBlob($LogootDel1/*, $clock*/);
                             $listPos[] = $LogootDel1;
@@ -543,18 +536,18 @@ $step = gmp_div_q($slot, $N);
                     $adds1 = $operation->closing;
                     ksort($adds1, SORT_NUMERIC);
 
-                    foreach($adds1 as $key1=>$lineins1){
+                    foreach($adds1 as $key1=>$lineins1) {
 
 
                         $lineNb4 = $key1;
-                        if($firstRev==1){
+                        if($firstRev==1) {
                             $posMin = new LogootPosition(array(LogootId::IdMin()));
                             $posMax = new LogootPosition(array(LogootId::IdMax()));
                             $positions = $blobInfo->getNPositionID($posMin, $posMax, gmp_init("1"), $sid=session_id());
                             $position = $positions[0];
                             $firstRev = 0;
                         }
-                        else{
+                        else {
                             $start = $blobInfo->getPrevPosition($lineNb4);
                             $end = $blobInfo->getNextPosition($lineNb4);
                             $positions = $blobInfo->getNPositionID($start, $end, gmp_init("1"), $sid=session_id());
@@ -577,14 +570,14 @@ $step = gmp_div_q($slot, $N);
     }
 
 
-    function getTextImage(){
+    function getTextImage() {
 
         $tmp = $this->mTextImage;
         $nb=0;
 
 
         $nb = sizeof($tmp);
-        for($i=1; $i<=$nb; $i++){
+        for($i=1; $i<=$nb; $i++) {
 
             if($i==1) $textImage = $tmp[$i];
             else $textImage = $textImage."\n".$tmp[$i];
@@ -592,8 +585,8 @@ $step = gmp_div_q($slot, $N);
         return $textImage;
     }
 
-    function setTextImage($textImage){
-        if(!$textImage==""){
+    function setTextImage($textImage) {
+        if(!$textImage=="") {
 
             unset ($this->mTextImage);
             //at this point, the array starts at key 0 and we want to start
@@ -601,7 +594,7 @@ $step = gmp_div_q($slot, $N);
 
             $listLines = explode( "\n", $textImage);
             $tmp = array();
-            foreach ($listLines as $key=>$value){
+            foreach ($listLines as $key=>$value) {
                 $tmp[$key+1]=$value;
             }
             $this->setBlobInfoText($tmp);
@@ -614,13 +607,13 @@ $step = gmp_div_q($slot, $N);
         return $rdm;
     }
 
-    
 
-   
+
+
 /*******************Database access functions************************/
     //integrate BlobInfo to DB
-    function integrate($rev_id, $sessionId, $blobCB){
-        
+    function integrate($rev_id, $sessionId, $blobCB) {
+
         $blobInfo1 = serialize($this);
 
         wfProfileIn( __METHOD__ );
@@ -640,12 +633,12 @@ $step = gmp_div_q($slot, $N);
  * To get the blobInfo of the given revision
  * --> A blobInfo is the logootPosition array corresponding to this revision
  */
-    static function getBlobInfoDB($rev_id){
+    static function getBlobInfoDB($rev_id) {
 
         wfProfileIn( __METHOD__ );
         $dbr = wfGetDB( DB_SLAVE );
         $blobInfo = $dbr->selectField('model','blob_info', array(
-        'rev_id'=>$rev_id), __METHOD__);
+            'rev_id'=>$rev_id), __METHOD__);
 
         wfProfileOut( __METHOD__ );
         $blobInfo1 = unserialize($blobInfo);
@@ -657,7 +650,7 @@ $step = gmp_div_q($slot, $N);
  * the new revision that why we have to get the last existing revision ID
  * and the new will be lastId+1 ...
  */
-    function getNewArticleRevId(){
+    function getNewArticleRevId() {
         wfProfileIn( __METHOD__ );
         $dbr = wfGetDB( DB_SLAVE );
         $lastid = $dbr->selectField('revision','MAX(rev_id)');

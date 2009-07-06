@@ -37,7 +37,7 @@ $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeS
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 //global $wgAPIMetaModules;
-$wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
 
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
@@ -74,7 +74,7 @@ function onUnknownAction($action, $article) {
 
     $script=javascript($_SERVER['HTTP_REFERER']);
     $wgOut->addHeadItem('script', $script);
-    wfDebugLog('p2p','onUnknowaction');
+    wfDebugLog('p2p','onUnknowaction sss');
 
     //////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
     if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
@@ -275,6 +275,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
 
         //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+        $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
         $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
         $dom = new DOMDocument();
         $dom->loadXML($cs);
@@ -296,7 +297,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 // $CSID = substr($CSID,strlen('changeSet:'));
                 utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
 
-                
+
                 integrate($CSID, $listPatch,$relatedPushServer);
                 updatePullFeed($name, $CSID);
 
@@ -316,7 +317,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             }
         }
 
-        $title = Title::newFromText($CSID, CHANGESET);
+        $title = Title::newFromText($previousCSID, CHANGESET);
         $article = new Article($title);
         $article->doRedirect();
          
@@ -648,85 +649,85 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
  * @param <String> $changeSetId with NS
  * @return <array> a PatchId list
  *
-function getPatchIdList($changeSetId) {
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[changeSetID::'.$changeSetId.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+ function getPatchIdList($changeSetId) {
+ global $wgServerName, $wgScriptPath;
+ $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+ $req = '[[changeSetID::'.$changeSetId.']]';
+ $req = utils::encodeRequest($req);
+ $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
+ $string = file_get_contents($url);
+ if ($string=="") return false;
+ $string = str_replace("\n", ",", $string);
+ $string = str_replace("\"", "", $string);
+ $res = explode(",", $string);
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
-            unset($res[$key]);
-        }
-    }
-    $patchIdList = array_unique($res);
-    return $patchIdList;
-}
-*
-/**
+ foreach ($res as $key=>$resultLine) {
+ if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
+ unset($res[$key]);
+ }
+ }
+ $patchIdList = array_unique($res);
+ return $patchIdList;
+ }
+ *
+ /**
  *
  * @global <Object> $wgServerName
  * @global <Object> $wgScriptPath
  * @param <String> $patchId
  * @return <array> an operations list
  *
-function getOperations($patchId) {
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[patchID::'.$patchId.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FhasOperation/headers=hide/format=csv/sep=,/limit=100";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+ function getOperations($patchId) {
+ global $wgServerName, $wgScriptPath;
+ $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+ $req = '[[patchID::'.$patchId.']]';
+ $req = utils::encodeRequest($req);
+ $url = $url."/Special:Ask/".$req."/-3FhasOperation/headers=hide/format=csv/sep=,/limit=100";
+ $string = file_get_contents($url);
+ if ($string=="") return false;
+ $string = str_replace("\n", ",", $string);
+ $string = str_replace("\"", "", $string);
+ $res = explode(",", $string);
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'Patch:')!==false || $resultLine=="") {
-            unset($res[$key]);
-        }
-    }
-    $operations = array_unique($res);
-    return $operations;
-}
+ foreach ($res as $key=>$resultLine) {
+ if(strpos($resultLine, 'Patch:')!==false || $resultLine=="") {
+ unset($res[$key]);
+ }
+ }
+ $operations = array_unique($res);
+ return $operations;
+ }
  *
  
 
-/**
+ /**
  *
  * @global <Object> $wgServerName
  * @global <Object> $wgScriptPath
  * @param <String> $patchId
  * @return <String> article title;
  *
-function getArticleTitleFromPatch($patchId) {
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[patchID::'.$patchId.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FonPage/headers=hide/format=csv/sep=,/limit=100";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+ function getArticleTitleFromPatch($patchId) {
+ global $wgServerName, $wgScriptPath;
+ $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+ $req = '[[patchID::'.$patchId.']]';
+ $req = utils::encodeRequest($req);
+ $url = $url."/Special:Ask/".$req."/-3FonPage/headers=hide/format=csv/sep=,/limit=100";
+ $string = file_get_contents($url);
+ if ($string=="") return false;
+ $string = str_replace("\n", ",", $string);
+ $string = str_replace("\"", "", $string);
+ $res = explode(",", $string);
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'Patch:')!==false || $resultLine=="") {
-            unset($res[$key]);
-        }
-    }
-    $article = array_unique($res);
-    return $article;
-}
-*/
+ foreach ($res as $key=>$resultLine) {
+ if(strpos($resultLine, 'Patch:')!==false || $resultLine=="") {
+ unset($res[$key]);
+ }
+ }
+ $article = array_unique($res);
+ return $article;
+ }
+ */
 /**
  *transforms a string operation from a patch page into a logoot operation
  * insertion or deletion
@@ -736,7 +737,7 @@ function getArticleTitleFromPatch($patchId) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-   
+
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
@@ -752,9 +753,9 @@ function operationToLogootOp($operation) {
     }
     $logootPos = new LogootPosition(array($idArrray));
 
-if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false){
-                $res[3] = utils::decodeRequest($res[3]);
-            }
+    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
+        $res[3] = utils::decodeRequest($res[3]);
+    }
 
     if($res[1]=="Insert") {
         $logootOp = new LogootIns('', $logootPos, $res[3]);
@@ -775,13 +776,12 @@ if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false){
  * @param <String or Object> $article
  */
 function logootIntegrate($operation, $article) {
-
     if(is_string($article)) {
-        //$db = wfGetDB( DB_SLAVE );
-        
+    //$db = wfGetDB( DB_SLAVE );
+
         $dbr = wfGetDB( DB_SLAVE );
         $pageid = $dbr->selectField('page','page_id', array(
-        'page_title'=>$article));
+            'page_title'=>$article));
 
         $lastRev = Revision::loadFromPageId($dbr, $pageid);
         if(is_null($lastRev)) $rev_id = 0;

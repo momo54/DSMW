@@ -8,6 +8,7 @@ include_once 'p2pAssert.php';
 require_once '../../..//includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
+ini_set('xdebug.auto_trace', 'On');
 
 /* To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -26,6 +27,7 @@ class extensionTest extends PHPUnit_Framework_TestCase {
     var $tmpScriptPath;
 
     function  __construct() {
+//xdebug_start_trace('/tmp/phpunit');
 
     }
     /**
@@ -55,7 +57,7 @@ class extensionTest extends PHPUnit_Framework_TestCase {
         $this->p2pBot3 = new p2pBot($basicbot3);
     }
 
-
+/*
     function testGetOperations() {
        /* global $wgServerName, $wgScriptPath;
         $wgServerName = $this->p2pBot1->bot->wikiServer;
@@ -71,7 +73,7 @@ previous: [[previous::none]]';
 
         $operations = getOperations($patchId);
         //assert
-        $this->assertEquals('2', count($operations));*/
+        $this->assertEquals('2', count($operations));
     //$this->assertEquals('patch:localhost/wiki1901', $lastPatchId);
     // unset ($patch);
         $this->markTestIncomplete(
@@ -79,7 +81,7 @@ previous: [[previous::none]]';
         );
     }
 
-    function testGetRequestedPages() {
+   /* function testGetRequestedPages() {
         $this->markTestIncomplete(
             'This test has not been implemented yet.'
         );
@@ -125,7 +127,7 @@ previous: [[previous::none]]';
         $this->markTestIncomplete(
             'This test has not been implemented yet.'
         );
-    }
+    }*/
 
     function testGetPatch() {
         $pageName = 'ChangeSet:localhost/wiki1';
@@ -139,7 +141,7 @@ previous: [[previous::none]]';
         $this->p2pBot1->createPage($pageName,$content);
 
 
-        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:localhost/wiki111&format=xml');
+        $patchXML = file_get_contents('http://localhost/mediawiki-1.13.5/api.php?XDEBUG_SESSION_START=netbeans-xdebug&action=query&meta=patch&papatchId=Patch:localhost/wiki2&format=xml');
 
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
@@ -147,7 +149,7 @@ previous: [[previous::none]]';
 
         foreach($patchs as $p) {
             $a = $p->getAttribute('id');
-            $this->assertEquals('patch:localhost/wiki111', strtolower($p->getAttribute('id')));
+            $this->assertEquals('patch:localhost/wiki2', strtolower($p->getAttribute('id')));
             $a = $p->getAttribute('onPage');
             $this->assertEquals('Paris', $p->getAttribute('onPage'));
             $a = $p->getAttribute('previous');

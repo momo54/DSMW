@@ -16,7 +16,7 @@ define ('INT_MIN', "0");
  *
  * @author mullejea
  */
-class ConflictTest extends PHPUnit_Framework_TestCase {
+class ConflictTest{// extends PHPUnit_Framework_TestCase {
 
 
     //    function testEditionConflict(){
