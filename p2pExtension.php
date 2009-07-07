@@ -72,8 +72,8 @@ function conflict(&$editor, &$out) {
 function onUnknownAction($action, $article) {
     global $wgOut;
 
-    $script=javascript($_SERVER['HTTP_REFERER']);
-    $wgOut->addHeadItem('script', $script);
+//    $script=javascript($_SERVER['HTTP_REFERER']);
+//    $wgOut->addHeadItem('script', $script);
     wfDebugLog('p2p','onUnknowaction sss');
 
     //////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
@@ -268,7 +268,9 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             $previousCSID = "none";
         }
         $relatedPushServer = getPushURL($name);
+        if(is_null($relatedPushServer))throw new MWException( __METHOD__.': no relatedPushServer url' );
         $namePush = getPushName($name);
+        if(is_null($namePush))throw new MWException( __METHOD__.': no PushName' );
         //split NS and name
         preg_match( "/^(.+?)_*:_*(.*)$/S", $namePush, $m );
         $nameWithoutNS = $m[2];
@@ -285,6 +287,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         foreach($changeSet as $cs) {
             if ($cs->hasAttribute("id")) {
                 $CSID = $cs->getAttribute('id');
+                $csName = $CSID;
             }
         }
 
@@ -317,9 +320,16 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             }
         }
 
-        $title = Title::newFromText($previousCSID, CHANGESET);
+        if(is_null($csName)){
+        $title = Title::newFromText('Special:ArticleAdminPage');
         $article = new Article($title);
         $article->doRedirect();
+        }
+        else{
+        $title = Title::newFromText($csName, CHANGESET);
+        $article = new Article($title);
+        $article->doRedirect();
+        }
          
         return false;
     }
@@ -605,38 +615,40 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
 // $patchIdList = getPatchIdList($changeSetId);
 //  $lastPatch = utils::getLastPatchId($pageName);
     foreach ($patchIdList as $patchId) {
-    //recuperation patch via api, creation (sauvegarde en local)
-        $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='.substr($patchId,strlen('patch:')).'&format=xml';
-        $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
+        if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
+        //recuperation patch via api, creation (sauvegarde en local)
+            $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='.substr($patchId,strlen('patch:')).'&format=xml';
+            $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
 
-        $dom = new DOMDocument();
-        $dom->loadXML($patch);
+            $dom = new DOMDocument();
+            $dom->loadXML($patch);
 
-        $patchs = $dom->getElementsByTagName('patch');
-        //        $patchID = null;
-        foreach($patchs as $p) {
-            if ($p->hasAttribute("onPage")) {
-                $onPage = $p->getAttribute('onPage');
+            $patchs = $dom->getElementsByTagName('patch');
+            //        $patchID = null;
+            foreach($patchs as $p) {
+                if ($p->hasAttribute("onPage")) {
+                    $onPage = $p->getAttribute('onPage');
+                }
+                if ($p->hasAttribute("previous")) {
+                    $previousPatch = $p->getAttribute('previous');
+                }
             }
-            if ($p->hasAttribute("previous")) {
-                $previousPatch = $p->getAttribute('previous');
+
+            $op = $dom->getElementsByTagName('operation');
+            foreach($op as $o)
+                $operations[] = $o->firstChild->nodeValue;
+            $lastPatch = utils::getLastPatchId($onPage);
+            if ($lastPatch==false) $lastPatch='none';
+
+            utils::createPatch($patchId, $onPage, $lastPatch, $operations);
+
+            foreach ($operations as $operation) {
+                $operation = operationToLogootOp($operation);
+                if ($operation!=false && is_object($operation)) {
+                    logootIntegrate($operation, $onPage);
+                }
             }
-        }
-
-        $op = $dom->getElementsByTagName('operation');
-        foreach($op as $o)
-            $operations[] = $o->firstChild->nodeValue;
-        $lastPatch = utils::getLastPatchId($onPage);
-        if ($lastPatch==false) $lastPatch='none';
-
-        utils::createPatch($patchId, $onPage, $lastPatch, $operations);
-
-        foreach ($operations as $operation) {
-            $operation = operationToLogootOp($operation);
-            if ($operation!=false && is_object($operation)) {
-                logootIntegrate($operation, $onPage);
-            }
-        }
+    }//end if pageExists
     }
 }
 

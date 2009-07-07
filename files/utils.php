@@ -108,13 +108,14 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         if($url=='')    $url = 'http://'.$wgServerName.$wgScriptPath;
         $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
         $string = file_get_contents($url1);//patches list
+        $string = str_replace('"', '', $string);
         $string = strtolower($string);
         if ($string=="") return false;
         $string = explode("\n", $string);
         foreach ($string as $key=>$str1) {
             if ($str1=="") unset ($string[$key]);
             $pos = strpos($str1, '!');
-            if($pos !== false) $string[$key] = 'patch:'.substr($str1, $pos+1);
+            if($pos !== false) $string[$key] = /*'patch:'.*/substr($str1, $pos+1);
         //else $string[$key] = 'Patch:'.$str1;
         }
 /*$string is the list of the patches */
