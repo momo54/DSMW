@@ -149,7 +149,9 @@ Pages concerned:
         }
         $patches = array();
         $tmpPatches = array();
-        $name = $_POST['push'];
+        if(isset ($_POST['push']))$name = $_POST['push'];
+        else $name="";
+        //else throw new MWException( __METHOD__.': no Pushfeed selected' );
         if(count($name)>1) {
             $outtext='<p><b>Select only one pushfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
@@ -236,7 +238,7 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
     elseif(isset ($_GET['action']) && $_GET['action']=='pullpage') {
         wfDebugLog('p2p','Create pull '.$_POST['pullname'].' with pushName '.$_POST['pushname'].' on '.$_POST['url']);
         $url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
-        $pushname = $_POST['pushname'];
+        $pushname = $_POST['pushname'];//with ns
         $pullname = $_POST['pullname'];
 
         $newtext = "PullFeed:
@@ -257,11 +259,15 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
     //////////OnPull/////////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpull') {
-        wfDebugLog('p2p','pull on ');
+        
+        if(isset ($_POST['pull'])){
+            $name = $_POST['pull'];
+            wfDebugLog('p2p','pull on ');
         foreach ($_POST['pull'] as $pull) {
             wfDebugLog('p2p',' - '.$pull);
         }
-        $name = $_POST['pull'];
+        }
+        else $name="";//throw new MWException( __METHOD__.': no PullName' );
         if(count($name)>1) {
             $outtext='<p><b>Select only one pullfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
@@ -773,7 +779,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-
+    $operation = utils::
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
@@ -789,9 +795,10 @@ function operationToLogootOp($operation) {
     }
     $logootPos = new LogootPosition(array($idArrray));
 
-    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
-        $res[3] = utils::decodeRequest($res[3]);
-    }
+//    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
+//        $res[3] = utils::decodeRequest($res[3]);
+//    }
+    $res[3] = utils::contentDecoding($res[3]);
 
     if($res[1]=="Insert") {
         $logootOp = new LogootIns('', $logootPos, $res[3]);

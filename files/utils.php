@@ -40,6 +40,26 @@ class utils {
         return $request;
     }
 
+/**
+ *
+ * @param <String> $content
+ * @return <String> encoded content
+ */
+    static function contentEncoding($content){
+        $res = base64_encode($content);
+        return $res;
+    }
+
+/**
+ *
+ * @param <String> $content
+ * @return <String> decoded content
+ */
+    static function contentDecoding($content) {
+        $res = base64_decode($content);
+        return $res;
+    }
+
     static function pageExist($pageName) {
         global $wgServerName, $wgScriptPath;
         $url = 'http://'.$wgServerName.$wgScriptPath;

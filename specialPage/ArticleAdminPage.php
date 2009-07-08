@@ -4,7 +4,7 @@
 require_once "$IP/includes/SpecialPage.php";
 
 /* Global variables */
-$wgAllowAnonUsers = false; # set to false to deny access to anonymous users
+//$wgAllowAnonUsers = false; # set to false to deny access to anonymous users
 
 /* Extension variables */
 $wgExtensionFunctions[] = "wfSetupAdminPage";
@@ -38,8 +38,9 @@ class ArticleAdminPage extends SpecialPage {
 
 
     function execute() {
-        global $wgOut, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;
+        global $wgOut, $wgServerName, $wgScriptPath;/*, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;*/
 
+        $url = 'http://'.$wgServerName.$wgScriptPath."/index.php";
         $wgOut->addHeadItem('script', ArticleAdminPage::javascript());
         
         if(isset($_GET['FeedDel'])) $this->deleteFeed($_GET['FeedDel']);
@@ -98,11 +99,11 @@ $i=0;
         
         
             $output .= '
-<FORM METHOD="POST" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPull">
+<FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPull">
 <table'.$tableStyle.' >
   <tr>
     <th colspan="5"'.$style.'>PULL:
-  <a href='.dirname($_SERVER['HTTP_REFERER']).'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>';
+  <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>';
 
   if ($pullFeeds!=false) {
            $output .='<a href="javascript:processPull(document.formPull.pullremove.value);">[Remove]</a>
@@ -148,11 +149,11 @@ $i=0;
             $pushFeeds = $this->getRequestedPages($req);
         
             $output .= '
-<FORM METHOD="POST" ACTION="'.dirname($_SERVER['HTTP_REFERER']).'" name="formPush">
+<FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPush">
 <table'.$tableStyle.' >
   <tr>
     <th colspan="5"'.$style.'>PUSH:
-  <a href='.dirname($_SERVER['HTTP_REFERER']).'?title=administration_push_site_addition&action=addpushpage>[Add]</a>';
+  <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_push_site_addition&action=addpushpage>[Add]</a>';
             if ($pushFeeds!=false) {
 
 

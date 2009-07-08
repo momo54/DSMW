@@ -2,6 +2,7 @@ Mediawiki P2P Plugin installation:
 
 
     * Download the zip file and extract it
+    * The admin user must be "WikiSysop" and the password "admin"
     * Paste the folder named p2pExtension into the Mediawiki extension folder
     * Edit LocalSettings.php in the root of your MediaWiki installation, and add the following line near the bottom:
 
@@ -19,7 +20,7 @@ Mediawiki P2P Plugin installation:
         (also available on Windows platforms since PHP5.1.0)
 
     * The Semantic Mediawiki extension must be installed (cf: http://semantic-mediawiki.org/wiki/Semantic_MediaWiki)
-        (in the LocalSettingd.php file, set the memory limit from 20 to 50M --> ini_set( 'memory_limit', '50M' ))
+        (in the LocalSettings.php file, set the memory limit from 20 to 50M --> ini_set( 'memory_limit', '50M' ))
 
     *The SimpleForms extension must be installed (cf: http://www.mediawiki.org/wiki/Extension:Simple_Forms)
 
@@ -32,6 +33,6 @@ Mediawiki P2P Plugin installation:
 
         $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch');
 
-    * The "cache" directory should exist and be writeable by the server
+    * The "cache" directory should exist and be writeable by the server (extensions/p2pExtension/bot/cache)
 
-    * The admin user must be "WikiSysop" and the password "admin"
+    

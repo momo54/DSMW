@@ -119,14 +119,18 @@ class Patch {
         $i=1;//op counter
         foreach ($this->mOperations as $operation){
             $lineContent = $operation->getLineContent();
-            if(strpos($lineContent, '[[')!==false || strpos($lineContent, ']]')!==false){
-                $lineContent = utils::encodeRequest($lineContent);
-            }
+//            if(strpos($lineContent, '[[')!==false || strpos($lineContent, ']]')!==false){
+//                $lineContent = utils::encodeRequest($lineContent);
+//            }
+            $lineContent1 = utils::contentEncoding($lineContent);//base64 encoding
             $type="";
             if($operation instanceof LogootIns) $type="Insert";
             else $type="Delete";
             $operationID = utils::generateID();
-            $text.=' hasOperation: [[hasOperation::'.$operationID.';'.$type.';'.$operation->getLogootPosition()->toString().';'.$lineContent.']] ';
+            $text.=' hasOperation: [[hasOperation::'.$operationID.';'.$type.';'
+            .$operation->getLogootPosition()->toString().';'.$lineContent1.'|'
+            .$operationID.';'.$type.';'.$operation->getLogootPosition()->toString()
+            .';'.$lineContent.']] ';
         }
         if (is_array($previous)){
             $text.=' previous: [[previous::';
