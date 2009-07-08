@@ -5,7 +5,8 @@
  */
 
 /**
- * Description of p2pBot
+ * GET Request => code 200
+ * POST Request => code 302
  *
  * @author marlene
  */
@@ -27,8 +28,8 @@ class p2pBot {
         return $content;
     }
 
-    function editPage($pageName,$content){
-         $res = $this->bot->wikiFilter($pageName,'append','summary',$content);
+    function editPage($pageName,$content) {
+        $res = $this->bot->wikiFilter($pageName,'append','summary',$content);
         return $res;
     }
 
@@ -36,23 +37,23 @@ class p2pBot {
     //$post_vars['url'] = $url;
         $post_vars['name'] = $name;
         $post_vars['keyword'] = $request;
-        $this->maxredirs = 0;
+        $this->bot->maxredirs = 0;
         if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=pushpage', $post_vars ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-           /* if ('200'==$code)
-                return true;
-            else
-                return false;*/
-            if ('200'==$code)
+            if ('200'==$code) {
+                echo 'Create push failed with error 200 : ('.$this->bot->results.')';
                 return false;
-            elseif ('302'==$code)
+            }
+            elseif ('302'==$code) {
                 return true;
-            else
+            }
+            else {
+                echo 'push failed error not 200 : ('.$this->bot->results.')';
                 return false;
-        //return false; // if you get this, it's time to debug.
+            }
         }else {
-        // we failed to submit the form.
+            echo 'push submit failed ('.$this->bot->wikiServer . PREFIX . '/index.php?action=pushpage '. $post_vars.')';
             return false;
         }
     }
@@ -60,17 +61,22 @@ class p2pBot {
     function push($name) {
         $post_vars['action'] = 'onpush';
         $post_vars['push[]'] = $name;
-        $this->maxredirs = 0;
+        $this->bot->maxredirs = 0;
         if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-            if ('200'==$code)
+            if ('200'==$code) {
+                echo 'push failed with error 200 : ('.$this->bot->results.')';
                 return false;
+            }
             elseif ('302'==$code)
                 return true;
-            else
+            else {
+                echo 'push failed error not 200 : ('.$this->bot->results.')';
                 return false;
+            }
         }else {
+            echo 'push submit failed ('.$this->bot->wikiServer . PREFIX . '/index.php '.$post_vars.')';
             return false;
         }
     }
@@ -79,23 +85,23 @@ class p2pBot {
         $post_vars['pullname'] = $pullName;
         $post_vars['url'] = $url;
         $post_vars['pushname'] = $pushName;
-        $this->maxredirs = 0;
+        $this->bot->maxredirs = 0;
         if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=pullpage', $post_vars ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-           /* if ('200'==$code)
-                return true;
-            else
-                return false;*/
             if ('200'==$code)
                 return false;
-            elseif ('302'==$code)
+            elseif ('302'==$code) {
+                echo 'Create pull failed with error 302 : ('.$this->bot->results.')';
                 return true;
-            else
+            }
+            else {
+                echo 'Create pull failed error not 302 : ('.$this->bot->results.')';
                 return false;
+            }
         //return false; // if you get this, it's time to debug.
         }else {
-        // we failed to submit the form.
+            echo 'Create pull submit failed ('.$this->bot->wikiServer . PREFIX . '/index.php?action=pullpage '. $post_vars.')';
             return false;
         }
     }
@@ -103,20 +109,21 @@ class p2pBot {
     function pull($pullName) {
         $post_vars['pull[]'] = $pullName;
         $post_vars['action'] = 'onpull';
-        $this->maxredirs = 0;
-        $url = $this->bot->wikiServer.PREFIX.'/index.php?action=onpull&pull='.$pullName;
+        $this->bot->maxredirs = 0;
+        $url = $this->bot->wikiServer.PREFIX.'/index.php';
         if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/index.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
-            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-            if ('200'==$code){
-                echo "pull failed:(".$this->bot->results.")";
+             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+            if ('200'==$code) {
+                echo "pull failed with error 200:(".$this->bot->results.")";
                 return false;
             }
             elseif ('302'==$code)
                 return true;
-            else
-                echo "pull failed not 200:(".$this->bot->results.")";
+            else {
+                echo "pull failed error not 200:(".$this->bot->results.")";
                 return false;
+            }
         }else {
             echo "pull submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
             return false;
@@ -129,7 +136,7 @@ function callbackTestFct($content1,$content2) {
 }
 
 function append($content,$line) {
-        $content=$content.$line;
-        return $content;
- }
+    $content=$content.$line;
+    return $content;
+}
 ?>

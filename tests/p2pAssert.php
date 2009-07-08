@@ -5,12 +5,14 @@ require_once '../files/utils.php';
 function assertPageExist($server,$pageName) {
     $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
     $rev =  unserialize($rev);
-    PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
+    PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0,
+        'Page '.$pageName.' unexist on '.$server);
 }
 
 function assertContentEquals($server,$pageName,$content) {
     $contentPage = getContentPage($server,$pageName);
-    PHPUnit_Framework_Assert::assertEquals($content,$contentPage);
+    PHPUnit_Framework_Assert::assertEquals($content,$contentPage,
+        'Content on page '.$pageName.' must be '.$content.' but is '.$contentPage);
 }
 
 function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
@@ -21,14 +23,17 @@ function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
     if(strtolower(substr($patch[2],0,strlen('Patch:')))=='patch:') {
         $patch[2] = substr($patch[2],strlen('patch:'));
     }
-    PHPUnit_Framework_Assert::assertEquals(strtolower($previousPatch),strtolower(substr($patch[2],0,-1)));
+    PHPUnit_Framework_Assert::assertEquals(strtolower($previousPatch),strtolower(substr($patch[2],0,-1)),
+        'Previous patch on patch '.$patchId.' must be but is '.$patch[2]);
 
     $opFound = split(',',$patch[1]);
-    PHPUnit_Framework_Assert::assertTrue(count($op[$pageName])==count($opFound));
+    PHPUnit_Framework_Assert::assertTrue(count($op[$pageName])==count($opFound),
+        'Patch '.$atchId.' must contains '.count($op[$pageName]).' operations but '.count($opFound).' operations were found');
 
     for ($j = 0 ; $j < count($opFound) ; $j++) {
         $opi = split(';', $opFound[$j]);
-        PHPUnit_Framework_Assert::assertEquals(strtolower($patchName.($clock)), strtolower($opi[0]));
+        PHPUnit_Framework_Assert::assertEquals(strtolower($patchName.($clock)), strtolower($opi[0]),
+            'Operation id on patch '.$patchId.' must be '.$patchName.($clock).' but '.strtolower($opi[0]).' was found');
         PHPUnit_Framework_Assert::assertEquals($op[$pageName][$j][strtolower($opi[1])],utils::decodeRequest($opi[3]));
         $clock = $clock + 1;
     }
@@ -39,7 +44,8 @@ function assertCSFromPushIncluded($serverPush,$pushName,$serverPull,$pullName) {
     $pushhead = substr($pushhead[0],0,-1);
     $pullhead = getSemanticRequest($serverPull, '[[name::PullFeed:'.$pullName, '-3FhasPullHead');
     $pullhead = substr($pullhead[0],0,-1);
-    PHPUnit_Framework_Assert::assertEquals($pushhead, $pullhead);
+    PHPUnit_Framework_Assert::assertEquals($pushhead, $pullhead,
+        'failed pullHead in pull '.$pullName.', pullHead must be '.$pushHead.' but '.$pullHead.' was found');
     assertPageExist($serverPull,$pullhead);
 }
 

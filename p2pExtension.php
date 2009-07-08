@@ -72,13 +72,12 @@ function conflict(&$editor, &$out) {
 function onUnknownAction($action, $article) {
     global $wgOut;
 
-//    $script=javascript($_SERVER['HTTP_REFERER']);
-//    $wgOut->addHeadItem('script', $script);
-    wfDebugLog('p2p','onUnknowaction sss');
+    //    $script=javascript($_SERVER['HTTP_REFERER']);
+    //    $wgOut->addHeadItem('script', $script);
 
     //////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
     if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
-
+        wfDebugLog('p2p','addPullPage ');
         $newtext = "Add a new site:
 
 {{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pullpage|method=POST|
@@ -101,6 +100,7 @@ PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
 
     /////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
     elseif(isset ($_GET['action']) && $_GET['action']=='addpushpage') {
+        wfDebugLog('p2p','addPushPage');
         $newtext = "Add a new pushfeed:
 
 {{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pushpage|method=POST|
@@ -118,6 +118,7 @@ Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=k
     ///////PushFeed page////////
     elseif(isset ($_GET['action']) && $_GET['action']=='pushpage') {
     //$url = $_POST['url'];//pas url mais changesetId
+        wfDebugLog('p2p','Create new push '.$_POST['name'].' with '.$_POST['keyword']);
         $name = $_POST['name'];
         $request = $_POST['keyword'];
         $stringReq = utils::encodeRequest($request);//avoid "semantic injection" :))
@@ -131,18 +132,21 @@ Pages concerned:
 {{#ask: ".$request."}}
 ";
 
-
+        wfDebugLog('p2p','  -> push page contains : '.$newtext);
         $title = Title::newFromText($_POST['name'], PUSHFEED);
 
         $article = new Article($title);
-        $article->doEdit($newtext, $summary="");
+        $edit = $article->doEdit($newtext, $summary="");
+        wfDebugLog('p2p','  -> doEdit '.$title.' : '.$edit);
         $article->doRedirect();
-
-
         return false;
     }
     ///////ChangeSet page////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpush') {
+        wfDebugLog('p2p','push on ');
+        foreach ($_POST['push'] as $push) {
+            wfDebugLog('p2p',' - '.$push);
+        }
         $patches = array();
         $tmpPatches = array();
         $name = $_POST['push'];
@@ -157,11 +161,10 @@ Pages concerned:
         }
 
         $name = $name[0];
-        wfDebugLog( 'p2p', 'name push : '.$name);
-
+        wfDebugLog('p2p','  -> pull '.$name);
         // $name = $_GET['name'];//PushFeed name
         $request = getPushFeedRequest($name);
-//        $previousCSID = getPreviousCSID($name);
+        //        $previousCSID = getPreviousCSID($name);
         $previousCSID = getHasPushHead($name);
         if($previousCSID==false) {
             $previousCSID = "none";
@@ -171,6 +174,7 @@ Pages concerned:
         //            $cnt = $count[1] + 1;
         //            $CSID = $name."_".$cnt;
         //        }
+        wfDebugLog('p2p','      ->pullHead : '.$previousCSID);
         $CSID = utils::generateID();//changesetID
         if($request==false) {
             $outtext='<p><b>No semantic request found!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'">back</a>';
@@ -187,7 +191,13 @@ Pages concerned:
         }
         $published = getPublishedPatches($name);
         $unpublished = array_diff($patches, $published);/*unpublished = patches-published*/
-        if(empty ($unpublished)) return false; //If there is no unpublished patch
+        if(empty ($unpublished)) {
+            $title = Title::newFromText('Special:ArticleAdminPage');
+            $article = new Article($title);
+            wfDebugLog('p2p','  -> no unpublished patch');
+            $article->doRedirect();
+            return false; //If there is no unpublished patch
+        }
         $pos = strrpos($CSID, ":");//NS removing
         if ($pos === false) {
         // not found...
@@ -224,6 +234,7 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
 
     //////////PullFeed page////////
     elseif(isset ($_GET['action']) && $_GET['action']=='pullpage') {
+        wfDebugLog('p2p','Create pull '.$_POST['pullname'].' with pushName '.$_POST['pushname'].' on '.$_POST['url']);
         $url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
         $pushname = $_POST['pushname'];
         $pullname = $_POST['pullname'];
@@ -246,6 +257,10 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
     //////////OnPull/////////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpull') {
+        wfDebugLog('p2p','pull on ');
+        foreach ($_POST['pull'] as $pull) {
+            wfDebugLog('p2p',' - '.$pull);
+        }
         $name = $_POST['pull'];
         if(count($name)>1) {
             $outtext='<p><b>Select only one pullfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
@@ -258,18 +273,22 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }
 
         $name = $name[0];//with NS
+        wfDebugLog('p2p','      -> pull : '.$name);
 
-//        $previousCSID = getPreviousPulledCSID($name);
-//        if($previousCSID==false) {
-//            $previousCSID = "none";
-//        }
+        //        $previousCSID = getPreviousPulledCSID($name);
+        //        if($previousCSID==false) {
+        //            $previousCSID = "none";
+        //        }
         $previousCSID = getHasPullHead($name);
         if($previousCSID==false) {
             $previousCSID = "none";
         }
+        wfDebugLog('p2p','      -> pullHead : '.$previousCSID);
         $relatedPushServer = getPushURL($name);
         if(is_null($relatedPushServer))throw new MWException( __METHOD__.': no relatedPushServer url' );
         $namePush = getPushName($name);
+        wfDebugLog('p2p','      -> pushServer '.$relatedPushServer);
+        wfDebugLog('p2p','      -> pushName '.$namePush);
         if(is_null($namePush))throw new MWException( __METHOD__.': no PushName' );
         //split NS and name
         preg_match( "/^(.+?)_*:_*(.*)$/S", $namePush, $m );
@@ -278,6 +297,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
         //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
         $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+        wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
         $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
         $dom = new DOMDocument();
         $dom->loadXML($cs);
@@ -290,16 +310,17 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 $csName = $CSID;
             }
         }
-
+        wfDebugLog('p2p','     -> changeSet found '.$CSID);
         while($CSID!=null) {
             if(!utils::pageExist($CSID)) {
                 $listPatch = null;
                 $patchs = $dom->getElementsByTagName('patch');
-                foreach($patchs as $p)
+                foreach($patchs as $p) {
+                    wfDebugLog('p2p','          -> patch '.$p->firstChild->nodeValue);
                     $listPatch[] = $p->firstChild->nodeValue;
+                }
                 // $CSID = substr($CSID,strlen('changeSet:'));
                 utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
-
 
                 integrate($CSID, $listPatch,$relatedPushServer);
                 updatePullFeed($name, $CSID);
@@ -318,19 +339,22 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                     $CSID = $cs->getAttribute('id');
                 }
             }
+            wfDebugLog('p2p','     -> changeSet found '.$CSID);
+        }
+        
+        if(is_null($csName)) {
+            wfDebugLog('p2p','  - redirect to Special:ArticleAdminPage');
+            $title = Title::newFromText('Special:ArticleAdminPage');
+            $article = new Article($title);
+            $article->doRedirect();
+        }
+        else {
+            wfDebugLog('p2p','  - redirect to ChangeSet:'.$csName);
+            $title = Title::newFromText($csName, CHANGESET);
+            $article = new Article($title);
+            $article->doRedirect();
         }
 
-        if(is_null($csName)){
-        $title = Title::newFromText('Special:ArticleAdminPage');
-        $article = new Article($title);
-        $article->doRedirect();
-        }
-        else{
-        $title = Title::newFromText($csName, CHANGESET);
-        $article = new Article($title);
-        $article->doRedirect();
-        }
-         
         return false;
     }
 

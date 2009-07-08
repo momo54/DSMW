@@ -61,19 +61,24 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         $pageName = "Paris";
         $content='content page Paris
 [[Category:city]]';
-        $this->p2pBot1->createPage($pageName,$content);
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
+            'Failed to create page '.$pageName.' ('.$this->p2pBot2->bot->results.')');
 
         //create push on wiki1
         $pushName = 'PushCity';
         $pushRequest = '[[Category:city]]';
-        $res = $this->p2pBot1->createPush($pushName, $pushRequest);
+        $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
+            'Failed to create push : '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
-        $res = $this->p2pBot1->push('PushFeed:'.$pushName);
+        $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
+            'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
         $pullName = 'pullCity';
-        $res = $this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName);
+        $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
+            'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
 
-        $res =  $this->p2pBot2->Pull($pullName);
+        $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
+            'failed to pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
 
         // assert cs from pushincluded
         assertCSFromPushIncluded($this->p2pBot1->bot->wikiServer, $pushName, $this->p2pBot2->bot->wikiServer, $pullName);
@@ -87,7 +92,8 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
         $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
         assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
-        $this->assertEquals($contentWiki1, $contentWiki2);
+        $this->assertEquals($contentWiki1, $contentWiki2,
+            'Failed content page Paris');
     }
 }
 ?>
