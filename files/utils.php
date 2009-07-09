@@ -143,11 +143,14 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
         $string1 = file_get_contents($url2);//previous list
         $string1 = strtolower($string1);
+        //$string1 = str_replace("patch:", "", $string1);
         if ($string1=="") return false;
         $string1 = explode("\n", $string1);
         foreach ($string1 as $key=>$str) {
             $pos = strpos($str, '!');
             if($pos !== false) $string1[$key] = substr($str, $pos+1);
+//            $pos2 = strpos($string1[$key], 'patch:');
+//            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
             if ($string1[$key]=="") unset ($string1[$key]);
             $pos1 = strpos($string1[$key], ';');
             if($pos1 !== false) {
@@ -162,6 +165,6 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         else return array_shift($result);
     }
 
-
+    
 }
 ?>

@@ -48,7 +48,7 @@ class PatchTest1 extends PHPUnit_Framework_TestCase {
 
         /*1st patch*/
         $pageName = "Patch:localhost/wiki1901";
-        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1901]]
+        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1901]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::none]]';
@@ -61,7 +61,7 @@ previous: [[previous::none]]';
 
         /*2nd patch*/
         $pageName = "Patch:localhost/wiki1902";
-        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1902]]
+        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1902]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::Patch:Localhost/wiki1901]]';
@@ -74,7 +74,7 @@ previous: [[previous::Patch:Localhost/wiki1901]]';
 
         /*3rd patch*/
         $pageName = "Patch:localhost/wiki1802";
-        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1802]]
+        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1802]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::Patch:Localhost/wiki1902]]';
@@ -87,7 +87,7 @@ previous: [[previous::Patch:Localhost/wiki1902]]';
 
         /*4th patch*/
         $pageName = "Patch:localhost/wiki1803";
-        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1803]]
+        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1803]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::Patch:Localhost/wiki1802]]';
@@ -100,7 +100,7 @@ previous: [[previous::Patch:Localhost/wiki1802]]';
 
         /*5th patch*/
         $pageName = "Patch:localhost/wiki1700";
-        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1700]]
+        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1700]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::Patch:Localhost/wiki1803]]';
@@ -113,7 +113,7 @@ previous: [[previous::Patch:Localhost/wiki1803]]';
 
         /*6th patch*/
         $pageName = "Patch:localhost/wiki1905";
-        $Patchcontent='Patch: patchID: [[patchID::localhost/wiki1905]]
+        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1905]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::Patch:Localhost/wiki1700]]';
