@@ -128,9 +128,9 @@ class Patch {
             else $type="Delete";
             $operationID = utils::generateID();
             $text.=' hasOperation: [[hasOperation::'.$operationID.';'.$type.';'
-            .$operation->getLogootPosition()->toString().';'.$lineContent1.'|'
+            .$operation->getLogootPosition()->toString().';'.$lineContent1/*.'|'
             .$operationID.';'.$type.';'.$operation->getLogootPosition()->toString()
-            .';'.$lineContent.']] ';
+            .';'.$lineContent*/.']] ';
         }
         if (is_array($previous)){
             $text.=' previous: [[previous::';

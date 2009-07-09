@@ -34,6 +34,7 @@ class ApiQueryChangeSet extends ApiQueryBase {
         //$request = '-5B-5BinPushFeed::PushFeed:Pushcity-5D-5D-5B-5BpreviousChangetSet::localhost-2Fwiki14-5D-5D';
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FhasPatch/format=csv/sep=!';
         $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FchangeSetID/-3FhasPatch/headers=hide/format=csv/sep=!');
+        $data = trim($data);
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 

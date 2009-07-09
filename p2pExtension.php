@@ -144,12 +144,15 @@ Pages concerned:
     ///////ChangeSet page////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpush') {
         wfDebugLog('p2p','push on ');
-        foreach ($_POST['push'] as $push) {
-            wfDebugLog('p2p',' - '.$push);
-        }
         $patches = array();
         $tmpPatches = array();
-        if(isset ($_POST['push']))$name = $_POST['push'];
+        if(isset ($_POST['push']))
+        {
+            $name = $_POST['push'];
+            foreach ($name as $push) {
+            wfDebugLog('p2p',' - '.$push);
+            }
+        }
         else $name="";
         //else throw new MWException( __METHOD__.': no Pushfeed selected' );
         if(count($name)>1) {
@@ -647,7 +650,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
     foreach ($patchIdList as $patchId) {
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
         //recuperation patch via api, creation (sauvegarde en local)
-            $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='.substr($patchId,strlen('patch:')).'&format=xml';
+            $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/strtolower($patchId)/*,strlen('patch:'))*/.'&format=xml';
             $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
 
             $dom = new DOMDocument();
@@ -779,7 +782,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-    $operation = utils::
+    
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
