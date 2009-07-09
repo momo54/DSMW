@@ -4,7 +4,7 @@ define( 'MEDIAWIKI', true );
 require_once 'p2pBot.php';
 require_once 'BasicBot.php';
 include_once 'p2pAssert.php';
-require_once '../../..//includes/GlobalFunctions.php';
+require_once '../../../includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
 
@@ -70,7 +70,7 @@ toto titi
 
         $patchId1 = 'localhost/wiki1'.$clock;
         $clock += 1;
-        assertPageExist($this->p2pBot1->bot->wikiServer, 'Patch:'.$patchId1);
+        assertPageExist($this->p2pBot1->bot->wikiServer, 'patch:'.$patchId1);
         assertPatch($this->p2pBot1->bot->wikiServer,$patchId1,$clock,$pageName,$op,'None');
 
         $op = null;
