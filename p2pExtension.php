@@ -130,6 +130,7 @@ Name: [[name::PushFeed:".$name."]]
 hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
 Pages concerned:
 {{#ask: ".$request."}}
+[[deleted::false| ]]
 ";
 
         wfDebugLog('p2p','  -> push page contains : '.$newtext);
@@ -249,6 +250,7 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
 name: [[name::PullFeed:".$pullname."]]
 pushFeedServer: [[pushFeedServer::".$url."]]
 pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
+[[deleted::false| ]]
 ";
 
         $title = Title::newFromText($pullname, PULLFEED);
