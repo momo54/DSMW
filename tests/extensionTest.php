@@ -1,24 +1,30 @@
 <?php
-//require_once('../p2pExtension.php');
-//require_once('../p2pExtension.php');
+
 define( 'MEDIAWIKI', true );
+if( defined( 'MW_INSTALL_PATH' ) ) {
+    $IP = MW_INSTALL_PATH;
+} else {
+    $IP = dirname('../../../.');
+}
+
 require_once 'p2pBot.php';
 require_once 'BasicBot.php';
+require_once '../logootEngine/LogootId.php';
+require_once '../logootEngine/LogootPosition.php';
+require_once '../logootop/LogootOp.php';
+require_once '../logootop/LogootIns.php';
+require_once '../logootop/LogootDel.php';
 include_once 'p2pAssert.php';
-require_once '../../../includes/GlobalFunctions.php';
-//require_once '../p2pExtension.php';
+require_once '../p2pExtension.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
-ini_set('xdebug.auto_trace', 'On');
+$wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
 
-/* To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  * Description of extensionTest
  *
- * @author mullejea
+ * @author hantzmar
  */
 class extensionTest extends PHPUnit_Framework_TestCase {
     var $p2pBot1;
@@ -27,10 +33,6 @@ class extensionTest extends PHPUnit_Framework_TestCase {
     var $tmpServerName;
     var $tmpScriptPath;
 
-    function  __construct() {
-    //xdebug_start_trace('/tmp/phpunit');
-
-    }
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -38,13 +40,8 @@ class extensionTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-    //storage of the global variable value
-     /*   global $wgServerName, $wgScriptPath;
-        $this->tmpServerName = $wgServerName;
-        $this->tmpScriptPath = $wgScriptPath;*/
-
-
         exec('./initWikiTest.sh');
+        exec('rm cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
@@ -111,15 +108,8 @@ previous: [[previous::none]]';
             'This test has not been implemented yet.'
         );
     }
-*/
+ * function testLogootIntegrate() {
 
-    function testOperationToLogootOp() {
-        //create page
-        //recuperer patch et le contenu de l'operation
-        //logoutIntegrate
-    }
-    function testLogootIntegrate() {
-        
     }
 
     function testIntegrate() {
@@ -127,170 +117,30 @@ previous: [[previous::none]]';
             'This test has not been implemented yet.'
         );
     }
-    function testGetPatch() {
-        $pageName = 'ChangeSet:localhost/wiki1';
-        $content = '[[changeSetID::localhost/wiki1]] [[inPullFeed::pulltoto]]
-            [[previousChangeSet::none]] [[hasPatch::Patch:localhost/wiki2]]';
-        $this->p2pBot1->createPage($pageName, $content);
-
-        $pageName = 'Patch:localhost/wiki2';
-        $content = '[[patchID::'.$pageName.']] [[onPage::Paris]] [[previous::none]]
-        [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
-        $this->p2pBot1->createPage($pageName,$content);
+*/
 
 
-        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:localhost/wiki2&format=xml');
+    function testOperationToLogootOp() {
+        $pageName = 'Toto';
+        $content = 'toto tata titi';
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
+            'failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
-        $dom = new DOMDocument();
-        $dom->loadXML($patchXML);
-        $patchs = $dom->getElementsByTagName('patch');
+        $patchId = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '');
+        $patchId = substr($patchId[0],0,-1);
+        $dom = getPatchXML($this->p2pBot1->bot->wikiServer,$patchId);
 
-        foreach($patchs as $p) {
-            $a = $p->getAttribute('id');
-            $this->assertEquals('patch:localhost/wiki2', strtolower($p->getAttribute('id')));
-            $a = $p->getAttribute('onPage');
-            $this->assertEquals('Paris', $p->getAttribute('onPage'));
-            $a = $p->getAttribute('previous');
-            $this->assertEquals('None', substr($p->getAttribute('previous'),0,-1));
-        }
+        $op = $dom->getElementsByTagName('operation');
+        foreach($op as $o)
+            $operations[] = $o->firstChild->nodeValue;
 
-        $listeOp = $dom->getElementsByTagName('operation');
+        $this->assertTrue(count($operations)==1);
 
-        $op = null;
-        foreach($listeOp as $o)
-            $op[] = $o->firstChild->nodeValue;
-        $this->assertTrue(count($op)==1);
-        $this->assertEquals(str_replace(" ", "",'Localhost/wiki121; Insert; (15555995255933583146:900c17ebee311fb6dd00970d26727577); content page Paris'),str_replace(" ","", $op[0]));
-
-        $pageName = 'ChangeSet:localhost/wiki3';
-        $content = '[[changeSetID::localhost/wiki3]] [[inPullFeed::pulltoto]]
-            [[previousChangeSet::changeSetID::localhost/wiki1]] [[hasPatch::Patch:localhost/wiki4]]';
-        $this->p2pBot1->createPage($pageName, $content);
-
-        $pageName = 'Patch:localhost/wiki4';
-        $content = '[[patchID::'.$pageName.']] [[onPage::Paris]] [[previous::none]]
-        [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
-        $this->p2pBot1->createPage($pageName,$content);
-
-        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:Localhost/wiki4&format=xml');
-
-        $dom = new DOMDocument();
-        $dom->loadXML($patchXML);
-        $patchs = $dom->getElementsByTagName('patch');
-
-        foreach($patchs as $p) {
-            $a = $p->getAttribute('id');
-            $this->assertEquals('Patch:Localhost/wiki4', $p->getAttribute('id'));
-            $a = $p->getAttribute('onPage');
-            $this->assertEquals('Paris', $p->getAttribute('onPage'));
-            $a = $p->getAttribute('previous');
-            $this->assertEquals('None', substr($p->getAttribute('previous'),0,-1));
-        }
-
-        $listeOp = $dom->getElementsByTagName('operation');
-        $op = null;
-        foreach($listeOp as $o)
-            $op[] = $o->firstChild->nodeValue;
-        $this->assertTrue(count($op)==1);
-        $this->assertEquals('localhost/wiki121;insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577);contentpageparis',strtolower(str_replace(' ','',$op[0])));
-
+        $op = operationToLogootOp($operations[0]);
+        $this->assertTrue($op instanceof LogootIns,'failed to create logootIns operation');
+        $this->assertEquals($content, $op->getLineContent());
+    //logoutIntegrate
     }
-
- /*   public function testGetChangeSet() {
-        $pageName = "ChangeSet:localhost/wiki12";
-        $content='ChangeSet:
-changeSetID: [[changeSetID::localhost/wiki12]]
-inPushFeed: [[inPushFeed::PushFeed:PushCity]]
-previousChangeSet: [[previousChangeSet::none]]
- hasPatch: [[hasPatch::"Patch:Berlin1"]] hasPatch: [[hasPatch::"Patch:Paris0"]]';
-        $this->p2pBot1->createPage($pageName, $content);
-
-        $pageName = 'PushFeed:PushCity';
-        $content = 'PushFeed:
-Name: [[name::CityPush2]]
-hasSemanticQuery: [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
-Pages concerned:
-{{#ask: [[Category:city]]}} hasPushHead: [[hasPushHead::ChangeSet:localhost/mediawiki12]]';
-        $this->p2pBot1->createPage($pageName,$content);
-
-        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=none&format=xml');
-
-        $dom = new DOMDocument();
-        $dom->loadXML($cs);
-        $changeSet = $dom->getElementsByTagName('changeSet');
-        foreach($changeSet as $cs) {
-            if ($cs->hasAttribute("id")) {
-                $CSID = $cs->getAttribute('id');
-            }
-        }
-
-        $this->assertEquals('localhost/wiki12',strtolower($CSID));
-
-        $listePatch = $dom->getElementsByTagName('patch');
-
-        foreach($listePatch as $pays)
-            $patch[] = $pays->firstChild->nodeValue;
-
-        $this->assertTrue(count($patch)==2);
-        $this->assertEquals('Patch:Berlin1',$patch[0]);
-        $this->assertEquals('Patch:Paris0',substr($patch[1],0,-1));
-
-        $pageName = "ChangeSet:localhost/wiki13";
-        $content='ChangeSet:
-changeSetID: [[changeSetID::localhost/wiki13]]
-inPushFeed: [[inPushFeed::PushFeed:PushCity]]
-previousChangeSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
- hasPatch: [[hasPatch::"Patch:Berlin2"]]';
-        $this->p2pBot1->createPage($pageName, $content);
-
-        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=ChangeSet:localhost/wiki12&format=xml');
-
-        $dom = new DOMDocument();
-        $dom->loadXML($cs);
-
-        $changeSet = $dom->getElementsByTagName('changeSet');
-        foreach($changeSet as $cs) {
-            if ($cs->hasAttribute("id")) {
-                $CSID = $cs->getAttribute('id');
-            }
-        }
-
-        $this->assertEquals('localhost/wiki13',strtolower($CSID));
-        $listePatch = $dom->getElementsByTagName('patch');
-
-        $patch = null;
-        foreach($listePatch as $pays)
-            $patch[] = $pays->firstChild->nodeValue;
-
-        $this->assertTrue(count($patch)==1);
-        $this->assertEquals('Patch:Berlin2',substr($patch[0],0,-1));
-
-        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=ChangeSet:localhost/wiki13&format=xml');
-
-        $dom = new DOMDocument();
-        $dom->loadXML($cs);
-        $changeSet = $dom->getElementsByTagName('changeSet');
-        $CSID = null;
-        foreach($changeSet as $cs) {
-            if ($cs->hasAttribute("id")) {
-                $CSID = $cs->getAttribute('id');
-            }
-        }
-
-        $this->assertEquals(null, $CSID);
-
-        $patch = null;
-        $listePatch = $dom->getElementsByTagName('patch');
-        foreach($listePatch as $pays)
-            $patch[] = $pays->firstChild->nodeValue;
-        $this->assertEquals(null, $patch);
-    }
-
-    protected function tearDown() {
-       /* global $wgServerName, $wgScriptPath;
-        $wgServerName = $this->tmpServerName;
-        $wgScriptPath = $this->tmpScriptPath;*/
-    //}
 
 }
 ?>

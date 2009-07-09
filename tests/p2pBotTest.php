@@ -7,10 +7,11 @@ include_once 'p2pAssert.php';
 require_once '../../..//includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
+
 /**
  * Description of p2pBotTest
  *
- * @author marlene
+ * @author hantz
  */
 class p2pBotTest extends PHPUnit_Framework_TestCase {
     var $p2pBot1;
@@ -59,12 +60,6 @@ class p2pBotTest extends PHPUnit_Framework_TestCase {
         $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
         assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content);
-    }
-
-    public function testEditPage() {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
     }
 
     public function testAppendPage() {

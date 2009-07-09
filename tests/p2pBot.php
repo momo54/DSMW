@@ -8,7 +8,7 @@
  * GET Request => code 200
  * POST Request => code 302
  *
- * @author marlene
+ * @author hantz
  */
 class p2pBot {
 
@@ -22,6 +22,7 @@ class p2pBot {
         $res = $this->bot->wikiFilter($pageName,'callbackTestFct','summary',$content);
         return $res;
     }
+
 
     static function append($content,$line) {
         $content=$content.$line;
@@ -89,14 +90,14 @@ class p2pBot {
         if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=pullpage', $post_vars ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-            if ('200'==$code)
+            if ('200'==$code) {
+                echo 'Create pull failed with error 200 : ('.$this->bot->results.')';
                 return false;
-            elseif ('302'==$code) {
-                echo 'Create pull failed with error 302 : ('.$this->bot->results.')';
-                return true;
             }
+            elseif ('302'==$code)
+                return true;
             else {
-                echo 'Create pull failed error not 302 : ('.$this->bot->results.')';
+                echo 'Create pull failed error not 200 : ('.$this->bot->results.')';
                 return false;
             }
         //return false; // if you get this, it's time to debug.
@@ -113,7 +114,7 @@ class p2pBot {
         $url = $this->bot->wikiServer.PREFIX.'/index.php';
         if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/index.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
-             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
                 echo "pull failed with error 200:(".$this->bot->results.")";
                 return false;

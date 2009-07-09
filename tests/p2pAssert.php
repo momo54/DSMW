@@ -15,7 +15,7 @@ function assertContentEquals($server,$pageName,$content) {
         'Content on page '.$pageName.' must be '.$content.' but is '.$contentPage);
 }
 
-function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
+function assertContentPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
     $patchName = substr($patchId,0,-strlen($clock-1));
     $patch = getSemanticRequest($server,'[[patchID::'.$patchId,'-3FonPage/-3FhasOperation/-3Fprevious');
 
@@ -28,13 +28,13 @@ function assertPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
 
     $opFound = split(',',$patch[1]);
     PHPUnit_Framework_Assert::assertTrue(count($op[$pageName])==count($opFound),
-        'Patch '.$atchId.' must contains '.count($op[$pageName]).' operations but '.count($opFound).' operations were found');
+        'Patch '.$patchId.' must contains '.count($op[$pageName]).' operations but '.count($opFound).' operations were found');
 
     for ($j = 0 ; $j < count($opFound) ; $j++) {
         $opi = split(';', $opFound[$j]);
-        PHPUnit_Framework_Assert::assertEquals(strtolower($patchName.($clock)), strtolower($opi[0]),
+        PHPUnit_Framework_Assert::assertEquals(strtolower(substr($patchName.($clock),strlen('patch:'))), strtolower($opi[0]),
             'Operation id on patch '.$patchId.' must be '.$patchName.($clock).' but '.strtolower($opi[0]).' was found');
-        PHPUnit_Framework_Assert::assertEquals($op[$pageName][$j][strtolower($opi[1])],utils::decodeRequest($opi[3]));
+        PHPUnit_Framework_Assert::assertEquals(strtolower($op[$pageName][$j][strtolower($opi[1])]),strtolower(utils::contentDecoding($opi[3])));
         $clock = $clock + 1;
     }
 }
@@ -64,11 +64,22 @@ function getSemanticRequest($server,$request,$param,$sep='!') {
     $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
     $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100');
     $array = split($sep, $php);
+    if( count($array)==1) {
+        return $array;
+    }
     $arrayRes[] = $array[1];
     for ($i = 2 ; $i < count($array) ; $i++) {
         $arrayRes[] = ereg_replace('"', '',$array[$i]);
     }
     return $arrayRes;
+}
+
+function getPatchXML($server,$patchId) {
+    $url = $server.'/api.php?action=query&meta=patch&papatchId='.substr($patchId,strlen('patch:')).'&format=xml';
+    $patchContent = file_get_contents($server.'/api.php?action=query&meta=patch&papatchId='.$patchId.'&format=xml');
+    $dom = new DOMDocument();
+    $dom->loadXML($patchContent);
+    return $dom;
 }
 
 ?>

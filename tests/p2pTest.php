@@ -11,10 +11,11 @@ require_once '../files/utils.php';
 $wgDebugLogGroups  = array(
     'p2p'=>"/tmp/p2p.log",
 );
+
 /**
  * Description of p2pTest
  *
- * @author marlene
+ * @author hantz
  */
 
 
@@ -57,33 +58,30 @@ class p2pTest extends PHPUnit_Framework_TestCase {
 
 
     public function testSimple1() {
-    //create page on wiki1
         $pageName = "Paris";
         $content='content page Paris
 [[Category:city]]';
         $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
-            'Failed to create page '.$pageName.' ('.$this->p2pBot2->bot->results.')');
+            'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
         //create push on wiki1
         $pushName = 'PushCity';
         $pushRequest = '[[Category:city]]';
         $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
-            'Failed to create push : '.$pushName.' ('.$this->p2pBot2->bot->results.')');
+            'Failed to create push : '.$pushName.' ('.$this->p2pBot1->bot->results.')');
 
+        //push on wiki1
         $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
+        //create pull on wiki2
         $pullName = 'pullCity';
         $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
             'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
 
+        //pull
         $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
             'failed to pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
-
-        // assert cs from pushincluded
-        assertCSFromPushIncluded($this->p2pBot1->bot->wikiServer, $pushName, $this->p2pBot2->bot->wikiServer, $pullName);
-
-        // asssert patch is present
 
         // assert page paris exist
         assertPageExist($this->p2pBot1->bot->wikiServer, $pageName);
@@ -94,6 +92,65 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
         $this->assertEquals($contentWiki1, $contentWiki2,
             'Failed content page Paris');
+    }
+
+    function testSimple2() {
+        $this->testSimple1();
+        $countCSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+        $countCSonWiki2 = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+
+        //create push on wiki2
+        $pushName = 'PushCity';
+        $pushRequest = '[[Category:city]]';
+        $this->assertTrue($this->p2pBot2->createPush($pushName, $pushRequest),
+            'Failed to create push : '.$pushName.' ('.$this->p2pBot2->bot->results.')');
+
+        $this->assertTrue($this->p2pBot2->push('PushFeed:'.$pushName),
+            'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
+
+        $countCS = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+        //assert no patch created
+        $this->assertTrue($countCSonWiki2==$countCS);
+
+        //create pull on wiki1
+        $pullName = 'pullCity';
+        $this->assertTrue($this->p2pBot1->createPull($pullName,'http://localhost/wiki2', $pushName),
+            'failed to create pull '.$pullCity.' ('.$this->p2pBot1->bot->results.')');
+
+        //pull
+        $this->assertTrue($this->p2pBot1->Pull('PullFeed:'.$pullName),
+            'failed to pull '.$pullName.' ('.$this->p2pBot1->bot->results.')');
+
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+        //assert no patch created
+        $this->assertTrue($countCSonWiki1==$countCS);
+
+    }
+
+    function testSimple3() {
+        $this->testSimple2();
+
+        $countCSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+        $countCSonWiki2 = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+
+        $pushName = 'PushCity';
+        $pullName = 'pullCity';
+        $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
+            'failed to push '.$pushName.' ('.$this->p2pBot1->bot->results.')');
+
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+        //assert no patch created
+        $this->assertTrue($countCSonWiki1==$countCS);
+
+        $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
+            'failed to pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
+
+        $countCS = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
+        //assert no patch created
+        $this->assertTrue($countCSonWiki2==$countCS);
+
+        $this->assertTrue($countCSonWiki1==1);
+        $this->assertTrue($countCSonWiki2==1);
     }
 }
 ?>

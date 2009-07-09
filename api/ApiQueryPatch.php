@@ -40,7 +40,6 @@ class ApiQueryPatch extends ApiQueryBase {
             substr($data[3],0,-1);
             $op = split(',',$data[3]);
             $result->setIndexedTagName($op, 'operation');
-            //$result->addValue((array ('query', $this->getModuleName(),$CSID)));
             $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);
             $result->addValue(array('query',$this->getModuleName()),'onPage',$data[2]);
             $result->addValue(array('query',$this->getModuleName()),'previous',$data[4]);
@@ -51,29 +50,6 @@ class ApiQueryPatch extends ApiQueryBase {
     public function getAllowedParams() {
         global $wgRestrictionTypes, $wgRestrictionLevels;
 
-       /* return array (
-            'oper' => array (
-                ApiBase :: PARAM_DFLT => false,
-                ApiBase :: PARAM_TYPE => 'boolean',
-            ),
-            'fromid' => array (
-                ApiBase :: PARAM_TYPE => 'integer',
-            ),
-            'id' => array (
-                ApiBase :: PARAM_TYPE => 'integer',
-            ),
-            'page_title' => array (
-                ApiBase :: PARAM_TYPE => 'string',
-            ),
-
-            'limit' => array (
-                ApiBase :: PARAM_DFLT => 10,
-                ApiBase :: PARAM_TYPE => 'limit',
-                ApiBase :: PARAM_MIN => 1,
-                ApiBase :: PARAM_MAX => ApiBase :: LIMIT_BIG1,
-                ApiBase :: PARAM_MAX2 => ApiBase :: LIMIT_BIG2
-            )
-        );*/
         return array (
         'patchId' => array (
         ApiBase :: PARAM_TYPE => 'string',
@@ -83,8 +59,6 @@ class ApiQueryPatch extends ApiQueryBase {
 
     public function getParamDescription() {
         return array(
-            /*'limit' => 'limit how many patch (id) will be returned',
-            'fromid' =>  'from which patch (id) to start enumeration',*/
         'patchId' => 'which patch id must be returned',
         );
     }
@@ -96,8 +70,6 @@ class ApiQueryPatch extends ApiQueryBase {
     protected function getExamples() {
         return array(
         'api.php?action=query&meta=patch&papatchId=1&format=xml',
-            /*'api.php?action=query&meta=patch&pafromid=1&paoper=true',
-            'api.php?action=query&meta=patch&pafromid=100',*/
         );
     }
 
