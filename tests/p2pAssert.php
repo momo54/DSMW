@@ -42,7 +42,7 @@ function assertContentPatch($server,$patchId,$clock,$pageName,$op,$previousPatch
     }
 }
 
-function assertCSFromPushIncluded($serverPush,$pushName,$serverPull,$pullName) {
+/*function assertCSFromPushIncluded($serverPush,$pushName,$serverPull,$pullName) {
     $pushhead = getSemanticRequest($serverPush, '[[name::PushFeed:'.$pushName, '-3FhasPushHead');
     $pushhead = substr($pushhead[0],0,-1);
     $pullhead = getSemanticRequest($serverPull, '[[name::PullFeed:'.$pullName, '-3FhasPullHead');
@@ -50,7 +50,7 @@ function assertCSFromPushIncluded($serverPush,$pushName,$serverPull,$pullName) {
     PHPUnit_Framework_Assert::assertEquals($pushhead, $pullhead,
         'failed pullHead in pull '.$pullName.', pullHead must be '.$pushHead.' but '.$pullHead.' was found');
     assertPageExist($serverPull,$pullhead);
-}
+}*/
 
 function getContentPage($server,$pageName) {
     $php = file_get_contents($server.'/api.php?action=query&prop=revisions&titles='.$pageName.'&rvprop=content&format=php');

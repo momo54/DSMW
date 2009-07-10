@@ -111,6 +111,12 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         $countCS = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
         //assert no patch created
         $this->assertTrue($countCSonWiki2==$countCS);
+        // assert that wiki1/paris == wiki2/paris
+        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
+        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
+        $this->assertEquals($contentWiki1, $contentWiki2,
+            'Failed content page Paris');
 
         //create pull on wiki1
         $pullName = 'pullCity';
@@ -124,6 +130,13 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
         //assert no patch created
         $this->assertTrue($countCSonWiki1==$countCS);
+
+        // assert that wiki1/paris == wiki2/paris
+        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
+        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
+        $this->assertEquals($contentWiki1, $contentWiki2,
+            'Failed content page Paris');
 
     }
 
@@ -149,8 +162,12 @@ class p2pTest extends PHPUnit_Framework_TestCase {
         //assert no patch created
         $this->assertTrue($countCSonWiki2==$countCS);
 
-//        $this->assertTrue($countCSonWiki1==1);
-//        $this->assertTrue($countCSonWiki2==1);
+        // assert that wiki1/paris == wiki2/paris
+        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
+        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
+        $this->assertEquals($contentWiki1, $contentWiki2,
+            'Failed content page Paris');
     }
 }
 ?>

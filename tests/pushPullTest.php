@@ -150,6 +150,7 @@ toto' ;
 
         //assert the changeSet created is ok
         $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet/-3FhasPatch');
+        $CSIDFound = $CSFound[0];
         $this->assertEquals(strtolower('PushFeed:'.$pushName),strtolower($CSFound[1]),
             'failed to push '.$pushName.', ChangeSet push name must be PushFeed:'.$pushName.' but '.$CSFound[1].' was found');
         $this->assertEquals('none',strtolower($CSFound[2]),
@@ -166,40 +167,18 @@ toto' ;
         $this->assertTrue($assert1 && $assert2,
             'failed to push '.$pushName.', wrong patch in changeSet');
 
-
-
-/*        $this->assertTrue($this->p2pBot1->editPage('Nancy','toto'),'failed to edit page Nancy');
-        $this->assertTrue($this->p2pBot1->editPage('Nancy','titi'),'failed to edit page Paris');
-        $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),'failed to push '.$pushName.')');
-
-        $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
-
-        $previousCS = $CSIDFound;
-        $CSIDFound = substr($pushFound[0],0,-1);
-        $this->assertNotNull($CSIDFound,
-            'Failed to push '.$pushName.', pushHead must be not null but '.$CSFound.' was found');
-        assertPageExist($this->p2pBot1->bot->wikiServer,$CSIDFound2);
-
-        $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
-        $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet/-3FhasPatch');
-        $this->assertEquals(strtolower('PushFeed:'.$pushName),strtolower($CSFound[1]),
-            'failed to push '.$pushName.', ChangeSet pushname must be PushFeed:'.$pushName.' but '.$CSFound[1].' was found');
-        $this->assertEquals($previousCS,$CSFound[2],
-            'failed to push '.$pushName.', ChangeSet previous must be '.$previousCS.' but '.$CSFound[2].' was found');
-
-        $contentCS = getContentPage($this->p2pBot1->bot->wikiServer,$CSIDFound);
-        $previousLastPatchNancy = $lastPatchNancy;
-        $lastPatchNancy = utils::getLastPatchId('Nancy',$this->p2pBot1->bot->wikiServer);
-        $patchCS = split(',',substr($CSFound[3],0,-1));
-        $this->assertTrue(count($patchCS)==2,
-            'failed to push '.$pushName.', ChangeSet must contains 2 patchs but '.count($patchCS).' patchs were found');
+        /* push without update */
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));
 
         $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot1->bot->results.')');
+
         $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
-        $this->assertEquals(strtolower($CSIDFound),strtolower(substr($pushFound[0],0,-1)),
-            'failed to push '.$pushName.' pushHead must be '.$CSIDFound.' but '.$pushFound[0].' was found');
-        assertContentEquals($this->p2pBot1->bot->wikiServer,$CSIDFound, $contentCS);*/
+        $this->assertEquals(strtolower('ChangeSet:'.$CSIDFound),strtolower(substr($pushFound[0],0,-1)),
+            'failed to push '.$pushName.' pushHead must be ChangeSet:'.$CSIDFound.' but '.$pushFound[0].' was found');
+
+        $countCSAfter = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));
+        $this->assertTrue($countCS == $countCSAfter);
 
     }
 
@@ -257,6 +236,17 @@ toto' ;
         $pullHead = getSemanticRequest($this->p2pBot2->bot->wikiServer,'[[name::PullFeed:'.$pullName.']]','-3FhasPullHead');
         $this->assertEquals(strtolower('ChangeSet:'.$CSName),strtolower(substr($pullHead[0],0,-1)));
 
+        /* pull without update */
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));
+
+        $this->assertTrue($this->p2pBot2->pull('PullFeed:'.$pullName),'error on pull '.$pullName.'('.$this->p2pBot2->bot->results.')');
+
+        $countCSAfter = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));
+        $pullFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PullFeed:'.$pushName.']]','-3FhasPullHead');
+        $this->assertEquals(strtolower($CSIDFound),strtolower(substr($pushFound[0],0,-1)),
+            'failed to push '.$pushName.' pushHead must be '.$CSIDFound.' but '.$pushFound[0].' was found');
+
+        $this->assertTrue($countCS==$countCSAfter);
     }
 }
 ?>
