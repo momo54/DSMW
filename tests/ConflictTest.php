@@ -16,28 +16,7 @@ define ('INT_MIN', "0");
  *
  * @author mullejea
  */
-class ConflictTest{// extends PHPUnit_Framework_TestCase {
-
-
-    //    function testEditionConflict(){
-    //        $username="mullejea"; //your username
-    //        $password="Muller.3"; //your password
-    //        $wiki='http://localhost/mediawiki-1.13.2/'; //prefix your wiki
-    //        $epm=5; //edit per minute
-    //        $lag=5; //max lag with server
-    //        $page='Test2';
-    //        $oldtext="";//$bot->get_page($page);
-    //        $newtext='my text';
-    //        $newtext1='the text of my concurrent';
-    //        $summary="";
-    //
-    //        $bot=new phpwikibot($username, $password, $wiki, $epm, $lag);
-    //
-    //        $val = $bot->editPage($page, $oldtext, $newtext, $newtext1, $summary);
-    //        $value = 'merge entre: '.$newtext.' et '.$newtext1;
-    //
-    //        $this->assertEquals($value, $val);
-    //    }
+class ConflictTest extends PHPUnit_Framework_TestCase {
 
     function testPosGeneration(){
 
@@ -83,14 +62,6 @@ class ConflictTest{// extends PHPUnit_Framework_TestCase {
         $this->assertLessThan($end, $result[0]);
         $this->assertGreaterThan($start, $result[0]);
 
-
-        //        $handle = fopen("/home/mullejea/Bureau/file.txt", "w");
-        //        foreach ($blobInfo->getBlobInfo() as $key=>$pos){
-        //            fwrite($handle, "\n ".$key." ");
-        //            foreach ($pos->getThisPosition() as $id){
-        //                fwrite($handle, " ".$id->toString()." ");
-        //            }
-        //        }
     }
 
    
@@ -165,8 +136,6 @@ class ConflictTest{// extends PHPUnit_Framework_TestCase {
     }
 
     function testConcIntegration(){
-//       $pc = new persistentClock();
-//        $pc->load();
         $blobInfo = new BlobInfo;
         $fp = fopen(dirname( __FILE__ )."/LogootTests/text2.txt", "r");
         $conctext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text2.txt"));
@@ -189,40 +158,7 @@ class ConflictTest{// extends PHPUnit_Framework_TestCase {
         //text3 fait 27lignes et text2 fait 10lignes
         $this->assertEquals(124, count($listPositions));
 
-//         $pc->store();
-//        unset($pc);
     }
-
-//    function testApiPatch(){
-//
-//        $wiki='http://localhost/www/mediawiki-1.13.2/';
-//        $php = file_get_contents($wiki.'api.php?action=query&meta=patch&format=php');
-//        $array=$php = unserialize($php);
-//        $array = array_shift($array);
-//        $array = array_shift($array);
-//        foreach ($array as $patch){
-//           $cnt = $cnt + 1;
-//           //$patch['patch_id'];
-//        }
-//
-//        $this->assertEquals('2', $cnt);
-//
-//    }
-//
-//    function testGetDistantPatch(){
-//        $wiki='http://localhost/www/mediawiki-1.13.2/';
-//        $php = file_get_contents($wiki.'api.php?action=query&meta=patch&paoper=true&format=php');
-//        $array=$php = unserialize($php);
-//        $array = array_shift($array);
-//        $array = array_shift($array);
-//        foreach ($array as $patch){
-//           $cnt = $cnt + 1;
-//           $op = $patch['operations'];
-//           $this->assertNotNull($op);
-//        }
-//
-//        $this->assertEquals('2', $cnt);
-//    }
 
 }
 ?>

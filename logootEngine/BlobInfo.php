@@ -481,9 +481,9 @@ $step = gmp_div_q($slot, $N);
                 else{/*the value is found in the array. It should not be, because
          * the logootid has to be unique
          */
-                 
-                    print '<h2>Logoot algorithm error,
-                                position exists yet!</h2>';
+                 throw new MWException( __METHOD__.': Logoot algorithm error,
+                                position already exists' );
+                    
                 }
             }
 
@@ -496,8 +496,9 @@ $step = gmp_div_q($slot, $N);
 
             }
             else{
-                print '<h2>Logoot algorithm error, did not
-                            find the line to delete</h2>';
+                throw new MWException( __METHOD__.': Logoot algorithm error,
+                                did not find the line to delete' );
+                
             }
 
         }

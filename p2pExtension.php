@@ -37,7 +37,7 @@ $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeS
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 //global $wgAPIMetaModules;
-$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+$wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
 
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
@@ -323,7 +323,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }
         wfDebugLog('p2p','     -> changeSet found '.$CSID);
         while($CSID!=null) {
-            if(!utils::pageExist($CSID)) {
+            //if(!utils::pageExist($CSID)) {
                 $listPatch = null;
                 $patchs = $dom->getElementsByTagName('patch');
                 foreach($patchs as $p) {
@@ -336,7 +336,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 integrate($CSID, $listPatch,$relatedPushServer);
                 updatePullFeed($name, $CSID);
 
-            }
+           // }
 
             $previousCSID = $CSID;
             $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
