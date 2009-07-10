@@ -60,16 +60,16 @@ class pushPullTest extends PHPUnit_Framework_TestCase {
     public function testPatch() {
          /* test patch after creating page*/
         $clock = 1;
-        $pageName = "Nancy";
-        $contentNancy='content page Nancy
+        $pageName = "Pouxeux";
+        $contentPage='content page Pouxeux
 toto titi
 [[Category:city]]';
 
-        $op[$pageName][]['insert'] = 'content page Nancy';
+        $op[$pageName][]['insert'] = 'content page Pouxeux';
         $op[$pageName][]['insert'] = 'toto titi';
         $op[$pageName][]['insert'] = '[[Category:city]]';
 
-        $this->assertTrue($this->p2pBot1->createPage($pageName,$contentNancy),'Create page Nancy failed : '.$this->p2pBot1->bot->results);
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$contentPage),'Create page Nancy failed : '.$this->p2pBot1->bot->results);
 
         $patchId1 = 'localhost/wiki1'.$clock;
         $clock += 1;
@@ -84,7 +84,7 @@ toto titi
             'failed to edit page '.$pageName.' : '.$this->p2pBot1->bot->results);
         $clock += 1;
         $op[$pageName][]['insert'] = 'toto';
-        $contentNancy .= '
+        $contentNancy .= 'ls
 toto' ;
         assertPageExist($this->p2pBot1->bot->wikiServer, 'patch:'.$patchId2);
         assertContentPatch($this->p2pBot1->bot->wikiServer,'patch:'.$patchId2,$clock,$pageName,$op,$patchId1);
@@ -92,14 +92,14 @@ toto' ;
         /* same test with another page */
         $op = null;
         $clock += 1;
-        $op['Paris'][]['insert'] = 'content page Paris';
-        $this->assertTrue($this->p2pBot1->createPage('Paris', 'content page Paris'),
-            'Create page Paris failed : '.$this->p2pBot1->bot->results);
+        $op['Paris11'][]['insert'] = 'content page Paris11';
+        $this->assertTrue($this->p2pBot1->createPage('Paris11', 'content page Paris11'),
+            'Create page Paris11 failed : '.$this->p2pBot1->bot->results);
 
         $patchId = 'localhost/wiki1'.$clock;
         $clock += 1;
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Patch:'.$patchId);
-        assertContentPatch($this->p2pBot1->bot->wikiServer,'patch:'.$patchId,$clock,'Paris',$op,'None');
+        assertContentPatch($this->p2pBot1->bot->wikiServer,'patch:'.$patchId,$clock,'Paris11',$op,'None');
     }
 
     public function testCreatePush() {
@@ -117,8 +117,8 @@ toto' ;
     }
 
     public function testPush() {
-        $pushName = 'PushCity';
-        $pushRequest = '[[Category:city]]';
+        $pushName = 'PushCity11';
+        $pushRequest = '[[Category:titi]]';
         $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
             'failed to create push PushCity : ('.$this->p2pBot1->bot->results.')');
 
@@ -130,10 +130,10 @@ toto' ;
         $this->assertEquals('',substr($pushFound[0],0,-1),
             'push PushCity error, pushHead must be null but '.$pushFound[0].' was found');
 
-        $this->assertTrue($this->p2pBot1->createPage('Nancy','content nancy [[Category:city]]',
-            'failed to create page Nancy ('.$this->p2pBot1->bot->results.')'));
-        $this->assertTrue($this->p2pBot1->createPage('Paris','content Paris [[Category:city]]',
-            'failed to create page Paris ('.$this->p2pBot1->bot->results.')'));
+        $this->assertTrue($this->p2pBot1->createPage('Arches',"content arches [[Category:titi]]",
+            'failed to create page Arches ('.$this->p2pBot1->bot->results.')'));
+        $this->assertTrue($this->p2pBot1->createPage('Paris11','content Paris11 [[Category:titi]]',
+            'failed to create page Paris11 ('.$this->p2pBot1->bot->results.')'));
 
             /* push with changeSet */
         $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
@@ -159,8 +159,8 @@ toto' ;
         $this->assertTrue(count($patchCS)==2,
             'failed to push '.$pushName.', ChangeSet must contains 2 patchs but '.count($patchCS).' patchs were found');
 
-        $lastPatchNancy = utils::getLastPatchId('Nancy', $this->p2pBot1->bot->wikiServer);
-        $lastPatchParis = utils::getLastPatchId('Paris', $this->p2pBot1->bot->wikiServer);
+        $lastPatchNancy = utils::getLastPatchId('Arches', $this->p2pBot1->bot->wikiServer);
+        $lastPatchParis = utils::getLastPatchId('Paris11', $this->p2pBot1->bot->wikiServer);
         $assert1 = strtolower($lastPatchNancy) == strtolower($patchCS[0]) || strtolower($lastPatchNancy) == strtolower($patchCS[1]);
         $assert2 = strtolower($lastPatchParis) == strtolower($patchCS[0]) || strtolower($lastPatchParis) == strtolower($patchCS[1]);
         $this->assertTrue($assert1 && $assert2,

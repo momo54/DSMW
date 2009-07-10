@@ -146,12 +146,12 @@ class apiTest extends PHPUnit_Framework_TestCase {
         $pageName = "ChangeSet:localhost/wiki12";
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki12]]
-inPushFeed: [[inPushFeed::PushFeed:PushCity]]
+inPushFeed: [[inPushFeed::PushFeed:PushCity11]]
 previousChangeSet: [[previousChangeSet::none]]
  hasPatch: [[hasPatch::"Patch:Berlin1"]] hasPatch: [[hasPatch::"Patch:Paris0"]]';
         $this->p2pBot1->createPage($pageName, $content);
 
-        $pageName = 'PushFeed:PushCity';
+        $pageName = 'PushFeed:PushCity11';
         $content = 'PushFeed:
 Name: [[name::CityPush2]]
 hasSemanticQuery: [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
@@ -160,7 +160,7 @@ Pages concerned:
         $this->p2pBot1->createPage($pageName,$content);
 
         //apiQueryChangeSet call
-        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=none&format=xml');
+        $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity11&cschangeSet=none&format=xml');
 
         $dom = new DOMDocument();
         $dom->loadXML($cs);

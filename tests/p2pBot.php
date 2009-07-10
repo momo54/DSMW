@@ -133,7 +133,7 @@ class p2pBot {
 }
 
 function callbackTestFct($content1,$content2) {
-    return $content1.$content2;
+    return $content2;
 }
 
 function append($content,$line) {

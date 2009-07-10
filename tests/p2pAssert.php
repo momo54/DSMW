@@ -31,9 +31,12 @@ function assertContentPatch($server,$patchId,$clock,$pageName,$op,$previousPatch
         'Patch '.$patchId.' must contains '.count($op[$pageName]).' operations but '.count($opFound).' operations were found');
 
     for ($j = 0 ; $j < count($opFound) ; $j++) {
-        $opi = split(';', $opFound[$j]);
+        $o = str_replace(' ', '', $opFound[$j]);
+        $opi = split(';', $o);
         PHPUnit_Framework_Assert::assertEquals(strtolower(substr($patchName.($clock),strlen('patch:'))), strtolower($opi[0]),
             'Operation id on patch '.$patchId.' must be '.$patchName.($clock).' but '.strtolower($opi[0]).' was found');
+        $a = strtolower($op[$pageName][$j][strtolower($opi[1])]);
+        $b = strtolower(utils::contentDecoding($opi[3]));
         PHPUnit_Framework_Assert::assertEquals(strtolower($op[$pageName][$j][strtolower($opi[1])]),strtolower(utils::contentDecoding($opi[3])));
         $clock = $clock + 1;
     }
@@ -62,7 +65,7 @@ function getContentPage($server,$pageName) {
 function getSemanticRequest($server,$request,$param,$sep='!') {
     $request = utils::encodeRequest($request);
     $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
-    $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100');
+    $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
     $array = split($sep, $php);
     if( count($array)==1) {
         return $array;
