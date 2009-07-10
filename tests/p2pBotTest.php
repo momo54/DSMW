@@ -74,29 +74,5 @@ class p2pBotTest extends PHPUnit_Framework_TestCase {
         assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content."
 toto");
     }
-
-    public function testCreatePush() {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-    }
-
-    public function testPush() {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-    }
-
-    public function testCreatePull() {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-    }
-
-    public function testPull() {
-        $this->markTestIncomplete(
-            'This test has not been implemented yet.'
-        );
-    }
 }
 ?>

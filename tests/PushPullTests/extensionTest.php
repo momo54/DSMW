@@ -4,27 +4,28 @@ define( 'MEDIAWIKI', true );
 if( defined( 'MW_INSTALL_PATH' ) ) {
     $IP = MW_INSTALL_PATH;
 } else {
-    $IP = dirname('../../../.');
+    $IP = dirname('../../../../.');
 }
 
-require_once 'p2pBot.php';
-require_once 'BasicBot.php';
-require_once '../logootEngine/LogootId.php';
-require_once '../logootEngine/LogootPosition.php';
-require_once '../logootop/LogootOp.php';
-require_once '../logootop/LogootIns.php';
-require_once '../logootop/LogootDel.php';
-include_once 'p2pAssert.php';
-require_once '../p2pExtension.php';
-require_once '../patch/Patch.php';
-require_once '../files/utils.php';
+require_once '../../files/utils.php';
+require_once '../p2pBot.php';
+require_once '../BasicBot.php';
+require_once '../../logootEngine/LogootId.php';
+require_once '../../logootEngine/LogootPosition.php';
+require_once '../../logootop/LogootOp.php';
+require_once '../../logootop/LogootIns.php';
+require_once '../../logootop/LogootDel.php';
+include_once '../p2pAssert.php';
+require_once '../../p2pExtension.php';
+//require_once '../../patch/Patch.php';
+
 $wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
 
 
 /**
  * Description of extensionTest
  *
- * @author hantzmar
+ * @author hantz
  */
 class extensionTest extends PHPUnit_Framework_TestCase {
     var $p2pBot1;
@@ -40,8 +41,8 @@ class extensionTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
-        exec('rm cache/*');
+        exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
+        exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);

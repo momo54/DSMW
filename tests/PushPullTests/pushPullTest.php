@@ -1,12 +1,12 @@
 <?php
 
 define( 'MEDIAWIKI', true );
-require_once 'p2pBot.php';
-require_once 'BasicBot.php';
-include_once 'p2pAssert.php';
-require_once '../../../includes/GlobalFunctions.php';
-require_once '../patch/Patch.php';
-require_once '../files/utils.php';
+require_once '../p2pBot.php';
+require_once '../BasicBot.php';
+require_once '../../../../includes/GlobalFunctions.php';
+require_once '../../patch/Patch.php';
+require_once '../../files/utils.php';
+include_once '../p2pAssert.php';
 
 
 /**
@@ -29,8 +29,8 @@ class pushPullTest extends PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
 
-        exec('./initWikiTest.sh');
-        exec('rm cache/*');
+        exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
+        exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
@@ -69,7 +69,7 @@ toto titi
         $op[$pageName][]['insert'] = 'toto titi';
         $op[$pageName][]['insert'] = '[[Category:city]]';
 
-        $this->assertTrue($this->p2pBot1->createPage($pageName,$contentPage),'Create page Nancy failed : '.$this->p2pBot1->bot->results);
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$contentPage),'Create page Pouxeux failed : '.$this->p2pBot1->bot->results);
 
         $patchId1 = 'localhost/wiki1'.$clock;
         $clock += 1;
@@ -117,6 +117,7 @@ toto' ;
     }
 
     public function testPush() {
+        //create pushFeed
         $pushName = 'PushCity11';
         $pushRequest = '[[Category:titi]]';
         $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
@@ -200,6 +201,7 @@ toto' ;
     }
 
     public function testPull() {
+        //create pushFeed on wiki1
         $pushName = 'pushCity';
         $pushContent = 'PushFeed:
 [[name::pushCity]]
@@ -221,6 +223,7 @@ toto' ;
         exec('rm cache/*');
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),'result patch='.$this->p2pBot1->bot->results);
 
+        //create pull on wiki2
         $pullName = 'pullCityonWiki1';
         $pullContent = '[[name::PullFeed:pullCityonWiki1]]
 [[pushFeedServer::http://localhost/wiki1]]
@@ -228,6 +231,7 @@ toto' ;
         exec('rm cache/*');
         $this->assertTrue($this->p2pBot2->createPage('PullFeed:'.$pullName,$pullContent),'result pull='.$this->p2pBot2->bot->results);
 
+        //pull
         $this->assertTrue($this->p2pBot2->pull('PullFeed:'.$pullName),'error on pull '.$pullName.'('.$this->p2pBot2->bot->results.')');
 
         assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:'.$CSName);

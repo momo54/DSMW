@@ -1,10 +1,10 @@
 <?php
 //require_once('../p2pExtension.php');
-require_once('../patch/Patch.php');
-require_once('../files/utils.php');
-require_once('../clockEngine/persistentClock.php');
-require_once 'p2pBot.php';
-require_once 'BasicBot.php';
+require_once('../../patch/Patch.php');
+require_once('../../files/utils.php');
+require_once('../../clockEngine/persistentClock.php');
+require_once '../p2pBot.php';
+require_once '../BasicBot.php';
 
 /**
  * Description of Test_2
@@ -28,7 +28,7 @@ class PatchTest1 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
+        exec('./initWikiTest.sh ../createDBTest.sql ../dump.sql');
         //wfDebugLog('p2p','start p2p Test');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';

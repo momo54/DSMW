@@ -1,6 +1,6 @@
 <?php
 require_once 'PHPUnit/Framework/Assert.php';
-require_once '../files/utils.php';
+//require_once '../files/utils.php';
 
 function assertPageExist($server,$pageName) {
     $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');

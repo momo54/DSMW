@@ -4,21 +4,21 @@ define( 'MEDIAWIKI', true );
 if( defined( 'MW_INSTALL_PATH' ) ) {
     $IP = MW_INSTALL_PATH;
 } else {
-    $IP = dirname('../../../.');
+    $IP = dirname('../../../../.');
 }
 
-require_once 'p2pBot.php';
-require_once 'BasicBot.php';
-require_once '../logootEngine/LogootId.php';
-require_once '../logootEngine/LogootPosition.php';
-require_once '../logootop/LogootOp.php';
-require_once '../logootop/LogootIns.php';
-require_once '../logootop/LogootDel.php';
-include_once 'p2pAssert.php';
-require_once '../p2pExtension.php';
-require_once '../patch/Patch.php';
-require_once '../files/utils.php';
-$wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
+require_once '../p2pBot.php';
+require_once '../BasicBot.php';
+require_once '../../logootEngine/LogootId.php';
+require_once '../../logootEngine/LogootPosition.php';
+require_once '../../logootop/LogootOp.php';
+require_once '../../logootop/LogootIns.php';
+require_once '../../logootop/LogootDel.php';
+require_once '../../p2pExtension.php';
+require_once '../../patch/Patch.php';
+require_once '../../files/utils.php';
+include_once '../p2pAssert.php';
+
 
 /**
  * apiQueryChangeSet and apiQueryPatch tests
@@ -39,8 +39,8 @@ class apiTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
-        exec('rm cache/*');
+        exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
+        exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
@@ -105,37 +105,6 @@ class apiTest extends PHPUnit_Framework_TestCase {
 
         $contentOp = str_replace(" ", "",'Localhost/wiki121; Insert; (15555995255933583146:900c17ebee311fb6dd00970d26727577); content page Paris');
         $this->assertEquals($contentOp,str_replace(" ","", $op[0]));
-
-
-/*        $patchName = 'Patch:localhost/wiki4';
-        $content = '[[patchID::'.$pageName.']] [[onPage::Paris]] [[previous::none]]
-        [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
-        $this->assertTrue($this->p2pBot1->createPage($this->p2pBot1->createPage($patchName,$content),
-            'failed to create page '.$patchName.' ('.$this->p2pBot1->bot->results.')'));
-
-        //ApiQueryPatch call
-        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:Localhost/wiki4&format=xml');
-
-        $dom = new DOMDocument();
-        $dom->loadXML($patchXML);
-        $patchs = $dom->getElementsByTagName('patch');
-
-        foreach($patchs as $p) {
-            $a = $p->getAttribute('id');
-            $this->assertEquals('Patch:Localhost/wiki4', $p->getAttribute('id'));
-            $a = $p->getAttribute('onPage');
-            $this->assertEquals('Paris', $p->getAttribute('onPage'));
-            $a = $p->getAttribute('previous');
-            $this->assertEquals('None', substr($p->getAttribute('previous'),0,-1));
-        }
-
-        $listeOp = $dom->getElementsByTagName('operation');
-        $op = null;
-        foreach($listeOp as $o)
-            $op[] = $o->firstChild->nodeValue;
-        $this->assertTrue(count($op)==1);
-        $this->assertEquals('localhost/wiki121;insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577);contentpageparis',strtolower(str_replace(' ','',$op[0])));*/
-
     }
 
     /**

@@ -1,7 +1,6 @@
-#/bin/sh
+#!/bin/sh
+mysql -u root -padmin < $1
 
-mysql -u root -padmin < createDBTest.sql
-
-mysql -u root -padmin wikidbTest1 < dump.sql
-mysql -u root -padmin wikidbTest2 < dump.sql
-mysql -u root -padmin wikidbTest3 < dump.sql
+mysql -u root -padmin wikidbTest1 < $2
+mysql -u root -padmin wikidbTest2 < $2
+mysql -u root -padmin wikidbTest3 < $2
