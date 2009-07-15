@@ -51,6 +51,23 @@ function pullFeedDel(){
         }
      }
 }
+
+function disableOthers(feedType, name){
+    alert(feedType);
+    alert(name);
+    if(feedType=="PullFeed"){
+    for (var i=0; i < document.getElementsByName("pull[]").length; i++)
+     {
+     if (!document.getElementsByName("pull[]")[i].value==name && !document.getElementsByName("pull[]")[i].checked)
+        {
+           document.getElementsByName("pull[]")[i].disabled=true;
+        }
+     }
+     }else
+     {
+     alert(\'pushfeed\');
+     }
+}
 </SCRIPT>';
            $wgOut->addScript($script1);
 
@@ -104,7 +121,7 @@ $i=0;
                 $data = //$this->getAwarenessData($row["site_url"]);
                 $output .= '
   <tr>
-    <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'" /></td>
+    <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'" onclick="javascript:disableOthers(\'PullFeed\', '.$pullFeed.')" /></td>
     <td >'.$pullFeed.'</td>
     <td align="center">[]</td>
     <td align="center">[]</td>
@@ -181,6 +198,239 @@ $output .='
         $wgOut->addHTML($output);
         return false;
     }
+
+
+//    function onUnknownAction($action, $article) {
+//        global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest,$wgMessageCache, $wgWatchingMessages, $namespace_titles, $wgSitename;
+//        //require_once("WhoIsWatchingTabbed.i18n.php");
+//
+//        $wgCachePages = false;
+//        //Verify that the action coming in is "admin"
+//        if($action == "admin") {
+//
+//            if(isset($_POST['wiki'])&& isset ($_POST['title'])&& isset ($_POST['id'])) {
+//
+//                $patchArray = $this->getPatches($_POST['id'], $_POST['title'], $_POST['wiki']);
+//                foreach ($patchArray as $patch){
+//                     $this->integratePatch($patch, $article);
+//                }$style = ' style="border-bottom: 2px solid #000;"';
+//                $tableStyle = ' style="float: left; margin-left: 40px;"';
+//                $output = "";
+//
+//                $tables = array("site");
+//                $columns = array("site_id", "site_url", "site_name");
+//                $conditions = '';
+//                $fname = "Database::select";
+//                $options = array(
+//            "ORDER BY" => "site_id",
+//                );
+//                if ($page_limit > 0) {
+//                    $options["LIMIT"] = $page_limit;
+//                }
+//                if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+//                    $output .= '<p>Error accessing list.</p>';
+//                } else if($db->numRows($result) == 0) {
+//                    $output .= '<p>No remote site.</p>';
+//                } else {
+//                    $output .= '
+//<FORM METHOD="POST" ACTION="">
+//<table'.$tableStyle.' border>
+//  <tr>
+//    <th colspan="5"'.$style.'>'.$db->numRows($result).' Remote Sites</th>
+//  </tr>
+//  <tr>
+//    <th colspan="2" >Site</th>
+//
+//    <th><input type="submit" value="Push"></th>
+//    <th><input type="submit" value="Pull"></th>
+//    <th><input type="submit" value="Remove"></th>
+//    <input type="hidden" name="ppc" value="true">
+//  </tr>';
+//                    while ($row = $db->fetchRow($result)) {
+//                        $i = $i + 1;
+//                        $output .= '
+//  <tr>
+//    <td>'.$row["site_id"].'</td>
+//    <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
+//    <td colspan="3" align="center"><input type="checkbox" name="push['.$i.']"/></td>
+//  </tr>';
+//                    }
+//                    $output .= '
+//
+//
+//</table>
+//</FORM>';
+//                }
+//
+//            }
+//
+//
+//            $page_title=$_GET['title'];
+//
+//
+//            $wgOut->setPagetitle($page_title.": Administration page");
+//
+//            //adding javascript to page header
+//            $file = dirname($_SERVER['PHP_SELF']).'/extensions/p2pExtension/specialPage/SPFunctions.js';
+//            $wgOut->addScriptFile($file);
+//
+//            $db = &wfGetDB(DB_SLAVE);
+//            $tables = array("site", "site_cnt", "page");
+//            $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
+//                        "page.page_title='".$_GET['title']."'");
+//            $fname = "Database::select";
+//            $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
+//            $options = array("ORDER BY site.site_id");
+//
+//            $output = "";
+//            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+//                $output .= '<p>Error accessing database.</p>';
+//            } else if($db->numRows($result) == 0) {
+//                $output .= '<p>This page is up to date.</p>';
+//            } else {
+//                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
+//                $output .= '<table border cellspacing="0" cellpadding="5"><tr>';
+//
+//
+//
+//                $output .= '<th'.$style.'>Remote site</th><th'.$style.'>Info</th><th'.$style.'>Action</th>';
+//
+//
+//                $output .= '</tr>';
+//
+//                //Display the data--display some data differently than others.
+//                while ($row = $db->fetchRow($result)) {
+//                    $output .= '<tr>';
+//
+//                    $output .= "<td title='yop'>";
+//                    $output .= htmlspecialchars($row['site_name']).'&nbsp;';
+//                    $output .= "</td>";
+//                    $output .= "<td>";
+//                    $output .= htmlspecialchars($row['counter']).'&nbsp;';
+//                    $output .= "</td>";
+//                    $output .= "<td>";
+//                    //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
+//                    //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
+//                    $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
+//                    $output .= "</td>";
+//                    $output .= '</tr>';
+//                }
+//
+//                $output .= '</table>';
+//            }
+//
+//
+//            $wgOut->addHTML($output);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//            //
+//            //            $db = &wfGetDB(DB_SLAVE);
+//            //
+//            //            $tables = array("user", "watchlist");
+//            //            $conditions = array("wl_user = user_id", "wl_namespace IN (".implode(", ", array_keys($namespace_titles)).")");
+//            //            $fname = "Database::select";
+//            //
+//            //            //Determine which results are going to be shown and the appropriate columns
+//            //            if(isset($_REQUEST["user_name"])) {
+//            //                $wgOut->setPagetitle(wfMsg("pages_watched_by_user"));
+//            //                $columns = array("wl_namespace","wl_title");
+//            //                $conditions[] = "LOWER(user_name) = " . $db->addQuotes(strtolower($_REQUEST["user_name"]));
+//            //            } else {
+//            //                $wgOut->setPagetitle(wfMsg("users_watching_page"));
+//            //                $columns = array("user_name", "user_real_name");
+//            //                $conditions[] = "LOWER(wl_title) = " . $db->addQuotes(strtolower($page_title));
+//            //            }
+//            //
+//            //            $order_col = "user_name";
+//            //            if(isset($_REQUEST["order_col"]) && in_array($_REQUEST["order_col"], $columns)) {
+//            //                $order_col = $_REQUEST["order_col"];
+//            //            }
+//            //
+//            //            //Change the way the results are ordered
+//            //            if(isset($_REQUEST["order_type"]) && $_REQUEST["order_type"] == "DESC") {
+//            //                $ordertypePOST  = "DESC";
+//            //                $ordertypeR = "ASC";
+//            //            } else {
+//            //                $ordertype  = "ASC";
+//            //                $ordertypeR = "DESC";
+//            //            }
+//            //            $options = array("ORDER BY" => "$order_col $ordertype");
+//            //
+//            //            $output = "";
+//            //            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+//            //                $output .= '<p>Error accessing watchlist.</p>';
+//            //            } else if($db->numRows($result) == 0) {
+//            //                $output .= '<p>Nobody is watching this page.</p>';
+//            //            } else {
+//            //                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
+//            //                $output .= '<table cellspacing="0" cellpadding="5"><tr>';
+//            //
+//            //                //Generate sortable column headings
+//            //                foreach($columns as $column){
+//            //                    $output .= '<th'.$style.'><a href="'.$_SERVER["PHP_SELF"].'?title='.$_REQUEST["title"].'&order_col='.$column.'&action=watching&order_type='.$ordertypeR.
+//            //                    (isset(POST$_REQUEST["user_name"]) ? '&user_name='.$_REQUEST["user_name"] : '').
+//            //                    (isset($_REQUEST["user_real_name"]) ? '&user_real_name='.$_REQUEST["user_real_name"] : '').'">'.wfMsg($column).'</a></th>';
+//            //
+//            //                }
+//            //                $output .= '</tr>';
+//            //
+//            //                //Display the data--display some data differently than others.
+//            //                while ($row = $db->fetchRow($result)) {
+//            //                    $output .= '<tr>';
+//            //                    foreach($columns as $column){
+//            //                        $output .= "<td>";
+//            //                        if ($column == "user_name") {
+//            //                            $output .= '<a href="'.$_SERVER["PHP_SELF"].'?title='.$_REQUEST["title"].'&action=watching&user_name='.$row[$column].'">'.$row[$column];
+//            //                        } elseif ($column == "user_real_name") {
+//            //                            $output .= $row[$column];
+//            //                        } elseif ($column == "wl_title") {
+//            //                            $output .= '<a href="'.$_SERVER["PHP_SELF"].'?title='.($row["wl_namespace"]!=0 ? $namespace_titles[$row["wl_namespace"]].':' : '').$row[$column].'&action=watching">'.$row[$column].'</a>';
+//            //                        } elseif ($column == "wl_namespace") {
+//            //                            $output .= $namespace_titles[$row[$column]];
+//            //                        } else {
+//            //                            $output .= htmlspecialchars($row[$column]).'&nbsp;';
+//            //                        }
+//            //                        $output .= "</td>";
+//            //                    }
+//            //                    $output .= '</tr>';
+//            //                }
+//            //                $output .= '</table>';
+//            //            }
+//            //            $wgOut->addHTML($output);
+//            return false;
+//        } else {
+//            return true;
+//        }
+//    }
+//
+//    function onSkinTemplateTabs(&$skin, &$content_actions) {
+//        global $wgRequest, $wgUser, $wgSitename;
+//
+//        $action = $wgRequest->getText("action");
+//        $db = &wfGetDB(DB_SLAVE);
+//
+//        $watcherCount = 0;
+//
+//        $content_actions["admin"] = array(
+//                "class" => ($action == "admin") ? "selected" : false,
+//                "text" => "Article admin (".$watcherCount." updates)",
+//                "href" => $skin->mTitle->getLocalURL("action=admin")
+//        );
+//
+//        return false;
+//    }
+
 
 /**
  *replaces the deleted semantic attribute in the feed page (pullfeed:.... or

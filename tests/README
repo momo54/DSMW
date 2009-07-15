@@ -23,4 +23,4 @@ Mediawiki P2P test :
 
         "myUser" must have all privileges on the database server
 
-    * Be sure that you have the exectuable permission on initWikiTest.sh
+    * Be sure that you have the executable permission on initWikiTest.sh

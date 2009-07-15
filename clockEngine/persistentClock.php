@@ -58,13 +58,13 @@ class persistentClock implements Clock{
 
     function load(){
     $db = wfGetDB( DB_SLAVE );
-        $this->mClock = $db->selectField('p2p_clock','value');
+        $this->mClock = $db->selectField('p2p_params','value');
 }
 
 function store(){
 
         $dbw = wfGetDB( DB_MASTER );
-        $dbw->update( 'p2p_clock', array(
+        $dbw->update( 'p2p_params', array(
             'value'        => $this->mClock,
             ), '*', __METHOD__ );
 

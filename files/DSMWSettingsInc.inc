@@ -29,4 +29,25 @@ $wgGroupPermissions['sysop']['editchangeset'] = true;
 
 //semantic mediawiki extension
  $smwgNamespaceIndex = 120;
+
+ //define unique serverId
+ global $serverId;
+ $serverId = getServerId();
+ if($serverId=="0"){
+     $serverId = md5(uniqid(mt_rand(), true));
+     store($serverId);
+ }
+ 
+ function getServerId(){
+        $db = wfGetDB( DB_SLAVE );
+        $res = $db->selectField('p2p_params','server_id');
+        return $res;
+ }
+
+ function store($serverId){
+        $dbw = wfGetDB( DB_MASTER );
+        $dbw->update( 'p2p_params', array(
+            'server_id'        => $serverId,
+            ), '*', __METHOD__ );
+    }
 ?>

@@ -78,8 +78,8 @@ function getSemanticRequest($server,$request,$param,$sep='!') {
 }
 
 function getPatchXML($server,$patchId) {
-    $url = $server.'/api.php?action=query&meta=patch&papatchId='.substr($patchId,strlen('patch:')).'&format=xml';
-    $patchContent = file_get_contents($server.'/api.php?action=query&meta=patch&papatchId='.$patchId.'&format=xml');
+    $url = $server.'/api.php?action=query&meta=patch&papatchId='.strtolower($patchId).'&format=xml';
+    $patchContent = file_get_contents($server.'/api.php?action=query&meta=patch&papatchId='.strtolower($patchId).'&format=xml');
     $dom = new DOMDocument();
     $dom->loadXML($patchContent);
     return $dom;
