@@ -12,7 +12,7 @@ class ArticleAdminPage extends SpecialPage {
         global $wgHooks, $wgSpecialPages, $wgWatchingMessages;
         # Add all our needed hooks
 //        $wgHooks["UnknownAction"][] = $this;
-//        $wgHooks["SkinTemplateTabs"][] = $this;
+        $wgHooks["SkinTemplateTabs"][] = $this;
         SpecialPage::SpecialPage('ArticleAdminPage'/*, "block"*/);// avec block => pasges speciales restreintes
     }
 
@@ -28,7 +28,7 @@ class ArticleAdminPage extends SpecialPage {
         //$wgOut->addHeadItem('script', ArticleAdminPage::javascript());
 
 
-        $script1 = '<SCRIPT language="Javascript"> function pushFeedDel(){
+        $script1 = '<SCRIPT type="text/javascript"> function pushFeedDel(){
   for (var i=0; i < document.getElementsByName("push[]").length; i++)
      {
      if (document.getElementsByName("push[]")[i].checked)
@@ -52,15 +52,21 @@ function pullFeedDel(){
      }
 }
 
-function disableOthers(feedType, name){
+function disableOthers(feedType, id){
+   
+}
+function disableOthers1(feedType, id){
     alert(feedType);
-    alert(name);
+    alert(id);
     if(feedType=="PullFeed"){
     for (var i=0; i < document.getElementsByName("pull[]").length; i++)
      {
-     if (!document.getElementsByName("pull[]")[i].value==name && !document.getElementsByName("pull[]")[i].checked)
+     if (document.getElementsByName("pull[]")[i].id!=id && !document.getElementsByName("pull[]")[i].checked)
         {
            document.getElementsByName("pull[]")[i].disabled=true;
+        }
+        else{
+           document.getElementsByName("pull[]")[i].disabled=false;
         }
      }
      }else
@@ -121,7 +127,7 @@ $i=0;
                 $data = //$this->getAwarenessData($row["site_url"]);
                 $output .= '
   <tr>
-    <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'" onclick="javascript:disableOthers(\'PullFeed\', '.$pullFeed.')" /></td>
+    <td align="center" onclick="javascript:disableOthers(\'PullFeed\', '.$i.');"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
     <td >'.$pullFeed.'</td>
     <td align="center">[]</td>
     <td align="center">[]</td>
@@ -414,22 +420,22 @@ $output .='
 //        }
 //    }
 //
-//    function onSkinTemplateTabs(&$skin, &$content_actions) {
-//        global $wgRequest, $wgUser, $wgSitename;
-//
-//        $action = $wgRequest->getText("action");
-//        $db = &wfGetDB(DB_SLAVE);
-//
-//        $watcherCount = 0;
-//
-//        $content_actions["admin"] = array(
-//                "class" => ($action == "admin") ? "selected" : false,
-//                "text" => "Article admin (".$watcherCount." updates)",
-//                "href" => $skin->mTitle->getLocalURL("action=admin")
-//        );
-//
-//        return false;
-//    }
+    function onSkinTemplateTabs(&$skin, &$content_actions) {
+        global $wgRequest, $wgUser, $wgSitename;
+
+        $action = $wgRequest->getText("action");
+        $db = &wfGetDB(DB_SLAVE);
+
+        $watcherCount = 0;
+
+        $content_actions["admin"] = array(
+                "class" => ($action == "admin") ? "selected" : false,
+                "text" => "Article admin (".$watcherCount." updates)",
+                "href" => $skin->mTitle->getLocalURL("action=admin")
+        );
+
+        return false;
+    }
 
 
 /**

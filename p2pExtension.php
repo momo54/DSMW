@@ -683,15 +683,13 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
 
             utils::createPatch($patchId, $onPage, $lastPatch, $operations);
 
-            foreach ($operations as $operation) {
-                wfDebugLog('p2p','      -> patch operation :'.$operation);
-                $operation = operationToLogootOp($operation);
-                if ($operation!=false && is_object($operation)) {
-                    wfDebugLog('p2p','      -> integrate operation');
-                    logootIntegrate($operation, $onPage);
-                    wfDebugLog('p2p','      -> integrate operation ok');
-                }
-            }
+//            foreach ($operations as $operation) {
+//                $operation = operationToLogootOp($operation);
+//                if ($operation!=false && is_object($operation)) {
+//                    logootIntegrate($operation, $onPage);
+//                }
+//            }
+            logootIntegrate($operations, $onPage);
     }//end if pageExists
     }
 }
@@ -813,6 +811,7 @@ function operationToLogootOp($operation) {
     //        $res[3] = utils::decodeRequest($res[3]);
     //    }
     $res[3] = utils::contentDecoding($res[3]);
+//    if($res[3]=="") $res[3]="\r\n";
 
     if($res[1]=="Insert") {
         $logootOp = new LogootIns('', $logootPos, $res[3]);
@@ -832,7 +831,7 @@ function operationToLogootOp($operation) {
  * @param <Object> $operation
  * @param <String or Object> $article
  */
-function logootIntegrate($operation, $article) {
+function logootIntegrate($operations, $article) {
     if(is_string($article)) {
     //$db = wfGetDB( DB_SLAVE );
 
@@ -850,15 +849,20 @@ function logootIntegrate($operation, $article) {
     else {
         $rev_id = $article->getRevIdFetched();
     }
-    $blobInfo = BlobInfo::loadBlobInfo($rev_id);
 
-    $blobInfo->integrateBlob($operation);
+    foreach ($operations as $operation) {
+        $operation = operationToLogootOp($operation);
 
-    $revId = $blobInfo->getNewArticleRevId();
-    $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
+        if ($operation!=false && is_object($operation)) {
+            $blobInfo = BlobInfo::loadBlobInfo($rev_id);
 
+            $blobInfo->integrateBlob($operation);
 
-    $article->doEdit($blobInfo->getTextImage(), $summary="");
+            $revId = $blobInfo->getNewArticleRevId();
+            $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
+    }//end if
+    }//end foreach operations
+    $status = $article->doEdit($blobInfo->getTextImage(), $summary="");
 }
 
 /**
