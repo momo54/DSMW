@@ -655,8 +655,8 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
     foreach ($patchIdList as $patchId) {
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
-          wfDebugLog('p2p','    -> patch unexist');
-        //recuperation patch via api, creation (sauvegarde en local)
+            wfDebugLog('p2p','    -> patch unexist');
+            //recuperation patch via api, creation (sauvegarde en local)
             $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/strtolower($patchId)/*,strlen('patch:'))*/.'&format=xml';
             $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
             wfDebugLog('p2p','      -> patch content :'.$patch);
@@ -683,12 +683,12 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
 
             utils::createPatch($patchId, $onPage, $lastPatch, $operations);
 
-//            foreach ($operations as $operation) {
-//                $operation = operationToLogootOp($operation);
-//                if ($operation!=false && is_object($operation)) {
-//                    logootIntegrate($operation, $onPage);
-//                }
-//            }
+            //            foreach ($operations as $operation) {
+            //                $operation = operationToLogootOp($operation);
+            //                if ($operation!=false && is_object($operation)) {
+            //                    logootIntegrate($operation, $onPage);
+            //                }
+            //            }
             logootIntegrate($operations, $onPage);
     }//end if pageExists
     }
@@ -811,7 +811,7 @@ function operationToLogootOp($operation) {
     //        $res[3] = utils::decodeRequest($res[3]);
     //    }
     $res[3] = utils::contentDecoding($res[3]);
-//    if($res[3]=="") $res[3]="\r\n";
+    //    if($res[3]=="") $res[3]="\r\n";
 
     if($res[1]=="Insert") {
         $logootOp = new LogootIns('', $logootPos, $res[3]);
@@ -849,19 +849,17 @@ function logootIntegrate($operations, $article) {
     else {
         $rev_id = $article->getRevIdFetched();
     }
-
+    $blobInfo = BlobInfo::loadBlobInfo($rev_id);
     foreach ($operations as $operation) {
         $operation = operationToLogootOp($operation);
 
         if ($operation!=false && is_object($operation)) {
-            $blobInfo = BlobInfo::loadBlobInfo($rev_id);
 
             $blobInfo->integrateBlob($operation);
-
-            $revId = $blobInfo->getNewArticleRevId();
-            $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
     }//end if
     }//end foreach operations
+    $revId = $blobInfo->getNewArticleRevId();
+    $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
     $status = $article->doEdit($blobInfo->getTextImage(), $summary="");
 }
 
