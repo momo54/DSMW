@@ -137,7 +137,7 @@ function callbackTestFct($content1,$content2) {
 }
 
 function append($content,$line) {
-    $content=$content.$line;
+    $content.=$line;
     return $content;
 }
 ?>

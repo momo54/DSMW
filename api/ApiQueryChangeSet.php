@@ -7,10 +7,10 @@ if( !defined('MEDIAWIKI') ) {
 
 /**
  * Description of ApiQueryPatch
- * Note: the "fromid" parameter is the autoincrement id in the patchs table and
- * not the patch_id
+ * return the changeSet which has the previous changeSet given by
+ * the parametere changeSet
  *
- * @author mullejea
+ * @author hantz
  */
 class ApiQueryChangeSet extends ApiQueryBase {
     public function __construct( $query, $moduleName ) {
@@ -28,10 +28,12 @@ class ApiQueryChangeSet extends ApiQueryBase {
     }
     private function run() {
         global $wgServerName, $wgScriptPath;
-
+        wfDebugLog('p2p','ApiQueryChangeSet');
         $params = $this->extractRequestParams();
         $request = $this->encodeRequest('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
+        wfDebugLog('p2p','  -> request : '.$request);
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FhasPatch/format=csv/sep=!';
+        wfDebugLog('p2p','  -> url request : '.$url);
         $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FchangeSetID/-3FhasPatch/headers=hide/format=csv/sep=!');
         $data = trim($data);
         $result = $this->getResult();
@@ -39,9 +41,12 @@ class ApiQueryChangeSet extends ApiQueryBase {
 
         $data = split('!',$data);
         $CSID = $data[1];
-
+        wfDebugLog('p2p','  -> CSID : '.$CSID);
         if($CSID) {
             $data = split(',',$data[2]);
+            for ($i = 0 ; $i < count($data) ; $i++) {
+                wfDebugLog('p2p','  -> patch : '.$data[$i]);
+            }
             $result->setIndexedTagName($data, 'patch');
             $result->addValue(array('query',$this->getModuleName()),'id',$CSID);
             $result->addValue('query', $this->getModuleName(), $data);

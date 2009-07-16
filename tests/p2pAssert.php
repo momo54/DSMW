@@ -12,7 +12,7 @@ function assertPageExist($server,$pageName) {
 function assertContentEquals($server,$pageName,$content) {
     $contentPage = getContentPage($server,$pageName);
     PHPUnit_Framework_Assert::assertEquals($content,$contentPage,
-        'Content on page '.$pageName.' must be '.$content.' but is '.$contentPage);
+        'wrong content on page '.$pageName);
 }
 
 function assertContentPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {

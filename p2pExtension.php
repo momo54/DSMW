@@ -37,7 +37,7 @@ $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeS
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 //global $wgAPIMetaModules;
-$wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
 
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
@@ -138,7 +138,6 @@ Pages concerned:
 
         $article = new Article($title);
         $edit = $article->doEdit($newtext, $summary="");
-        wfDebugLog('p2p','  -> doEdit '.$title.' : '.$edit);
         $article->doRedirect();
         return false;
     }
@@ -147,11 +146,10 @@ Pages concerned:
         wfDebugLog('p2p','push on ');
         $patches = array();
         $tmpPatches = array();
-        if(isset ($_POST['push']))
-        {
+        if(isset ($_POST['push'])) {
             $name = $_POST['push'];
             foreach ($name as $push) {
-            wfDebugLog('p2p',' - '.$push);
+                wfDebugLog('p2p',' - '.$push);
             }
         }
         else $name="";
@@ -167,7 +165,7 @@ Pages concerned:
         }
 
         $name = $name[0];
-        wfDebugLog('p2p','  -> pull '.$name);
+        wfDebugLog('p2p','  -> pushname '.$name);
         // $name = $_GET['name'];//PushFeed name
         $request = getPushFeedRequest($name);
         //        $previousCSID = getPreviousCSID($name);
@@ -180,7 +178,8 @@ Pages concerned:
         //            $cnt = $count[1] + 1;
         //            $CSID = $name."_".$cnt;
         //        }
-        wfDebugLog('p2p','      ->pullHead : '.$previousCSID);
+        wfDebugLog('p2p','  ->pushrequest '.$request);
+        wfDebugLog('p2p','  ->pushHead : '.$previousCSID);
         $CSID = utils::generateID();//changesetID
         if($request==false) {
             $outtext='<p><b>No semantic request found!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'">back</a>';
@@ -191,6 +190,7 @@ Pages concerned:
         $pages = getRequestedPages($request);//ce sont des pages et non des patches
         foreach ($pages as $page) {
         // wfDebugLog( 'p2p', 'page found '.$age);
+            wfDebugLog('p2p','  ->requested page '.$page);
             $request1 = '[[Patch:+]][[onPage::'.$page.']]';
             $tmpPatches = getRequestedPages($request1);
             $patches = array_merge($patches, $tmpPatches);
@@ -217,7 +217,9 @@ changeSetID: [[changeSetID::".$CSID."]]
 inPushFeed: [[inPushFeed::".$name."]]
 previousChangeSet: [[previousChangeSet::".$previousCSID."]]
 ";
+        //wfDebugLog('p2p','  -> count unpublished patch '.count($unpublished));
         foreach ($unpublished as $patch) {
+            wfDebugLog('p2p','  -> unpublished patch '.$patch);
             $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
         }
 
@@ -264,13 +266,13 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 
     //////////OnPull/////////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpull') {
-        
-        if(isset ($_POST['pull'])){
+
+        if(isset ($_POST['pull'])) {
             $name = $_POST['pull'];
             wfDebugLog('p2p','pull on ');
-        foreach ($_POST['pull'] as $pull) {
-            wfDebugLog('p2p',' - '.$pull);
-        }
+            foreach ($_POST['pull'] as $pull) {
+                wfDebugLog('p2p',' - '.$pull);
+            }
         }
         else $name="";//throw new MWException( __METHOD__.': no PullName' );
         if(count($name)>1) {
@@ -298,8 +300,8 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         $relatedPushServer = getPushURL($name);
         if(is_null($relatedPushServer))throw new MWException( __METHOD__.': no relatedPushServer url' );
         $namePush = getPushName($name);
-        wfDebugLog('p2p','      -> pushServer '.$relatedPushServer);
-        wfDebugLog('p2p','      -> pushName '.$namePush);
+        wfDebugLog('p2p','      -> pushServer : '.$relatedPushServer);
+        wfDebugLog('p2p','      -> pushName : '.$namePush);
         if(is_null($namePush))throw new MWException( __METHOD__.': no PushName' );
         //split NS and name
         preg_match( "/^(.+?)_*:_*(.*)$/S", $namePush, $m );
@@ -323,20 +325,20 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }
         wfDebugLog('p2p','     -> changeSet found '.$CSID);
         while($CSID!=null) {
-            //if(!utils::pageExist($CSID)) {
-                $listPatch = null;
-                $patchs = $dom->getElementsByTagName('patch');
-                foreach($patchs as $p) {
-                    wfDebugLog('p2p','          -> patch '.$p->firstChild->nodeValue);
-                    $listPatch[] = $p->firstChild->nodeValue;
-                }
-                // $CSID = substr($CSID,strlen('changeSet:'));
-                utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
+        //if(!utils::pageExist($CSID)) {
+            $listPatch = null;
+            $patchs = $dom->getElementsByTagName('patch');
+            foreach($patchs as $p) {
+                wfDebugLog('p2p','          -> patch '.$p->firstChild->nodeValue);
+                $listPatch[] = $p->firstChild->nodeValue;
+            }
+            // $CSID = substr($CSID,strlen('changeSet:'));
+            utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
 
-                integrate($CSID, $listPatch,$relatedPushServer);
-                updatePullFeed($name, $CSID);
+            integrate($CSID, $listPatch,$relatedPushServer);
+            updatePullFeed($name, $CSID);
 
-           // }
+            // }
 
             $previousCSID = $CSID;
             $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
@@ -352,7 +354,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             }
             wfDebugLog('p2p','     -> changeSet found '.$CSID);
         }
-        
+
         if(is_null($csName)) {
             wfDebugLog('p2p','  - redirect to Special:ArticleAdminPage');
             $title = Title::newFromText('Special:ArticleAdminPage');
@@ -649,12 +651,15 @@ function updatePushFeed($name, $CSID) {
 function integrate($changeSetId,$patchIdList,$relatedPushServer) {
 // $patchIdList = getPatchIdList($changeSetId);
 //  $lastPatch = utils::getLastPatchId($pageName);
+    wfDebugLog('p2p','- integrate : '.$changeSetId);
     foreach ($patchIdList as $patchId) {
+        wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
+          wfDebugLog('p2p','    -> patch unexist');
         //recuperation patch via api, creation (sauvegarde en local)
             $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/strtolower($patchId)/*,strlen('patch:'))*/.'&format=xml';
             $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
-
+            wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
             $dom->loadXML($patch);
 
@@ -669,6 +674,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
                 }
             }
 
+            $operations = null;
             $op = $dom->getElementsByTagName('operation');
             foreach($op as $o)
                 $operations[] = $o->firstChild->nodeValue;
@@ -678,9 +684,12 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             utils::createPatch($patchId, $onPage, $lastPatch, $operations);
 
             foreach ($operations as $operation) {
+                wfDebugLog('p2p','      -> patch operation :'.$operation);
                 $operation = operationToLogootOp($operation);
                 if ($operation!=false && is_object($operation)) {
+                    wfDebugLog('p2p','      -> integrate operation');
                     logootIntegrate($operation, $onPage);
+                    wfDebugLog('p2p','      -> integrate operation ok');
                 }
             }
     }//end if pageExists
@@ -784,7 +793,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-    
+
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
@@ -800,9 +809,9 @@ function operationToLogootOp($operation) {
     }
     $logootPos = new LogootPosition(array($idArrray));
 
-//    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
-//        $res[3] = utils::decodeRequest($res[3]);
-//    }
+    //    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
+    //        $res[3] = utils::decodeRequest($res[3]);
+    //    }
     $res[3] = utils::contentDecoding($res[3]);
 
     if($res[1]=="Insert") {
@@ -940,11 +949,15 @@ function getPushName($name) {//pullfeed name with NS
 
 function getPushURL($name) {//pullfeed name with NS
     global $wgServerName, $wgScriptPath;
+    wfDebugLog('p2p','- getPushURL');
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[[PullFeed:+]] [[name::'.$name.']]';
+    wfDebugLog('p2p','  -> request : '.$req);
     $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FpushFeedServer/headers=hide/order=desc/format=csv/limit=1";
+    wfDebugLog('p2p','  -> url request : '.$url);
     $string = file_get_contents($url);
+    wfDebugLog('p2p','  -> csv result : '.$string);
     if ($string=="") return false;
     $string = str_replace("\n", ",", $string);
     $string = str_replace("\"", "", $string);
@@ -955,6 +968,7 @@ function getPushURL($name) {//pullfeed name with NS
             unset($res[$key]);
         }
     }
+    wfDebugLog('p2p','  -> result '.$res[1]);
     if (empty ($res)) return false;
     else return $res[1];
 }

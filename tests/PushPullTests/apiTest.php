@@ -101,7 +101,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
         foreach($listeOp as $o)
             $op[] = $o->firstChild->nodeValue;
 
-        $this->assertTrue(count($op)==1);
+        $this->assertTrue(count($op)==1,'failed to count operation, '.count($op).' were found, but 1 operation is required');
 
         $contentOp = str_replace(" ", "",'Localhost/wiki121; Insert; (15555995255933583146:900c17ebee311fb6dd00970d26727577); content page Paris');
         $this->assertEquals($contentOp,str_replace(" ","", $op[0]));

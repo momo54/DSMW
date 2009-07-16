@@ -19,7 +19,7 @@ $wgDebugLogGroups  = array(
  */
 
 
-class p2pTest extends PHPUnit_Framework_TestCase {
+class p2pTest1 extends PHPUnit_Framework_TestCase {
 
     var $p2pBot1;
     var $p2pBot2;

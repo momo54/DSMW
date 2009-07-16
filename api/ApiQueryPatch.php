@@ -6,10 +6,9 @@ if( !defined('MEDIAWIKI') ) {
 
 /**
  * Description of ApiQueryPatch
- * Note: the "fromid" parameter is the autoincrement id in the patchs table and
- * not the patch_id
+ * return the patch contain given by the parameter patchId
  *
- * @author mullejea
+ * @author hantz
  */
 class ApiQueryPatch extends ApiQueryBase {
     public function __construct( $query, $moduleName ) {

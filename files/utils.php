@@ -40,21 +40,21 @@ class utils {
         return $request;
     }
 
-/**
- *
- * @param <String> $content
- * @return <String> encoded content
- */
-    static function contentEncoding($content){
+    /**
+     *
+     * @param <String> $content
+     * @return <String> encoded content
+     */
+    static function contentEncoding($content) {
         $res = base64_encode($content);
         return $res;
     }
 
-/**
- *
- * @param <String> $content
- * @return <String> decoded content
- */
+    /**
+     *
+     * @param <String> $content
+     * @return <String> decoded content
+     */
     static function contentDecoding($content) {
         $res = base64_decode($content);
         return $res;
@@ -64,7 +64,9 @@ class utils {
         global $wgServerName, $wgScriptPath;
         $url = 'http://'.$wgServerName.$wgScriptPath;
         $rev = file_get_contents($url.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
+        wfDebugLog('p2p','  -> result page exist : '.$rev);
         $rev =  unserialize($rev);
+        wfDebugLog('p2p','  -> count : '.count($rev['query']['pages'][-1]));
         return count($rev['query']['pages'][-1])==0;
     //PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
     }
@@ -97,7 +99,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         $title = Title::newFromText($CSID, CHANGESET);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
-}
+    }
 
     static function createPatch($patchId, $onPage, $previousPatch, $operations) {
         $text = 'Patch: patchID: [[patchID::'.$patchId.']]
@@ -105,17 +107,17 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         foreach ($operations as $op) {
             $text .= 'hasOperation [[hasOperation::'.$op.']] ';
         }
-        if (is_array($previousPatch)){
+        if (is_array($previousPatch)) {
             $text.=' previous: [[previous::';
-            foreach ($previousPatch as $prev){
+            foreach ($previousPatch as $prev) {
                 $text.=$prev.';';
             }
             $text.=']]';
         }
-        else{
-        $text.=' previous: [[previous::'.$previousPatch.']]';
+        else {
+            $text.=' previous: [[previous::'.$previousPatch.']]';
         }
-     
+
         $title = Title::newFromText($patchId, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary="");
@@ -149,8 +151,8 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         foreach ($string1 as $key=>$str) {
             $pos = strpos($str, '!');
             if($pos !== false) $string1[$key] = substr($str, $pos+1);
-//            $pos2 = strpos($string1[$key], 'patch:');
-//            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
+            //            $pos2 = strpos($string1[$key], 'patch:');
+            //            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
             if ($string1[$key]=="") unset ($string1[$key]);
             $pos1 = strpos($string1[$key], ';');
             if($pos1 !== false) {
@@ -165,6 +167,6 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         else return array_shift($result);
     }
 
-    
+
 }
 ?>
