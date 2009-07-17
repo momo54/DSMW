@@ -213,12 +213,12 @@ toto' ;
         $CSContent = '[[changeSetID::TestCS1Pull]]
 [[inPushFeed::PushFeed:pushCity]]
 [[previousChangeSet::none]]
-[[hasPatch::Patch:testPatch1]]';
+[[hasPatch::Patch:TestPatch1]]';
         $this->assertTrue($this->p2pBot1->createPage('ChangeSet:'.$CSName,$CSContent),
             'failed on create page testCS1Pull ('.$this->p2pBot1->bot->results.')');
 
-        $patchName = 'testPatch1';
-        $patchContent = 'Patch: patchID: [[patchID::Patch:testPatch1]]
+        $patchName = 'TestPatch1';
+        $patchContent = 'Patch: patchID: [[patchID::Patch:TestPatch1]]
  onPage: [[onPage::Paris]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
