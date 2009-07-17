@@ -36,9 +36,13 @@ $wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
 $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeSet.php";
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
+global $wgVersion;
+if(compareMWVersion($wgVersion)==-1) {
+    $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+}else {
 //global $wgAPIMetaModules;
-$wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
-
+    $wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+}
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
 
@@ -147,95 +151,96 @@ Pages concerned:
         $patches = array();
         $tmpPatches = array();
         if(isset ($_POST['push'])) {
-            $name = $_POST['push'];
-            foreach ($name as $push) {
+            $name1 = $_POST['push'];
+            foreach ($name1 as $push) {
                 wfDebugLog('p2p',' - '.$push);
             }
         }
-        else $name="";
+        else $name1="";
         //else throw new MWException( __METHOD__.': no Pushfeed selected' );
-        if(count($name)>1) {
-            $outtext='<p><b>Select only one pushfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
-            $wgOut->addHTML($outtext);
-            return false;
-        }elseif($name=="") {
+        //        if(count($name)>1) {
+        //            $outtext='<p><b>Select only one pushfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
+        //            $wgOut->addHTML($outtext);
+        //            return false;
+       /* }else*/if($name1=="") {
             $outtext='<p><b>No pushfeed selected!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
             return false;
         }
 
-        $name = $name[0];
-        wfDebugLog('p2p','  -> pushname '.$name);
-        // $name = $_GET['name'];//PushFeed name
-        $request = getPushFeedRequest($name);
-        //        $previousCSID = getPreviousCSID($name);
-        $previousCSID = getHasPushHead($name);
-        if($previousCSID==false) {
-            $previousCSID = "none";
-        //$CSID = $name."_0";
-        }//else{
-        //            $count = explode(" ", $previousCSID);
-        //            $cnt = $count[1] + 1;
-        //            $CSID = $name."_".$cnt;
-        //        }
-        wfDebugLog('p2p','  ->pushrequest '.$request);
-        wfDebugLog('p2p','  ->pushHead : '.$previousCSID);
-        $CSID = utils::generateID();//changesetID
-        if($request==false) {
-            $outtext='<p><b>No semantic request found!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'">back</a>';
-            $wgOut->addHTML($outtext);
-            return false;
-        }
+        //$name = $name1[0];
+        foreach ($name1 as $name) {// for each pushfeed name==> push
+            wfDebugLog('p2p','  -> pushname '.$name);
+            // $name = $_GET['name'];//PushFeed name
+            $request = getPushFeedRequest($name);
+            //        $previousCSID = getPreviousCSID($name);
+            $previousCSID = getHasPushHead($name);
+            if($previousCSID==false) {
+                $previousCSID = "none";
+            //$CSID = $name."_0";
+            }//else{
+            //            $count = explode(" ", $previousCSID);
+            //            $cnt = $count[1] + 1;
+            //            $CSID = $name."_".$cnt;
+            //        }
+            wfDebugLog('p2p','  ->pushrequest '.$request);
+            wfDebugLog('p2p','  ->pushHead : '.$previousCSID);
+            $CSID = utils::generateID();//changesetID
+            if($request==false) {
+                $outtext='<p><b>No semantic request found!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'">back</a>';
+                $wgOut->addHTML($outtext);
+                return false;
+            }
 
-        $pages = getRequestedPages($request);//ce sont des pages et non des patches
-        foreach ($pages as $page) {
-        // wfDebugLog( 'p2p', 'page found '.$age);
-            wfDebugLog('p2p','  ->requested page '.$page);
-            $request1 = '[[Patch:+]][[onPage::'.$page.']]';
-            $tmpPatches = getRequestedPages($request1);
-            $patches = array_merge($patches, $tmpPatches);
-        }
-        $published = getPublishedPatches($name);
-        $unpublished = array_diff($patches, $published);/*unpublished = patches-published*/
-        if(empty ($unpublished)) {
-            $title = Title::newFromText('Special:ArticleAdminPage');
-            $article = new Article($title);
-            wfDebugLog('p2p','  -> no unpublished patch');
-            $article->doRedirect();
-            return false; //If there is no unpublished patch
-        }
-        $pos = strrpos($CSID, ":");//NS removing
-        if ($pos === false) {
-        // not found...
-            $articleName = $CSID;
-        }else {
-            $articleName = substr($CSID, 0,$pos+1);
-            $CSID = "ChangeSet:".$articleName;
-        }
-        $newtext = "ChangeSet:
+            $pages = getRequestedPages($request);//ce sont des pages et non des patches
+            foreach ($pages as $page) {
+            // wfDebugLog( 'p2p', 'page found '.$age);
+                wfDebugLog('p2p','  ->requested page '.$page);
+                $request1 = '[[Patch:+]][[onPage::'.$page.']]';
+                $tmpPatches = getRequestedPages($request1);
+                $patches = array_merge($patches, $tmpPatches);
+            }
+            $published = getPublishedPatches($name);
+            $unpublished = array_diff($patches, $published);/*unpublished = patches-published*/
+            if(empty ($unpublished)) {
+                $title = Title::newFromText('Special:ArticleAdminPage');
+                $article = new Article($title);
+                wfDebugLog('p2p','  -> no unpublished patch');
+                $article->doRedirect();
+                return false; //If there is no unpublished patch
+            }
+            $pos = strrpos($CSID, ":");//NS removing
+            if ($pos === false) {
+            // not found...
+                $articleName = $CSID;
+            }else {
+                $articleName = substr($CSID, 0,$pos+1);
+                $CSID = "ChangeSet:".$articleName;
+            }
+            $newtext = "ChangeSet:
 changeSetID: [[changeSetID::".$CSID."]]
 inPushFeed: [[inPushFeed::".$name."]]
 previousChangeSet: [[previousChangeSet::".$previousCSID."]]
 ";
-        //wfDebugLog('p2p','  -> count unpublished patch '.count($unpublished));
-        foreach ($unpublished as $patch) {
-            wfDebugLog('p2p','  -> unpublished patch '.$patch);
-            $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
-        }
+            //wfDebugLog('p2p','  -> count unpublished patch '.count($unpublished));
+            foreach ($unpublished as $patch) {
+                wfDebugLog('p2p','  -> unpublished patch '.$patch);
+                $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
+            }
 
 
-        $update = updatePushFeed($name, $CSID);
-        if($update==true) {// update the "hasPushHead" value successful
-            $title = Title::newFromText($articleName, CHANGESET);
-            $article = new Article($title);
-            $article->doEdit($newtext, $summary="");
-            $article->doRedirect();
-        }
-        else {
-            $outtext='<p><b>PushFeed has not been updated!</b></p>';
-            $wgOut->addHTML($outtext);
-        }
-
+            $update = updatePushFeed($name, $CSID);
+            if($update==true) {// update the "hasPushHead" value successful
+                $title = Title::newFromText($articleName, CHANGESET);
+                $article = new Article($title);
+                $article->doEdit($newtext, $summary="");
+                $article->doRedirect();
+            }
+            else {
+                $outtext='<p><b>PushFeed has not been updated!</b></p>';
+                $wgOut->addHTML($outtext);
+            }
+        }//end foreach pushfeed list
         return false;
     }
 
@@ -268,24 +273,25 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
     elseif(isset ($_POST['action']) && $_POST['action']=='onpull') {
 
         if(isset ($_POST['pull'])) {
-            $name = $_POST['pull'];
+            $name1 = $_POST['pull'];
             wfDebugLog('p2p','pull on ');
             foreach ($_POST['pull'] as $pull) {
                 wfDebugLog('p2p',' - '.$pull);
             }
         }
-        else $name="";//throw new MWException( __METHOD__.': no PullName' );
-        if(count($name)>1) {
+        else $name1="";//throw new MWException( __METHOD__.': no PullName' );
+        /*if(count($name)>1) {
             $outtext='<p><b>Select only one pullfeed!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
             return false;
-        }elseif($name=="") {
+        }else*/if($name1=="") {
             $outtext='<p><b>No pullfeed selected!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
             $wgOut->addHTML($outtext);
             return false;
         }
 
-        $name = $name[0];//with NS
+        //$name = $name1[0];//with NS
+        foreach ($name1 as $name){// for each pullfeed name==> pull
         wfDebugLog('p2p','      -> pull : '.$name);
 
         //        $previousCSID = getPreviousPulledCSID($name);
@@ -367,7 +373,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             $article = new Article($title);
             $article->doRedirect();
         }
-
+        }//end foreach list pullfeed
         return false;
     }
 
@@ -1014,6 +1020,25 @@ function updatePullFeed($name, $CSID) {
     $article->doEdit($pageContent, $summary="");
 
     return true;
+}
+
+/**
+ *
+ * @param <String> $version1
+ * @param <String> $version2='1.14.0'
+ * @return <integer>
+ */
+function compareMWVersion($version1, $version2='1.14.0') {
+    $version1 = explode(".", $version1);
+    $version2 = explode(".", $version2);
+
+    if($version1[0]>$version2[0]) return 1;
+    elseif($version1[0]<$version2[0]) return -1;
+    elseif($version1[1]>$version2[1]) return 1;
+    elseif($version1[1]<$version2[1]) return -1;
+    elseif($version1[2]>$version2[2]) return 1;
+    elseif($version1[2]<$version2[2]) return -1;
+    else return 0;
 }
 
 /******************************************************************************/

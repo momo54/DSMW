@@ -52,28 +52,6 @@ function pullFeedDel(){
      }
 }
 
-function disableOthers(feedType, id){
-   
-}
-function disableOthers1(feedType, id){
-    alert(feedType);
-    alert(id);
-    if(feedType=="PullFeed"){
-    for (var i=0; i < document.getElementsByName("pull[]").length; i++)
-     {
-     if (document.getElementsByName("pull[]")[i].id!=id && !document.getElementsByName("pull[]")[i].checked)
-        {
-           document.getElementsByName("pull[]")[i].disabled=true;
-        }
-        else{
-           document.getElementsByName("pull[]")[i].disabled=false;
-        }
-     }
-     }else
-     {
-     alert(\'pushfeed\');
-     }
-}
 </SCRIPT>';
            $wgOut->addScript($script1);
 
@@ -127,7 +105,7 @@ $i=0;
                 $data = //$this->getAwarenessData($row["site_url"]);
                 $output .= '
   <tr>
-    <td align="center" onclick="javascript:disableOthers(\'PullFeed\', '.$i.');"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
+    <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
     <td >'.$pullFeed.'</td>
     <td align="center">[]</td>
     <td align="center">[]</td>
