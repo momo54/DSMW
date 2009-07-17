@@ -5,7 +5,8 @@ define( 'MEDIAWIKI', true );
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once '../../../../includes/GlobalFunctions.php';
 require_once 'apiTest.php';
-require_once 'pushPullTest.php';
+require_once 'pushTest.php';
+require_once 'pullTest.php';
 require_once 'extensionTest.php';
 require_once 'PatchTest1.php';
 require_once 'PatchTest2.php';
@@ -29,7 +30,8 @@ class AllTests {
         $suite->addTestSuite('PatchTest2');
         $suite->addTestSuite('extensionTest');
         $suite->addTestSuite('apiTest');
-        $suite->addTestSuite('pushPullTest');
+        $suite->addTestSuite('pushTest');
+        $suite->addTestSuite('pullTest');
         return $suite;
     }
 }

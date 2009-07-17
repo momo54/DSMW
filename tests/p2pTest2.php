@@ -79,7 +79,7 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
             'failed to pull Prof1Course1 ('.$this->p2pBot2->bot->results.')');
 
         assertPageExist($this->p2pBot2->bot->wikiServer, 'Lesson1');
-        assertContentEquals($this->p2pBot2->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
+        assertContentEquals($this->p2pBot2->bot->wikiServer,$this->p2pBot1->bot->wikiServer, $pageNameLesson1);
 
         //edit page lesson1 on wiki2
         $addContent = '
@@ -100,7 +100,7 @@ This mode is based on divergence......';
             'failed to pull Prof2Course1 ('.$this->p2pBot1->bot->results.')');
 
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Lesson1');
-        assertContentEquals($this->p2pBot1->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
+        assertContentEquals($this->p2pBot1->bot->wikiServer,$this->p2pBot2->bot->wikiServer, $pageNameLesson1);
 
         //push on wiki1 for student, lessons and exercises
         $this->assertTrue($this->p2pBot1->createPush('S1Course1', '[[type::!Exam]][[forYear::2009]]'),
@@ -115,10 +115,10 @@ This mode is based on divergence......';
             'failed to pull Prof2Course1 ('.$this->p2pBot3->bot->results.')');
 
         assertPageExist($this->p2pBot3->bot->wikiServer, 'Lesson1');
-        assertContentEquals($this->p2pBot3->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
+        assertContentEquals($this->p2pBot3->bot->wikiServer, $this->p2pBot1->bot->wikiServer, $pageNameLesson1);
 
         assertPageExist($this->p2pBot3->bot->wikiServer, 'Exercises1');
-        assertContentEquals($this->p2pBot3->bot->wikiServer, 'Exercises1','content exercises1 [[forYear::2009]] [[type::Exercise]]');
+        assertContentEquals($this->p2pBot3->bot->wikiServer, $this->p2pBot1->bot->wikiServer, 'Exercises1');
 
         //edit page lesson1 on wiki3
         $this->p2pBot3->bot->wikiLogin();
@@ -139,7 +139,7 @@ This mode is based on divergence......';
         $this->assertTrue($this->p2pBot1->Pull('PullFeed:StudCourse1'),
             'failed to pull StudCourse1 ('.$this->p2pBot1->bot->results.')');
 
-        assertContentEquals($this->p2pBot1->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot3->bot->wikiServer, $pageNameLesson1);
 
     }
 }

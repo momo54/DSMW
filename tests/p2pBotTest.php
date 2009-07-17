@@ -52,14 +52,15 @@ class p2pBotTest extends PHPUnit_Framework_TestCase {
 [[Category:city]]';
         $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
-        assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content);
+        $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);
+        $this->assertEquals($content,$contentFound);
 
         $pageName = "Nancy";
         $content='content page Nancy
 [[Category:city]]';
         $this->p2pBot1->createPage($pageName,$content);
-        assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
-        assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content);
+        $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);
+        $this->assertEquals($content,$contentFound);
     }
 
     public function testAppendPage() {
@@ -68,11 +69,14 @@ class p2pBotTest extends PHPUnit_Framework_TestCase {
 [[Category:city]]';
         $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
-        assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content);
+        $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);
+        $this->assertEquals($content,$contentFound);
 
         $this->p2pBot1->editPage($pageName,"toto");
-        assertContentEquals($this->p2pBot1->bot->wikiServer,$pageName,$content."
-toto");
+        $content .= '
+toto';
+        $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);
+        $this->assertEquals($content,$contentFound);
     }
 }
 ?>

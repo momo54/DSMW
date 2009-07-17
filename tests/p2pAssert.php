@@ -9,10 +9,11 @@ function assertPageExist($server,$pageName) {
         'Page '.$pageName.' unexist on '.$server);
 }
 
-function assertContentEquals($server,$pageName,$content) {
-    $contentPage = getContentPage($server,$pageName);
-    PHPUnit_Framework_Assert::assertEquals($content,$contentPage,
-        'wrong content on page '.$pageName);
+function assertContentEquals($server1,$server2,$pageName) {
+    $contentPage1 = getContentPage($server1,$pageName);
+    $contentPage2 = getContentPage($server2,$pageName);
+    PHPUnit_Framework_Assert::assertEquals($contentPage1,$contentPage2,
+        'content page '.$pageName.' is not equals between '.$server1.' and '.$server2);
 }
 
 function assertContentPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
