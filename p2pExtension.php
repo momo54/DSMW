@@ -651,14 +651,14 @@ function updatePushFeed($name, $CSID) {
 function integrate($changeSetId,$patchIdList,$relatedPushServer) {
 // $patchIdList = getPatchIdList($changeSetId);
 //  $lastPatch = utils::getLastPatchId($pageName);
-    wfDebugLog('p2p','- integrate : '.$changeSetId);
+    wfDebugLog('p2p',' - function integrate : '.$changeSetId);
     foreach ($patchIdList as $patchId) {
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
-            wfDebugLog('p2p','    -> patch unexist');
-            //recuperation patch via api, creation (sauvegarde en local)
-            $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/strtolower($patchId)/*,strlen('patch:'))*/.'&format=xml';
-            $patch = file_get_contents($url/*$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml'*/);
+            wfDebugLog('p2p','      -> patch unexist');
+            $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+            wfDebugLog('p2p','      -> getPatch request url '.$url);
+            $patch = file_get_contents($url);
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
             $dom->loadXML($patch);
@@ -951,7 +951,7 @@ function getPushName($name) {//pullfeed name with NS
 
 function getPushURL($name) {//pullfeed name with NS
     global $wgServerName, $wgScriptPath;
-    wfDebugLog('p2p','- getPushURL');
+    wfDebugLog('p2p',' - function getPushURL');
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[[PullFeed:+]] [[name::'.$name.']]';
     wfDebugLog('p2p','  -> request : '.$req);
@@ -970,7 +970,7 @@ function getPushURL($name) {//pullfeed name with NS
             unset($res[$key]);
         }
     }
-    wfDebugLog('p2p','  -> result '.$res[1]);
+    wfDebugLog('p2p','  -> result '.$res[1].')');
     if (empty ($res)) return false;
     else return $res[1];
 }

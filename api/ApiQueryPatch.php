@@ -26,11 +26,15 @@ class ApiQueryPatch extends ApiQueryBase {
     }
     private function run() {
         global $wgServerName, $wgScriptPath;
+
         $params = $this->extractRequestParams();
+        wfDebugLog('p2p','ApiQueryPatch params '.$params['patchId']);
         $request = $this->encodeRequest('[[patchID::'.$params['patchId'].']]');
-
-        $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FpatchID/-3FonPage/-3FhasOperation/-3Fprevious/headers=hide/format=csv/sep=!');
-
+        wfDebugLog('p2p','  -> request : '.$request);
+        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FpatchID/-3FonPage/-3FhasOperation/-3Fprevious/headers=hide/format=csv/sep=!';
+        wfDebugLog('p2p','  -> url request : '.$url);
+        $data = file_get_contents($url);
+        wfDebugLog('p2p','  -> result : '.$data);
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 

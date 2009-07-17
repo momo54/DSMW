@@ -81,7 +81,7 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
         assertPageExist($this->p2pBot2->bot->wikiServer, 'Lesson1');
         assertContentEquals($this->p2pBot2->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
 
-        //edit page on wiki2
+        //edit page lesson1 on wiki2
         $addContent = '
 This mode is based on divergence......';
         $this->p2pBot2->editPage($pageNameLesson1, $addContent);
@@ -102,7 +102,7 @@ This mode is based on divergence......';
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Lesson1');
         assertContentEquals($this->p2pBot1->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
 
-        //push on wiki1 for student, lesson and exercises
+        //push on wiki1 for student, lessons and exercises
         $this->assertTrue($this->p2pBot1->createPush('S1Course1', '[[type::!Exam]][[forYear::2009]]'),
             'Failed to create push : S1Course1 ('.$this->p2pBot1->bot->results.')');
         $this->assertTrue($this->p2pBot1->push('PushFeed:S1Course1'),
@@ -119,6 +119,27 @@ This mode is based on divergence......';
 
         assertPageExist($this->p2pBot3->bot->wikiServer, 'Exercises1');
         assertContentEquals($this->p2pBot3->bot->wikiServer, 'Exercises1','content exercises1 [[forYear::2009]] [[type::Exercise]]');
+
+        //edit page lesson1 on wiki3
+        $this->p2pBot3->bot->wikiLogin();
+        $addContent = 'content from student';
+        $this->assertTrue($this->p2pBot3->editPage('Lesson1', $addContent),
+            'failed to edit page Lesson1');
+        $pageContentLesson1 = getContentPage($this->p2pBot3->bot->wikiServer, $pageNameLesson1);
+
+        //push on wiki3 for prof1, lessons and exercises
+        $this->assertTrue($this->p2pBot3->createPush('StudCourse1', '[[type::!Exam]][[forYear::2009]]'),
+            'failed to create push : StudCourse1 ('.$this->p2pBot3->bot->results.')');
+        $this->assertTrue($this->p2pBot3->push('PushFeed:StudCourse1'),
+            'failed to push StudCourse1 ('.$this->p2pBot3->bot->results.')');
+
+        //pull on wiki1 from student
+        $this->assertTrue($this->p2pBot1->createPull('StudCourse1',$this->p2pBot3->bot->wikiServer, 'StudCourse1'),
+            'failed to create pull StudCourse1 ('.$this->p2pBot1->bot->results.')');
+        $this->assertTrue($this->p2pBot1->Pull('PullFeed:StudCourse1'),
+            'failed to pull StudCourse1 ('.$this->p2pBot1->bot->results.')');
+
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $pageNameLesson1, $pageContentLesson1);
 
     }
 }

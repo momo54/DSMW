@@ -111,7 +111,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
      * test ApiQueryChangeSet whithout previous changeSet
      */
     public function testGetChangeSetWhithoutPreviousCS() {
-        /* test with no previousChangeSet */
+        // test with no previousChangeSet
         $pageName = "ChangeSet:localhost/wiki12";
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki12]]
@@ -193,19 +193,20 @@ previousChangeSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
      * test apiQueryChangeSet with an unexist changeSet
      */
     public function testGetChangeSetWhithUnexistCS() {
+        $this->p2pBot1->createPage('toto', 'titi');
         $cs = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=changeSet&cspushName=PushCity&cschangeSet=ChangeSet:localhost/wiki13&format=xml');
 
         $dom = new DOMDocument();
         $dom->loadXML($cs);
         $changeSet = $dom->getElementsByTagName('changeSet');
         $CSID = null;
-        foreach($changeSet as $cs) {
-            if ($cs->hasAttribute("id")) {
-                $CSID = $cs->getAttribute('id');
+        foreach($changeSet as $cs1) {
+            if ($cs1->hasAttribute("id")) {
+                $CSID = $cs1->getAttribute('id');
             }
         }
 
-        $this->assertEquals(null, $CSID);
+        $this->assertEquals(null, $CSID,'failed, changeSetId must be null but '.$CSID.' was found');
 
         $patch = null;
         $listePatch = $dom->getElementsByTagName('patch');
