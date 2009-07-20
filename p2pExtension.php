@@ -148,7 +148,8 @@ $newtext.="----
     }
     ///////ChangeSet page////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpush') {
-        wfDebugLog('p2p','push on ');
+        wfDebugLog('p2p','push on '.$_POST['push']);
+        wfDebugLog('p2p',implode($_POST['push']));
         $patches = array();
         $tmpPatches = array();
         if(isset ($_POST['push'])) {
