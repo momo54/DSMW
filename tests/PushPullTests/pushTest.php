@@ -178,5 +178,28 @@ toto titi
         $this->assertEquals('ChangeSet:'.$previousCS, substr($CSFound[0],0,-1));
     }
 
+    public function testMultiPush() {
+        $this->assertTrue($this->p2pBot1->createPage('Toto12', '[[Category:toto]]'));
+        $this->assertTrue($this->p2pBot1->createPage('Titi12', '[[Category:titi]]'));
+        $this->assertTrue($this->p2pBot1->createPage('Tata12', '[[Category:tata]]'));
+
+        $this->assertTrue($this->p2pBot1->createPush('PushToto12', '[[Category:toto]]'));
+        $this->assertTrue($this->p2pBot1->createPush('PushTiti12', '[[Category:titi]]'));
+        $this->assertTrue($this->p2pBot1->createPush('PushTata12', '[[Category:tata]]'));
+
+        $array = array('PushFeed:PushToto12','PushFeed:PushTiti12','PushFeed:PushTata12');
+        $this->assertTrue($this->p2pBot1->push($array));
+
+        //assert that allchange set were created
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[inPushFeed::PushFeed:PushToto12]]', '-3FchangeSetID'));
+        $this->assertTrue($countCS==1);
+
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[inPushFeed::PushFeed:PushTiti12]]', '-3FchangeSetID'));
+        $this->assertTrue($countCS==1);
+
+        $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[inPushFeed::PushFeed:PushTata12]]', '-3FchangeSetID'));
+        $this->assertTrue($countCS==1);
+    }
+
 }
 ?>

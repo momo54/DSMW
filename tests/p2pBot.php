@@ -61,7 +61,11 @@ class p2pBot {
 
     function push($name) {
         $post_vars['action'] = 'onpush';
-        $post_vars['push[]'] = $name;
+        if(is_array($name)) {
+            $post_vars['push'] = $name;
+        }else {
+            $post_vars['push[]'] = $name;
+        }
         $this->bot->maxredirs = 0;
         if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
@@ -108,7 +112,11 @@ class p2pBot {
     }
 
     function pull($pullName) {
-        $post_vars['pull[]'] = $pullName;
+        if(is_array($pullName)) {
+            $post_vars['pull'] = $pullName;
+        }else {
+            $post_vars['pull[]'] = $pullName;
+        }
         $post_vars['action'] = 'onpull';
         $this->bot->maxredirs = 0;
         $url = $this->bot->wikiServer.PREFIX.'/index.php';
