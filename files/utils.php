@@ -80,6 +80,9 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         foreach ($listPatch as $patch) {
             $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
         }
+        $newtext.="
+----
+[[Special:ArticleAdminPage]]";
 
         $title = Title::newFromText($CSID, CHANGESET);
         $article = new Article($title);
@@ -95,7 +98,9 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         foreach ($listPatch as $patch) {
             $newtext .=" hasPatch: [[hasPatch::".$patch."]]";
         }
-
+$newtext.="
+----
+[[Special:ArticleAdminPage]]";
         $title = Title::newFromText($CSID, CHANGESET);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
@@ -117,11 +122,32 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         else {
             $text.=' previous: [[previous::'.$previousPatch.']]';
         }
-
+$text.="
+----
+[[Special:ArticleAdminPage]]";
         $title = Title::newFromText($patchId, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary="");
     }
+
+//    static function createPushFeed($name, $request){
+//        $stringReq = utils::encodeRequest($request);//avoid "semantic injection" :-)
+//
+//        $newtext = "PushFeed:
+//Name: [[name::PushFeed:".$name."]]
+//hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
+//Pages concerned:
+//{{#ask: ".$request."}}
+//[[deleted::false| ]]
+//";
+//$newtext.="----
+//[[Special:ArticleAdminPage]]";
+//        wfDebugLog('p2p','  -> push page contains : '.$newtext);
+//        $title = Title::newFromText($name, PUSHFEED);
+//
+//        $article = new Article($title);
+//        $edit = $article->doEdit($newtext, $summary="");
+//    }
 
     static function getLastPatchId($pageName, $url='') {
         global $wgServerName, $wgScriptPath;
@@ -167,6 +193,11 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         else return array_shift($result);
     }
 
-
+    static function isValidURL($url) {
+        $arr = parse_url($url);
+        if(!isset ($arr['scheme']) || !isset ($arr['host']))
+            return false;
+        else return true;
+    }
 }
 ?>

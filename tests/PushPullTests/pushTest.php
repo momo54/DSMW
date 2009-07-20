@@ -65,7 +65,7 @@ toto titi
 
         $this->assertTrue($this->p2pBot1->createPage($pageName,$contentPage),'Create page Pouxeux failed : '.$this->p2pBot1->bot->results);
 
-        $patch = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
+        $patch = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$pageName.']]', '-3FpatchID');
 
         //assert that one patch was created
         $this->assertTrue(count($patch)==1);
@@ -74,7 +74,7 @@ toto titi
         $this->assertTrue($this->p2pBot1->editPage($pageName,'toto'),
             'failed to edit page '.$pageName.' : '.$this->p2pBot1->bot->results);
 
-        $patch = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
+        $patch = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$pageName.']]', '-3FpatchID');
 
         //assert that one patch was created
         $this->assertTrue(count($patch)==2);
@@ -101,17 +101,21 @@ toto titi
     //create pushFeed
         $this->testCreatePush();
 
+        $CS = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[ChangeSet:+]]','');
+        $res = count($CS);
         // push without changeSet creationg
         $this->assertTrue($this->p2pBot1->push('PushFeed:PushCity11'),
             'failed to push PushCity : ('.$this->p2pBot1->bot->results.')');
 
-        //assert that no changeSet was created
         $CS = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[ChangeSet:+]]','');
-        $this->assertEquals('',$CS[0],
-            'failed on push, no changeSet must be created but '.count($CS).' changeSet were found');
+        $res1 = count($CS);
+
+        //assert that no changeSet was created
+        $this->assertTrue($res == $res1,
+            'failed on push, no changeSet must be created but '.$res1-$res.' changeSet were found');
 
         //assert that pushHead attribute is always null
-        $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
+        $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:PushCity11]]','-3FhasPushHead');
         $this->assertEquals('',substr($pushFound[0],0,-1),
             'push PushCity error, pushHead must be null but '.$pushFound[0].' was found');
     }
@@ -161,13 +165,13 @@ toto titi
     public function testPushWithChangeSet2() {
         $this->testPushWithChangeSet1();
 
-        $allCS = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
+        $allCS = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]][[inPushFeed::PushFeed:PushCity11]]', '-3FchangeSetID');
         $previousCS = substr($allCS[0],0,-1);
         $this->p2pBot1->editPage(Arches, 'content added on the page');
 
         $this->p2pBot1->push('PushFeed:PushCity11');
 
-        $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:'.$pushName.']]','-3FhasPushHead');
+        $pushFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:PushCity11]]','-3FhasPushHead');
         $CSIDFound = substr($pushFound[0],0,-1);
 
         $this->assertNotEquals($previousCS, $CSIDFound);
@@ -175,7 +179,7 @@ toto titi
 
         //assert that previousChangeSet is ok
         $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FpreviousChangeSet');
-        $this->assertEquals('ChangeSet:'.$previousCS, substr($CSFound[0],0,-1));
+        $this->assertEquals('changeset:'.strtolower($previousCS), strtolower(substr($CSFound[0],0,-1)));
     }
 
     public function testMultiPush() {

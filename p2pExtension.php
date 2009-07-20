@@ -136,7 +136,8 @@ Pages concerned:
 {{#ask: ".$request."}}
 [[deleted::false| ]]
 ";
-
+$newtext.="----
+[[Special:ArticleAdminPage]]";
         wfDebugLog('p2p','  -> push page contains : '.$newtext);
         $title = Title::newFromText($_POST['name'], PUSHFEED);
 
@@ -228,6 +229,9 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
                 $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
             }
 
+$newtext.="
+----
+[[Special:ArticleAdminPage]]";
 
             $update = updatePushFeed($name, $CSID);
             if($update==true) {// update the "hasPushHead" value successful
@@ -249,6 +253,8 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
     elseif(isset ($_GET['action']) && $_GET['action']=='pullpage') {
         wfDebugLog('p2p','Create pull '.$_POST['pullname'].' with pushName '.$_POST['pushname'].' on '.$_POST['url']);
         $url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
+        if(utils::isValidURL($url)==false)
+        throw new MWException( __METHOD__.': '.$url.' seems not to be an url' );//throws an exception if $url is invalid
         $pushname = $_POST['pushname'];//with ns
         $pullname = $_POST['pullname'];
 
@@ -259,7 +265,8 @@ pushFeedServer: [[pushFeedServer::".$url."]]
 pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 [[deleted::false| ]]
 ";
-
+$newtext.="----
+[[Special:ArticleAdminPage]]";
         $title = Title::newFromText($pullname, PULLFEED);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
@@ -318,6 +325,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
         wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
         $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+        if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Sever (ChangeSet API)' );
         $dom = new DOMDocument();
         $dom->loadXML($cs);
 
@@ -665,6 +673,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = file_get_contents($url);
+            if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Sever (Patch API)' );
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
             $dom->loadXML($patch);

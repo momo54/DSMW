@@ -11,7 +11,7 @@ class ArticleAdminPage extends SpecialPage {
     function ArticleAdminPage() {
         global $wgHooks, $wgSpecialPages, $wgWatchingMessages;
         # Add all our needed hooks
-//        $wgHooks["UnknownAction"][] = $this;
+        $wgHooks["UnknownAction"][] = $this;
         $wgHooks["SkinTemplateTabs"][] = $this;
         SpecialPage::SpecialPage('ArticleAdminPage'/*, "block"*/);// avec block => pasges speciales restreintes
     }
@@ -184,14 +184,14 @@ $output .='
     }
 
 
-//    function onUnknownAction($action, $article) {
-//        global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest,$wgMessageCache, $wgWatchingMessages, $namespace_titles, $wgSitename;
-//        //require_once("WhoIsWatchingTabbed.i18n.php");
-//
-//        $wgCachePages = false;
-//        //Verify that the action coming in is "admin"
-//        if($action == "admin") {
-//
+    function onUnknownAction($action, $article) {
+        global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest,$wgMessageCache, $wgWatchingMessages, $namespace_titles, $wgSitename;
+        //require_once("WhoIsWatchingTabbed.i18n.php");
+
+        $wgCachePages = false;
+        //Verify that the action coming in is "admin"
+        if($action == "admin") {
+
 //            if(isset($_POST['wiki'])&& isset ($_POST['title'])&& isset ($_POST['id'])) {
 //
 //                $patchArray = $this->getPatches($_POST['id'], $_POST['title'], $_POST['wiki']);
@@ -309,109 +309,116 @@ $output .='
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//            //
-//            //            $db = &wfGetDB(DB_SLAVE);
-//            //
-//            //            $tables = array("user", "watchlist");
-//            //            $conditions = array("wl_user = user_id", "wl_namespace IN (".implode(", ", array_keys($namespace_titles)).")");
-//            //            $fname = "Database::select";
-//            //
-//            //            //Determine which results are going to be shown and the appropriate columns
-//            //            if(isset($_REQUEST["user_name"])) {
-//            //                $wgOut->setPagetitle(wfMsg("pages_watched_by_user"));
-//            //                $columns = array("wl_namespace","wl_title");
-//            //                $conditions[] = "LOWER(user_name) = " . $db->addQuotes(strtolower($_REQUEST["user_name"]));
-//            //            } else {
-//            //                $wgOut->setPagetitle(wfMsg("users_watching_page"));
-//            //                $columns = array("user_name", "user_real_name");
-//            //                $conditions[] = "LOWER(wl_title) = " . $db->addQuotes(strtolower($page_title));
-//            //            }
-//            //
-//            //            $order_col = "user_name";
-//            //            if(isset($_REQUEST["order_col"]) && in_array($_REQUEST["order_col"], $columns)) {
-//            //                $order_col = $_REQUEST["order_col"];
-//            //            }
-//            //
-//            //            //Change the way the results are ordered
-//            //            if(isset($_REQUEST["order_type"]) && $_REQUEST["order_type"] == "DESC") {
-//            //                $ordertypePOST  = "DESC";
-//            //                $ordertypeR = "ASC";
-//            //            } else {
-//            //                $ordertype  = "ASC";
-//            //                $ordertypeR = "DESC";
-//            //            }
-//            //            $options = array("ORDER BY" => "$order_col $ordertype");
-//            //
-//            //            $output = "";
-//            //            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-//            //                $output .= '<p>Error accessing watchlist.</p>';
-//            //            } else if($db->numRows($result) == 0) {
-//            //                $output .= '<p>Nobody is watching this page.</p>';
-//            //            } else {
-//            //                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
-//            //                $output .= '<table cellspacing="0" cellpadding="5"><tr>';
-//            //
-//            //                //Generate sortable column headings
-//            //                foreach($columns as $column){
-//            //                    $output .= '<th'.$style.'><a href="'.$_SERVER["PHP_SELF"].'?title='.$_REQUEST["title"].'&order_col='.$column.'&action=watching&order_type='.$ordertypeR.
-//            //                    (isset(POST$_REQUEST["user_name"]) ? '&user_name='.$_REQUEST["user_name"] : '').
-//            //                    (isset($_REQUEST["user_real_name"]) ? '&user_real_name='.$_REQUEST["user_real_name"] : '').'">'.wfMsg($column).'</a></th>';
-//            //
-//            //                }
-//            //                $output .= '</tr>';
-//            //
-//            //                //Display the data--display some data differently than others.
-//            //                while ($row = $db->fetchRow($result)) {
-//            //                    $output .= '<tr>';
-//            //                    foreach($columns as $column){
-//            //                        $output .= "<td>";
-//            //                        if ($column == "user_name") {
-//            //                            $output .= '<a href="'.$_SERVER["PHP_SELF"].'?title='.$_REQUEST["title"].'&action=watching&user_name='.$row[$column].'">'.$row[$column];
-//            //                        } elseif ($column == "user_real_name") {
-//            //                            $output .= $row[$column];
-//            //                        } elseif ($column == "wl_title") {
-//            //                            $output .= '<a href="'.$_SERVER["PHP_SELF"].'?title='.($row["wl_namespace"]!=0 ? $namespace_titles[$row["wl_namespace"]].':' : '').$row[$column].'&action=watching">'.$row[$column].'</a>';
-//            //                        } elseif ($column == "wl_namespace") {
-//            //                            $output .= $namespace_titles[$row[$column]];
-//            //                        } else {
-//            //                            $output .= htmlspecialchars($row[$column]).'&nbsp;';
-//            //                        }
-//            //                        $output .= "</td>";
-//            //                    }
-//            //                    $output .= '</tr>';
-//            //                }
-//            //                $output .= '</table>';
-//            //            }
-//            //            $wgOut->addHTML($output);
-//            return false;
-//        } else {
-//            return true;
-//        }
-//    }
-//
+
+
+
+    //$wgOut->setPagetitle($page_title.": Administration page");
+    $output = "";
+
+
+
+
+            //
+            //            $db = &wfGetDB(DB_SLAVE);
+            //
+            //            $tables = array("user", "watchlist");
+            //            $conditions = array("wl_user = user_id", "wl_namespace IN (".implode(", ", array_keys($namespace_titles)).")");
+            //            $fname = "Database::select";
+            //
+            //            //Determine which results are going to be shown and the appropriate columns
+            //            if(isset($_REQUEST["user_name"])) {
+            //                $wgOut->setPagetitle(wfMsg("pages_watched_by_user"));
+            //                $columns = array("wl_namespace","wl_title");
+            //                $conditions[] = "LOWER(user_name) = " . $db->addQuotes(strtolower($_REQUEST["user_name"]));
+            //            } else {
+            //                $wgOut->setPagetitle(wfMsg("users_watching_page"));
+            //                $columns = array("user_name", "user_real_name");
+            //                $conditions[] = "LOWER(wl_title) = " . $db->addQuotes(strtolower($page_title));
+            //            }
+            //
+            //            $order_col = "user_name";
+            //            if(isset($_REQUEST["order_col"]) && in_array($_REQUEST["order_col"], $columns)) {
+            //                $order_col = $_REQUEST["order_col"];
+            //            }
+            //
+            //            //Change the way the results are ordered
+            //            if(isset($_REQUEST["order_type"]) && $_REQUEST["order_type"] == "DESC") {
+            //                $ordertypePOST  = "DESC";
+            //                $ordertypeR = "ASC";
+            //            } else {
+            //                $ordertype  = "ASC";
+            //                $ordertypeR = "DESC";
+            //            }
+            //            $options = array("ORDER BY" => "$order_col $ordertype");
+            //
+            //            $output = "";
+            //            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
+            //                $output .= '<p>Error accessing watchlist.</p>';
+            //            } else if($db->numRows($result) == 0) {
+            //                $output .= '<p>Nobody is watching this page.</p>';
+            //            } else {
+            //                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
+            //                $output .= '<table cellspacing="0" cellpadding="5"><tr>';
+            //
+            //                //Generate sortable column headings
+            //                foreach($columns as $column){
+            //                    $output .= '<th'.$style.'><a href="'.$_SERVER["PHP_SELF"].'?title='.$_REQUEST["title"].'&order_col='.$column.'&action=watching&order_type='.$ordertypeR.
+            //                    (isset(POST$_REQUEST["user_name"]) ? '&user_name='.$_REQUEST["user_name"] : '').
+            //                    (isset($_REQUEST["user_real_name"]) ? '&user_real_name='.$_REQUEST["user_real_name"] : '').'">'.wfMsg($column).'</a></th>';
+            //
+            //                }
+            //                $output .= '</tr>';
+            //
+            //                //Display the data--display some data differently than others.
+            //                while ($row = $db->fetchRow($result)) {
+            //                    $output .= '<tr>';
+            //                    foreach($columns as $column){
+            //                        $output .= "<td>";
+            //                        if ($column == "user_name") {
+            //                            $output .= '<a href="'.$_SERVER["PHP_SELF"].'?title='.$_REQUEST["title"].'&action=watching&user_name='.$row[$column].'">'.$row[$column];
+            //                        } elseif ($column == "user_real_name") {
+            //                            $output .= $row[$column];
+            //                        } elseif ($column == "wl_title") {
+            //                            $output .= '<a href="'.$_SERVER["PHP_SELF"].'?title='.($row["wl_namespace"]!=0 ? $namespace_titles[$row["wl_namespace"]].':' : '').$row[$column].'&action=watching">'.$row[$column].'</a>';
+            //                        } elseif ($column == "wl_namespace") {
+            //                            $output .= $namespace_titles[$row[$column]];
+            //                        } else {
+            //                            $output .= htmlspecialchars($row[$column]).'&nbsp;';
+            //                        }
+            //                        $output .= "</td>";
+            //                    }
+            //                    $output .= '</tr>';
+            //                }
+            //                $output .= '</table>';
+            //            }
+            //            $wgOut->addHTML($output);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     function onSkinTemplateTabs(&$skin, &$content_actions) {
         global $wgRequest, $wgUser, $wgSitename;
 
         $action = $wgRequest->getText("action");
         $db = &wfGetDB(DB_SLAVE);
 
-        $watcherCount = 0;
+        $watcherCount = 1;
 
-        $content_actions["admin"] = array(
+        if($skin->mTitle->mNamespace == PATCH
+            || $skin->mTitle->mNamespace == PULLFEED
+            || $skin->mTitle->mNamespace == PUSHFEED
+            || $skin->mTitle->mNamespace == CHANGESET
+        ) {
+        }else {
+
+            $content_actions["admin"] = array(
                 "class" => ($action == "admin") ? "selected" : false,
                 "text" => "Article admin (".$watcherCount." updates)",
                 "href" => $skin->mTitle->getLocalURL("action=admin")
-        );
-
+            );
+        }
         return false;
     }
 
@@ -426,7 +433,7 @@ $output .='
  * @return <boolean>
  */
 function deleteFeed($feed) {
-//if the browser page is refresh, feed keeps the same value
+//if the browser page is refreshed, feed keeps the same value
 //but [[deleted::false| ]] isn't found and nothing is done
 preg_match( "/^(.+?)_*:_*(.*)$/S", $feed, $m );
     $articleName = $m[2];
