@@ -142,7 +142,8 @@ class Patch {
         else{
         $text.=' previous: [[previous::'.$previous.']]';
         }
-        $text.="----
+        $text.="
+----
 [[Special:ArticleAdminPage]]";
         $title = Title::newFromText($ID, PATCH);
         $article = new Article($title);

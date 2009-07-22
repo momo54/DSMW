@@ -14,10 +14,36 @@ $wgHooks['UnknownAction'][] = 'onUnknownAction';
 $wgHooks['EditPage::attemptSave'][] = 'attemptSave';
 $wgHooks['EditPageBeforeConflictDiff'][] = 'conflict';
 
-$wgAutoloadClasses['BlobInfo'] = "$wgP2PExtensionIP/logootEngine/BlobInfo.php";
-$wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
+////////////////////OLD VERSION (logoot component modified)/////////////////////
+//$wgAutoloadClasses['BlobInfo'] = "$wgP2PExtensionIP/logootEngine/BlobInfo.php";
+//$wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
+//$wgAutoloadClasses['LogootPosition'] =
+//    "$wgP2PExtensionIP/logootEngine/LogootPosition.php";
+//$wgAutoloadClasses['Diff1']
+//    = $wgAutoloadClasses['_DiffEngine1']
+//    = $wgAutoloadClasses['_DiffOp1']
+//    = $wgAutoloadClasses['_DiffOp_Add1']
+//    = $wgAutoloadClasses['_DiffOp_Change1']
+//    = $wgAutoloadClasses['_DiffOp_Copy1']
+//    = $wgAutoloadClasses['_DiffOp_Delete1']
+//    = "$wgP2PExtensionIP/differenceEngine/DiffEngine.php";
+//
+//$wgAutoloadClasses['LogootOp'] = "$wgP2PExtensionIP/logootop/LogootOp.php";
+//$wgAutoloadClasses['LogootIns'] = "$wgP2PExtensionIP/logootop/LogootIns.php";
+//$wgAutoloadClasses['LogootDel'] = "$wgP2PExtensionIP/logootop/LogootDel.php";
+//$wgAutoloadClasses['Patch'] = "$wgP2PExtensionIP/patch/Patch.php";
+//$wgAutoloadClasses['persistentClock'] = "$wgP2PExtensionIP/clockEngine/persistentClock.php";
+//$wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
+//$wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeSet.php";
+//$wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
+////////////////////OLD VERSION (logoot component modified)/////////////////////
+
+
+$wgAutoloadClasses['logootEngine'] = "$wgP2PExtensionIP/logootComponent/logootEngine.php";
+$wgAutoloadClasses['logoot'] = "$wgP2PExtensionIP/logootComponent/logoot.php";
+$wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootComponent/LogootId.php";
 $wgAutoloadClasses['LogootPosition'] =
-    "$wgP2PExtensionIP/logootEngine/LogootPosition.php";
+    "$wgP2PExtensionIP/logootComponent/LogootPosition.php";
 $wgAutoloadClasses['Diff1']
     = $wgAutoloadClasses['_DiffEngine1']
     = $wgAutoloadClasses['_DiffOp1']
@@ -25,16 +51,20 @@ $wgAutoloadClasses['Diff1']
     = $wgAutoloadClasses['_DiffOp_Change1']
     = $wgAutoloadClasses['_DiffOp_Copy1']
     = $wgAutoloadClasses['_DiffOp_Delete1']
-    = "$wgP2PExtensionIP/differenceEngine/DiffEngine.php";
+    = "$wgP2PExtensionIP/logootComponent/DiffEngine.php";
 
-$wgAutoloadClasses['LogootOp'] = "$wgP2PExtensionIP/logootop/LogootOp.php";
-$wgAutoloadClasses['LogootIns'] = "$wgP2PExtensionIP/logootop/LogootIns.php";
-$wgAutoloadClasses['LogootDel'] = "$wgP2PExtensionIP/logootop/LogootDel.php";
+$wgAutoloadClasses['LogootIns'] = "$wgP2PExtensionIP/logootComponent/LogootIns.php";
+$wgAutoloadClasses['LogootDel'] = "$wgP2PExtensionIP/logootComponent/LogootDel.php";
+$wgAutoloadClasses['boModel'] = "$wgP2PExtensionIP/logootModel/boModel.php";
+$wgAutoloadClasses['dao'] = "$wgP2PExtensionIP/logootModel/dao.php";
+$wgAutoloadClasses['manager'] = "$wgP2PExtensionIP/logootModel/manager.php";
+
 $wgAutoloadClasses['Patch'] = "$wgP2PExtensionIP/patch/Patch.php";
 $wgAutoloadClasses['persistentClock'] = "$wgP2PExtensionIP/clockEngine/persistentClock.php";
 $wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
 $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeSet.php";
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
+
 
 global $wgVersion;
 if(compareMWVersion($wgVersion)==-1) {
@@ -148,12 +178,22 @@ $newtext.="----
     }
     ///////ChangeSet page////////
     elseif(isset ($_POST['action']) && $_POST['action']=='onpush') {
-        wfDebugLog('p2p','push on '.$_POST['push']);
-        wfDebugLog('p2p',implode($_POST['push']));
+
+        /*In case we push directly from an article page*/
+        if(isset ($_POST['page']) && isset ($_POST['request'])){
+            $result = utils::createPushFeed($_POST['push'], $_POST['request']);
+            if ($result==false) {throw new MWException(
+                __METHOD__.': no Pushfeed created in utils:: createPushFeed:
+                        name: '.$_POST['push'].' request'. $_POST['request'] );
+            }
+        }
+
+        wfDebugLog('p2p','push on ');
         $patches = array();
         $tmpPatches = array();
         if(isset ($_POST['push'])) {
             $name1 = $_POST['push'];
+            if(!is_array($name1)) $name1 = array ($name1);
             foreach ($name1 as $push) {
                 wfDebugLog('p2p',' - '.$push);
             }
@@ -1067,11 +1107,6 @@ function attemptSave($editpage) {
     $ns = $editpage->mTitle->getNamespace();
     if( ($ns == PATCH) || ($ns == PUSHFEED) || ($ns == PULLFEED) || ($ns == CHANGESET))return true;
 
-    //    $pc = new persistentClock();
-    //    $pc->load();
-
-
-    $firstRev = 0;
     $actualtext = $editpage->textbox1;//V2
 
     $dbr = wfGetDB( DB_SLAVE );
@@ -1079,69 +1114,156 @@ function attemptSave($editpage) {
     if(is_null($lastRevision)) {
         $conctext = "";
         $rev_id = 0;
-        $firstRev = 1;
     }
     else {
         $conctext= $lastRevision->getText();//V1 conc
         $rev_id = $lastRevision->getId();
     }
 
-    $blobInfo = BlobInfo::loadBlobInfo($rev_id);//V1
-    $blobInfo->setTextImage($conctext);
-
-
-
+    $model = manager::loadModel($rev_id);
+    $logoot = new logootEngine($model);
+   
     //get the revision with the edittime==>V0
     $rev = Revision::loadFromTimestamp($dbr, $editpage->mTitle, $editpage->edittime);
     if(is_null($rev)) {
         $text = "";
         $rev_id1=0;
-        $firstRev = 1;
     }
     else {
         $text = $rev->getText();//VO
         $rev_id1 = $rev->getId();
     }
 
-
     if($conctext!=$text) {//if last revision is not V0, there is editing conflict
 
-        $blobInfo1 = BlobInfo::loadBlobInfo($rev_id1);
-        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev/*, $pc*/);
-
+        $model1 = manager::loadModel($rev_id1);
+        $logoot1 = new logootEngine($model1);
+        $listOp1 = $logoot1->generate($text, $actualtext);
         //creation Patch P2
-        $tmp = serialize($listPos);
+        $tmp = serialize($listOp1);
         $patchid = sha1($tmp);
-        $patch = new Patch($patchid, $listPos, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-        //$patch->store();//stores the patch in the DB
+        $patch = new Patch($patchid, $listOp1, getNewArticleRevId(), $editpage->mArticle->getId());
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
         //integration: diffs between VO and V2 into V1
-        foreach ($listPos as $operation) {
-            $blobInfo->integrateBlob($operation/*, $pc*/);
-        }
+
+            $modelAfterIntegrate = $logoot->integrate($listOp1);
+
     }else {//no edition conflict
-        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev/*, $pc*/);
-        $tmp = serialize($diffs);
+        $listOp = $logoot->generate($conctext, $actualtext);
+        $modelAfterIntegrate = $logoot->getModel();
+        $tmp = serialize($listOp);
         $patchid = sha1($tmp);
-        $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-        //$patch->store();//stores the patch in the DB
+        $patch = new Patch($patchid, $listOp, getNewArticleRevId(), $editpage->mArticle->getId());
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
     }
-    $revId = $blobInfo->getNewArticleRevId();
+    $revId = getNewArticleRevId();
 
-    //before integration into DB, we must update the "haslastPatch" property
-    //$blobInfo->lastPatchPropertyUpdate();
+    manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
 
-    $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
-
-
-    //    $pc->store();
-    //    unset($pc);
-    $editpage->textbox1 = $blobInfo->getTextImage();
+    $editpage->textbox1 = $modelAfterIntegrate->getText();
     return true;
 }
+
+/**
+ * Our model is stored in the DB just before Mediawiki creates
+ * the new revision that's why we have to get the last existing revision ID
+ * and the new will be lastId+1 ...
+ * @return <Integer> last revision id + 1
+ */
+    function getNewArticleRevId(){
+        wfProfileIn( __METHOD__ );
+        $dbr = wfGetDB( DB_SLAVE );
+        $lastid = $dbr->selectField('revision','MAX(rev_id)');
+        wfProfileOut( __METHOD__ );
+        return $lastid + 1;
+    }
+
+
+////////////////////OLD VERSION (logoot component modified)/////////////////////
+//function attemptSave($editpage) {
+//    $ns = $editpage->mTitle->getNamespace();
+//    if( ($ns == PATCH) || ($ns == PUSHFEED) || ($ns == PULLFEED) || ($ns == CHANGESET))return true;
+//
+//    //    $pc = new persistentClock();
+//    //    $pc->load();
+//
+//
+//    $firstRev = 0;
+//    $actualtext = $editpage->textbox1;//V2
+//
+//    $dbr = wfGetDB( DB_SLAVE );
+//    $lastRevision = Revision::loadFromTitle($dbr, $editpage->mTitle);
+//    if(is_null($lastRevision)) {
+//        $conctext = "";
+//        $rev_id = 0;
+//        $firstRev = 1;
+//    }
+//    else {
+//        $conctext= $lastRevision->getText();//V1 conc
+//        $rev_id = $lastRevision->getId();
+//    }
+//
+//    $blobInfo = BlobInfo::loadBlobInfo($rev_id);//V1
+//    $blobInfo->setTextImage($conctext);
+//
+//
+//
+//    //get the revision with the edittime==>V0
+//    $rev = Revision::loadFromTimestamp($dbr, $editpage->mTitle, $editpage->edittime);
+//    if(is_null($rev)) {
+//        $text = "";
+//        $rev_id1=0;
+//        $firstRev = 1;
+//    }
+//    else {
+//        $text = $rev->getText();//VO
+//        $rev_id1 = $rev->getId();
+//    }
+//
+//
+//    if($conctext!=$text) {//if last revision is not V0, there is editing conflict
+//
+//        $blobInfo1 = BlobInfo::loadBlobInfo($rev_id1);
+//        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev/*, $pc*/);
+//
+//        //creation Patch P2
+//        $tmp = serialize($listPos);
+//        $patchid = sha1($tmp);
+//        $patch = new Patch($patchid, $listPos, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
+//        //$patch->store();//stores the patch in the DB
+//        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
+//
+//        //integration: diffs between VO and V2 into V1
+//        foreach ($listPos as $operation) {
+//            $blobInfo->integrateBlob($operation/*, $pc*/);
+//        }
+//    }else {//no edition conflict
+//        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev/*, $pc*/);
+//        $tmp = serialize($diffs);
+//        $patchid = sha1($tmp);
+//        $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
+//        //$patch->store();//stores the patch in the DB
+//        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
+//
+//    }
+//    $revId = $blobInfo->getNewArticleRevId();
+//
+//    //before integration into DB, we must update the "haslastPatch" property
+//    //$blobInfo->lastPatchPropertyUpdate();
+//
+//    $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
+//
+//
+//    //    $pc->store();
+//    //    unset($pc);
+//    $editpage->textbox1 = $blobInfo->getTextImage();
+//    return true;
+//}
+////////////////////OLD VERSION (logoot component modified)/////////////////////
+
+
 
 function javascript($url) {
     $output = '

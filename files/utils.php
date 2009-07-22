@@ -199,5 +199,24 @@ $text.="
             return false;
         else return true;
     }
+
+    static function createPushFeed($name, $request){
+        $stringReq = utils::encodeRequest($request);//avoid "semantic injection"
+        $newtext = "PushFeed:
+Name: [[name::PushFeed:".$name."]]
+hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
+Pages concerned:
+{{#ask: ".$request."}}
+[[deleted::false| ]]
+";
+$newtext.="----
+[[Special:ArticleAdminPage]]";
+        wfDebugLog('p2p','  -> push page contains : '.$newtext);
+        $title = Title::newFromText($name, PUSHFEED);
+        $article = new Article($title);
+        $status = $article->doEdit($newtext, $summary="");
+        if($status->isGood()) return true;
+        else return false;
+    }
 }
 ?>

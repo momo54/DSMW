@@ -1,0 +1,1 @@
+<?php $cookiesCache = array( 'wikidbTest3_session' => '84d06a548243b74be1b825bd24d618f0','wikidbTest3UserID' => '1','wikidbTest3UserName' => 'WikiSysop','wikidbTest3Token' => 'e031ae80da008ce5776386ff096565c4',); ?>
