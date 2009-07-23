@@ -92,7 +92,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
         $patchName = 'TestPatch1';
         $patchContent = 'Patch: patchID: [[patchID::Patch:TestPatch1]]
- onPage: [[onPage::Paris]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
+ onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
 
@@ -147,7 +147,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
         $patchName = 'TestPatch11';
         $patchContent = 'Patch: patchID: [[patchID::Patch:TestPatch11]]
- onPage: [[onPage::Paris]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
+ onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
 
@@ -169,7 +169,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
         $patchName = 'TestPatch12';
         $patchContent = 'Patch: patchID: [[patchID::Patch:TestPatch12]]
- onPage: [[onPage::Paris]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
+ onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
 

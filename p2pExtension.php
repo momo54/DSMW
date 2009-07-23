@@ -905,18 +905,23 @@ function logootIntegrate($operations, $article) {
     else {
         $rev_id = $article->getRevIdFetched();
     }
-    $blobInfo = BlobInfo::loadBlobInfo($rev_id);
+    $listOp = array();
+    //$blobInfo = BlobInfo::loadBlobInfo($rev_id);
+    $model = manager::loadModel($rev_id);
+    $logoot = new logootEngine($model);
+
     foreach ($operations as $operation) {
         $operation = operationToLogootOp($operation);
 
         if ($operation!=false && is_object($operation)) {
-
-            $blobInfo->integrateBlob($operation);
+            $listOp[]=$operation;
+        //$blobInfo->integrateBlob($operation);
     }//end if
     }//end foreach operations
-    $revId = $blobInfo->getNewArticleRevId();
-    $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
-    $status = $article->doEdit($blobInfo->getTextImage(), $summary="");
+    $modelAfterIntegrate = $logoot->integrate($listOp);
+    $revId = utils::getNewArticleRevId();
+    manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
+    $status = $article->doEdit($modelAfterIntegrate->getText(), $summary="");
 }
 
 /**
@@ -1142,7 +1147,7 @@ function attemptSave($editpage) {
         //creation Patch P2
         $tmp = serialize($listOp1);
         $patchid = sha1($tmp);
-        $patch = new Patch($patchid, $listOp1, getNewArticleRevId(), $editpage->mArticle->getId());
+        $patch = new Patch($patchid, $listOp1, utils::getNewArticleRevId(), $editpage->mArticle->getId());
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
         //integration: diffs between VO and V2 into V1
@@ -1154,11 +1159,11 @@ function attemptSave($editpage) {
         $modelAfterIntegrate = $logoot->getModel();
         $tmp = serialize($listOp);
         $patchid = sha1($tmp);
-        $patch = new Patch($patchid, $listOp, getNewArticleRevId(), $editpage->mArticle->getId());
+        $patch = new Patch($patchid, $listOp, utils::getNewArticleRevId(), $editpage->mArticle->getId());
         $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
 
     }
-    $revId = getNewArticleRevId();
+    $revId = utils::getNewArticleRevId();
 
     manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
 
@@ -1172,13 +1177,13 @@ function attemptSave($editpage) {
  * and the new will be lastId+1 ...
  * @return <Integer> last revision id + 1
  */
-    function getNewArticleRevId(){
-        wfProfileIn( __METHOD__ );
-        $dbr = wfGetDB( DB_SLAVE );
-        $lastid = $dbr->selectField('revision','MAX(rev_id)');
-        wfProfileOut( __METHOD__ );
-        return $lastid + 1;
-    }
+//    function getNewArticleRevId(){
+//        wfProfileIn( __METHOD__ );
+//        $dbr = wfGetDB( DB_SLAVE );
+//        $lastid = $dbr->selectField('revision','MAX(rev_id)');
+//        wfProfileOut( __METHOD__ );
+//        return $lastid + 1;
+//    }
 
 
 ////////////////////OLD VERSION (logoot component modified)/////////////////////

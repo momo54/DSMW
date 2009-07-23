@@ -218,5 +218,20 @@ $newtext.="----
         if($status->isGood()) return true;
         else return false;
     }
+
+    /**
+ * Our model is stored in the DB just before Mediawiki creates
+ * the new revision that's why we have to get the last existing revision ID
+ * and the new will be lastId+1 ...
+ * @return <Integer> last revision id + 1
+ */
+    static function getNewArticleRevId(){
+        wfProfileIn( __METHOD__ );
+        $dbr = wfGetDB( DB_SLAVE );
+        $lastid = $dbr->selectField('revision','MAX(rev_id)');
+        wfProfileOut( __METHOD__ );
+        return $lastid + 1;
+    }
+
 }
 ?>

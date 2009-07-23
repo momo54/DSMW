@@ -1,14 +1,14 @@
 <?php
-require_once '../logootComponent/LogootId.php';
-require_once '../logootComponent/LogootPosition.php';
-require_once '../logootComponent/DiffEngine.php';
-require_once '../logootComponent/logoot.php';
-require_once '../logootComponent/logootEngine.php';
-require_once '../logootComponent/LogootIns.php';
-require_once '../logootComponent/LogootDel.php';
-require_once '../logootModel/boModel.php';
-require_once '../logootModel/dao.php';
-require_once '../logootModel/manager.php';
+require_once '../../logootComponent/LogootId.php';
+require_once '../../logootComponent/LogootPosition.php';
+require_once '../../logootComponent/DiffEngine.php';
+require_once '../../logootComponent/logoot.php';
+require_once '../../logootComponent/logootEngine.php';
+require_once '../../logootComponent/LogootIns.php';
+require_once '../../logootComponent/LogootDel.php';
+require_once '../../logootModel/boModel.php';
+require_once '../../logootModel/dao.php';
+require_once '../../logootModel/manager.php';
 define ('INT_MAX', "18446744073709551616");
 define ('INT_MIN', "0");
 /**
@@ -56,8 +56,8 @@ class logootTest1 extends PHPUnit_Framework_TestCase {
 
     function testIntegration(){
         $oldtext = "";
-        $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
-        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text1.txt"));
+        $fp = fopen(dirname( __FILE__ )."/text1.txt", "r");
+        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/text1.txt"));
         fclose($fp);
         $model = manager::loadModel(0);
         $logoot = new logootEngine($model);
@@ -102,8 +102,8 @@ class logootTest1 extends PHPUnit_Framework_TestCase {
 
 
         $oldtext = "";
-        $fp = fopen(dirname( __FILE__ )."/LogootTests/text2.txt", "r");
-        $conctext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text2.txt"));
+        $fp = fopen(dirname( __FILE__ )."/text2.txt", "r");
+        $conctext = fread($fp, filesize(dirname( __FILE__ )."/text2.txt"));
         fclose($fp);
         $model = manager::loadModel(0);
         $logoot = new logootEngine($model);
@@ -113,8 +113,8 @@ class logootTest1 extends PHPUnit_Framework_TestCase {
 
         //We get the operations list generated on a text 'text1'
         $oldtext = "";
-        $fp = fopen(dirname( __FILE__ )."/LogootTests/text1.txt", "r");
-        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/LogootTests/text1.txt"));
+        $fp = fopen(dirname( __FILE__ )."/text1.txt", "r");
+        $actualtext = fread($fp, filesize(dirname( __FILE__ )."/text1.txt"));
         fclose($fp);
         $model1 = manager::loadModel(0);
         $logoot1 = new logootEngine($model1);
