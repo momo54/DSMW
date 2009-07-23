@@ -2,6 +2,7 @@
 
 
 require_once "$IP/includes/SpecialPage.php";
+require_once "$wgP2PExtensionIP/files/utils.php";
 
 /* Extension variables */
 $wgExtensionFunctions[] = "wfSetupAdminPage";
@@ -185,27 +186,65 @@ function pullFeedDel(){
 
 
     function onUnknownAction($action, $article) {
-        global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest,$wgMessageCache, $wgWatchingMessages, $namespace_titles, $wgSitename;
+        global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle,
+        $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest,$wgMessageCache,
+        $wgWatchingMessages, $namespace_titles, $wgSitename,$wgServerName, $wgScriptPath;
+
+        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
         //require_once("WhoIsWatchingTabbed.i18n.php");
 
         $wgCachePages = false;
         //Verify that the action coming in is "admin"
         if($action == "admin") {
+            wfDebugLog('p2p', 'Admin page');
             $title = $article->mTitle->getText();
+            wfDebugLog('p2p', ' -> title : '.$title);
             $wgOut->setPagetitle('DSMW on '.$title);
-            $req = '[[Patch:+]][[onPage::'.$title.']]';
-            $patchs = $this->getRequestedPages($req);
 
-            $output = '<table>';
+            //part list of patch
+            $patchs = $this->orderPatchByPrevious($title);
+
+            $output = '<div><table><caption>List of patchs</caption>';
             foreach ($patchs as $patch) {
-                $output .= '<tr><td>'.$patch.'</td>';
+                wfDebugLog('p2p','  -> patchId : '.$patch);
+                if(!utils::isRemote($patch)) {
+                    wfDebugLog('p2p','      -> remote patch');
+                    $output .= '<tr BGCOLOR="#CCCCCC"><td>'.wfTimestamp(TS_RFC2822, $article->getTimestamp()).' : </td>';
+                // $output .= '<tr><td BGCOLOR="#33CC00"><a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a></td>';
+                }else {
+                    wfDebugLog('p2p','      -> local patch');
+                    $output .= '<tr><td>'.wfTimestamp(TS_RFC2822, $article->getTimestamp()).' : </td>';
+                //$output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a></td>';
 
-                $title = Title::newFromText( $patch,PATCH );
-                $article = new Article( $title );
+                }
 
-                $output .= '<td>'.wfTimestamp(TS_RFC2822, $article->mTimestamp).'</td></tr>';
+                $op = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.strtolower($patch).']]','?hasOperation');
+                $countOp = utils::countOperation($op);
+                $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
+                $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
+                /*$titlePatch = Title::newFromText( $patch,PATCH );
+                $article = new Article( $title );*/
             }
-            $output .= '</table>';
+            $output .= '</table></div>';
+
+            //part list of push
+            $pushs = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']]','?inPushFeed');
+            $output .= '<div><table><caption>List of pushs</caption>';
+            foreach ($pushs as $push) {
+                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$push.'">'.$push.'</a> : </td>';
+                $publishedInPush = getPublishedPatches($push);
+                foreach ($publishedInPush as $patch) {
+                    if(count(utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$title.']]',''))){
+                        $published[] = $patch;
+                    }
+                }
+                $unpublished = array_diff($patchs, $published);
+                $output .= '<td>'.count($unpublished).'/'.count($patchs).' unpublished patchs </td></tr>';
+            }
+            $output .= '</table></div>';
+            //part list of pull
+
+            //part push page
             $wgOut->addHTML($output);
             return false;
         }
@@ -438,37 +477,37 @@ function pullFeedDel(){
         }else {
 
             $content_actions["admin"] = array(
-            "class" => ($action == "admin") ? "selected" : false,
-            "text" => "Article admin (".$watcherCount." updates)",
-            "href" => $skin->mTitle->getLocalURL("action=admin")
+                "class" => ($action == "admin") ? "selected" : false,
+                "text" => "Article admin (".$watcherCount." updates)",
+                "href" => $skin->mTitle->getLocalURL("action=admin")
             );
         }
         return false;
     }
 
 
-/**
- *replaces the deleted semantic attribute in the feed page (pullfeed:.... or
- * pushfeed:....)
- * This aims to "virtualy" delete the article, it will no longer appear in the
- * special page (Special:ArticleAdminPage)
- *
- * @param <String> $feed
- * @return <boolean>
- */
-function deleteFeed($feed) {
-//if the browser page is refreshed, feed keeps the same value
-//but [[deleted::false| ]] isn't found and nothing is done
-preg_match( "/^(.+?)_*:_*(.*)$/S", $feed, $m );
-    $articleName = $m[2];
-    if($m[1]=="PullFeed") $title = Title::newFromText($articleName, PULLFEED);
-    elseif($m[1]=="PushFeed") $title = Title::newFromText($articleName, PUSHFEED);
-    else throw new MWException( __METHOD__.': no valid namespace detected' );
-    //get PushFeed by name
-    
-    $dbr = wfGetDB( DB_SLAVE );
-    $revision = Revision::loadFromTitle($dbr, $title);
-    $pageContent = $revision->getText();
+    /**
+     *replaces the deleted semantic attribute in the feed page (pullfeed:.... or
+     * pushfeed:....)
+     * This aims to "virtualy" delete the article, it will no longer appear in the
+     * special page (Special:ArticleAdminPage)
+     *
+     * @param <String> $feed
+     * @return <boolean>
+     */
+    function deleteFeed($feed) {
+    //if the browser page is refreshed, feed keeps the same value
+    //but [[deleted::false| ]] isn't found and nothing is done
+        preg_match( "/^(.+?)_*:_*(.*)$/S", $feed, $m );
+        $articleName = $m[2];
+        if($m[1]=="PullFeed") $title = Title::newFromText($articleName, PULLFEED);
+        elseif($m[1]=="PushFeed") $title = Title::newFromText($articleName, PUSHFEED);
+        else throw new MWException( __METHOD__.': no valid namespace detected' );
+        //get PushFeed by name
+
+        $dbr = wfGetDB( DB_SLAVE );
+        $revision = Revision::loadFromTitle($dbr, $title);
+        $pageContent = $revision->getText();
 
         $dbr = wfGetDB( DB_SLAVE );
         $revision = Revision::loadFromTitle($dbr, $title);
@@ -504,10 +543,11 @@ preg_match( "/^(.+?)_*:_*(.*)$/S", $feed, $m );
     /**
      * returns an array of page titles received via the request
      */
-    function getRequestedPages($request) {
+    function getRequestedPages($request,$params="") {
         global $wgServerName, $wgScriptPath;
         $req = utils::encodeRequest($request);
-        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
+        $params = utils::encodeRequest($params);
+        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/".$params."/headers=hide/format=csv/sep=,/limit=100";
         $string = file_get_contents($url1);
         $res = explode("\n", $string);
         foreach ($res as $key=>$page) {
@@ -539,6 +579,33 @@ preg_match( "/^(.+?)_*:_*(.*)$/S", $feed, $m );
         return $article;
     }
 
+    function orderPatchByPrevious($title,$previousPatch='none') {
+        $firstPatch = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]','?patchID');
+
+        /*while($firstPatch) {
+            $p = split(',',$firstPatch[0]);
+            $firstPatch[0] = $p[1];
+            $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
+            foreach ($patchFound as $p) {
+                $firstPatch[] = $p;
+            }
+            
+            $newPatch = array_shift($firstPatch);
+            if(!$marque[$newPatch]) {
+                $marque[$newPatch] = 1;
+                $patchs[] = $newPatch;
+            }*/
+        while($firstPatch) {
+            $p = split(',',$firstPatch[0]);
+            $firstPatch[0] = $p[1];
+            $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
+            foreach ($patchFound as $p) {
+                $firstPatch[] = $p;
+            }
+            $patchs[] = array_shift($firstPatch);
+        }
+        return $patchs;
+    }
 
 //static function javascript(){
 //$output = '

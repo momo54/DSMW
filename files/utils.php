@@ -98,7 +98,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         foreach ($listPatch as $patch) {
             $newtext .=" hasPatch: [[hasPatch::".$patch."]]";
         }
-$newtext.="
+        $newtext.="
 ----
 [[Special:ArticleAdminPage]]";
         $title = Title::newFromText($CSID, CHANGESET);
@@ -122,7 +122,7 @@ $newtext.="
         else {
             $text.=' previous: [[previous::'.$previousPatch.']]';
         }
-$text.="
+        $text.="
 ----
 [[Special:ArticleAdminPage]]";
         $title = Title::newFromText($patchId, PATCH);
@@ -130,24 +130,24 @@ $text.="
         $article->doEdit($text, $summary="");
     }
 
-//    static function createPushFeed($name, $request){
-//        $stringReq = utils::encodeRequest($request);//avoid "semantic injection" :-)
-//
-//        $newtext = "PushFeed:
-//Name: [[name::PushFeed:".$name."]]
-//hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
-//Pages concerned:
-//{{#ask: ".$request."}}
-//[[deleted::false| ]]
-//";
-//$newtext.="----
-//[[Special:ArticleAdminPage]]";
-//        wfDebugLog('p2p','  -> push page contains : '.$newtext);
-//        $title = Title::newFromText($name, PUSHFEED);
-//
-//        $article = new Article($title);
-//        $edit = $article->doEdit($newtext, $summary="");
-//    }
+    //    static function createPushFeed($name, $request){
+    //        $stringReq = utils::encodeRequest($request);//avoid "semantic injection" :-)
+    //
+    //        $newtext = "PushFeed:
+    //Name: [[name::PushFeed:".$name."]]
+    //hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
+    //Pages concerned:
+    //{{#ask: ".$request."}}
+    //[[deleted::false| ]]
+    //";
+    //$newtext.="----
+    //[[Special:ArticleAdminPage]]";
+    //        wfDebugLog('p2p','  -> push page contains : '.$newtext);
+    //        $title = Title::newFromText($name, PUSHFEED);
+    //
+    //        $article = new Article($title);
+    //        $edit = $article->doEdit($newtext, $summary="");
+    //    }
 
     static function getLastPatchId($pageName, $url='') {
         global $wgServerName, $wgScriptPath;
@@ -200,7 +200,46 @@ $text.="
         else return true;
     }
 
-    static function createPushFeed($name, $request){
+    static function isRemote($patchId) {
+        return strpos(strtolower($patchId), strtolower(getServerId()));
+    }
+
+    /**
+     *
+     * @param <type> $stringOpInPatch
+     * @return <type> array of nb insert and delete operation
+     */
+    static function countOperation($opInPatch) {
+        $res['insert'] = 0;
+        $res['delete'] = 0;
+        foreach ($opInPatch as $op) {
+            $op = strtolower($op);
+            $res['insert'] += substr_count($op, 'insert');
+            $res['delete'] += substr_count($op, 'delete');
+        }
+        return $res;
+    }
+
+    static function getSemanticRequest($server,$request,$param,$sep='!') {
+        $request = utils::encodeRequest($request);
+        $param = utils::encodeRequest($param);
+        $url = $server.'/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
+        $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
+        if($php == "") {
+            return array();
+        }
+        $array = split($sep, $php);
+        if( count($array)==1) {
+            return $array;
+        }
+        $arrayRes[] = $array[1];
+        for ($i = 2 ; $i < count($array) ; $i++) {
+            $arrayRes[] = ereg_replace('"', '',$array[$i]);
+        }
+        return $arrayRes;
+    }
+
+        static function createPushFeed($name, $request){
         $stringReq = utils::encodeRequest($request);//avoid "semantic injection"
         $newtext = "PushFeed:
 Name: [[name::PushFeed:".$name."]]
