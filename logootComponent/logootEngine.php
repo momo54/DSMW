@@ -27,7 +27,7 @@ class logootEngine implements logoot{
         foreach ($opList as $operation){
          if($operation instanceof LogootIns){
             $result = $this->dichoSearch1($operation->getLogootPosition());
-            
+            wfDebugLog('p2p',' - integrate dicho result: '.$result);
             if(is_array($result)){
         /* position array begins at key '1' which corresponds with line1
          * Lines array begins at key '0' as a normal array, because there is
@@ -365,7 +365,7 @@ $step = gmp_div_q($slot, $N);
      * @param <Object> $position
      */
     private function add($lineNumber, $position){
-
+        wfDebugLog('p2p',' - function logootEngine::'.__METHOD__);
         $listIds = $this->model->getPositionlist();
       
         //position shifting
@@ -386,7 +386,7 @@ $step = gmp_div_q($slot, $N);
      * @param <Object> $line
      */
     private function addLine($lineNumber, $line){
-
+        wfDebugLog('p2p',' - function logootEngine::'.__METHOD__);
         $listLines = $this->model->getLinelist();
         //position shifting
         $nbLines = count($listLines);
@@ -398,6 +398,7 @@ $step = gmp_div_q($slot, $N);
         $listLines[$lineNumber] = $line;
 
         $this->model->setLinelist($listLines);
+        wfDebugLog('p2p',' - line added '.$line);
     }
 
     /**

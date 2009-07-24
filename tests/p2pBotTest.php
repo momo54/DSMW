@@ -47,26 +47,26 @@ class p2pBotTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testCreatePage() {
-        $pageName = "Paris";
-        $content='content page Paris
-[[Category:city]]';
+        $pageName = "Lambach";
+        $content='content page Lambach
+[[Category:city1]]';
         $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
         $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);
         $this->assertEquals($content,$contentFound);
 
-        $pageName = "Nancy";
-        $content='content page Nancy
-[[Category:city]]';
+        $pageName = "Pouxeux";
+        $content='content page Pouxeux
+[[Category:city1]]';
         $this->p2pBot1->createPage($pageName,$content);
         $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);
         $this->assertEquals($content,$contentFound);
     }
 
     public function testAppendPage() {
-        $pageName = "Paris";
-        $content='content page Paris
-[[Category:city]]';
+        $pageName = "Lambach";
+        $content='content page Lambach
+[[Category:city1]]';
         $this->p2pBot1->createPage($pageName,$content);
         assertPageExist($this->p2pBot1->bot->wikiServer,$pageName);
         $contentFound = getContentPage($this->p2pBot1->bot->wikiServer, $pageName);

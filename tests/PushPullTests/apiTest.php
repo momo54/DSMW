@@ -73,7 +73,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
 
         $this->assertTrue($this->p2pBot1->createPage($patchName,$content),
             'failed to create page '.$patchName.' ('.$this->p2pBot1->bot->results.')');
-        $patchName = 'patch:localhost/wiki2';
+        $patchName = 'Patch:localhost/wiki2';
         $content = '[[patchID::'.$patchName.']] [[onPage::Paris]] [[previous::none]]
         [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
 

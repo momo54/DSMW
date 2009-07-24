@@ -1,4 +1,5 @@
 <?php
+define( 'MEDIAWIKI', true );
 require_once '../../logootComponent/LogootId.php';
 require_once '../../logootComponent/LogootPosition.php';
 require_once '../../logootComponent/DiffEngine.php';
@@ -9,6 +10,7 @@ require_once '../../logootComponent/LogootDel.php';
 require_once '../../logootModel/boModel.php';
 require_once '../../logootModel/dao.php';
 require_once '../../logootModel/manager.php';
+require_once '../../../../includes/GlobalFunctions.php';
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
 /**

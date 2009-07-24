@@ -90,8 +90,8 @@ class pullTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->p2pBot1->createPage('ChangeSet:'.$CSName,$CSContent),
             'failed on create page testCS1Pull ('.$this->p2pBot1->bot->results.')');
 
-        $patchName = 'testpatch1';
-        $patchContent = 'Patch: patchID: [[patchID::patch:testpatch1]]
+        $patchName = 'Testpatch1';
+        $patchContent = 'Patch: patchID: [[patchID::Patch:Testpatch1]]
  onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
@@ -110,12 +110,12 @@ class pullTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->p2pBot2->pull('PullFeed:'.$pullName),'error on pull '.$pullName.'('.$this->p2pBot2->bot->results.')');
 
         assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:'.$CSName);
-        assertPageExist($this->p2pBot2->bot->wikiServer, 'patch:'.$patchName);
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Patch:'.$patchName);
 
         $pullHead = getSemanticRequest($this->p2pBot2->bot->wikiServer,'[[name::PullFeed:'.$pullName.']]','-3FhasPullHead');
         $this->assertEquals(strtolower('ChangeSet:'.$CSName),strtolower(substr($pullHead[0],0,-1)));
 
-        /* pull without update */
+        // pull without update
         $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));
 
         $this->assertTrue($this->p2pBot2->pull('PullFeed:'.$pullName),'error on pull '.$pullName.'('.$this->p2pBot2->bot->results.')');
@@ -129,74 +129,74 @@ class pullTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testMultiPull() {
-        $pushName = 'pushCity11';
+        $pushName = 'PushCity11';
         $pushContent = 'PushFeed:
-[[name::pushCity11]]
+[[name::PushCity11]]
 [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
-[[hasPushHead::ChangeSet:testCS1Pull11]]';
+[[hasPushHead::ChangeSet:TestCS1Pull11]]';
         $this->assertTrue($this->p2pBot1->createPage('PushFeed:'.$pushName,$pushContent),
             'failed on create page pushCity ('.$this->p2pBot1->bot->results.')');
 
-        $CSName = 'testCS1Pull11';
+        $CSName = 'TestCS1Pull11';
         $CSContent = '[[changeSetID::TestCS1Pull11]]
-[[inPushFeed::PushFeed:pushCity11]]
+[[inPushFeed::PushFeed:PushCity11]]
 [[previousChangeSet::none]]
-[[hasPatch::patch:testpatch11]]';
+[[hasPatch::patch:Testpatch11]]';
         $this->assertTrue($this->p2pBot1->createPage('ChangeSet:'.$CSName,$CSContent),
             'failed on create page testCS1Pull ('.$this->p2pBot1->bot->results.')');
 
-        $patchName = 'testpatch11';
-        $patchContent = 'Patch: patchID: [[patchID::patch:testpatch11]]
+        $patchName = 'Testpatch11';
+        $patchContent = 'Patch: patchID: [[patchID::Patch:Testpatch11]]
  onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
 
-        $pushName = 'pushCity12';
+        $pushName = 'PushCity12';
         $pushContent = 'PushFeed:
-[[name::pushCity12]]
+[[name::PushCity12]]
 [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
-[[hasPushHead::ChangeSet:testCS1Pull12]]';
+[[hasPushHead::ChangeSet:TestCS1Pull12]]';
         $this->assertTrue($this->p2pBot1->createPage('PushFeed:'.$pushName,$pushContent),
             'failed on create page pushCity ('.$this->p2pBot1->bot->results.')');
 
-        $CSName = 'testCS1Pull12';
+        $CSName = 'TestCS1Pull12';
         $CSContent = '[[changeSetID::TestCS1Pull12]]
 [[inPushFeed::PushFeed:pushCity12]]
 [[previousChangeSet::none]]
-[[hasPatch::patch:testpatch12]]';
+[[hasPatch::Patch:Testpatch12]]';
         $this->assertTrue($this->p2pBot1->createPage('ChangeSet:'.$CSName,$CSContent),
             'failed on create page testCS1Pull ('.$this->p2pBot1->bot->results.')');
 
-        $patchName = 'testpatch12';
-        $patchContent = 'Patch: patchID: [[patchID::patch:testpatch12]]
+        $patchName = 'Testpatch12';
+        $patchContent = 'Patch: patchID: [[patchID::Patch:Testpatch12]]
  onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
-            'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
+            'failed on create page testPatch12 ('.$this->p2pBot1->bot->results.')');
 
         exec('rm ../cache/*');
         $this->p2pBot2->bot->wikiConnected = false;
-        
-        $pullContent = '[[name::PullFeed:pullCityonWiki11]]
+
+        $pullContent = '[[name::PullFeed:PullCityonWiki11]]
 [[pushFeedServer::http://localhost/wiki1]]
-[[pushFeedName::PushFeed:pushCity11]] [[hasPullHead::none]]';
+[[pushFeedName::PushFeed:PushCity11]] [[hasPullHead::none]]';
         $this->assertTrue($this->p2pBot2->createPage('PullFeed:pullCityonWiki11',$pullContent),
             'failed on create pull ('.$this->p2pBot2->bot->results.')');
 
-        $pullContent = '[[name::PullFeed:pullCityonWiki12]]
+        $pullContent = '[[name::PullFeed:PullCityonWiki12]]
 [[pushFeedServer::http://localhost/wiki1]]
-[[pushFeedName::PushFeed:pushCity12]] [[hasPullHead::none]]';
+[[pushFeedName::PushFeed:PushCity12]] [[hasPullHead::none]]';
         $this->assertTrue($this->p2pBot2->createPage('PullFeed:pullCityonWiki12',$pullContent),
             'failed on create pull ('.$this->p2pBot2->bot->results.')');
 
         //pull
-        $array = array('PullFeed:pullCityonWiki11','PullFeed:pullCityonWiki12');
+        $array = array('PullFeed:PullCityonWiki11','PullFeed:PullCityonWiki12');
         $this->assertTrue($this->p2pBot2->pull($array),'error on pull ('.$this->p2pBot2->bot->results.')');
 
-            assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:testCS1Pull11');
-        assertPageExist($this->p2pBot2->bot->wikiServer, 'patch:testpatch11');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:TestCS1Pull11');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Patch:Testpatch11');
 
-        assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:testCS1Pull12');
-        assertPageExist($this->p2pBot2->bot->wikiServer, 'patch:testpatch12');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'ChangeSet:TestCS1Pull12');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Patch:Testpatch12');
 
     }
 }

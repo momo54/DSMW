@@ -75,7 +75,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
             'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
         //create pull on wiki2
-        $pullName = 'pullCity';
+        $pullName = 'PullCity';
         $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
             'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
 
@@ -102,7 +102,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $this->assertEquals($CSonWiki1,$CSonWiki2);
     }
 
-    function testSimple2() {
+/*    function testSimple2() {
         $this->testSimple1();
 
         $countCSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
@@ -187,7 +187,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $PatchonWiki2 = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
         $this->assertEquals($PatchonWiki1,$PatchonWiki2);
     }
-
+*/
     function arraytolower($array) {
       foreach($array as $key => $value) {
           $array[$key] = strtolower($value);

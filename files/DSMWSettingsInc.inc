@@ -35,7 +35,7 @@ $wgGroupPermissions['sysop']['editchangeset'] = true;
  $serverId = getServerId();
  if($serverId=="0"){
      $serverId = md5(uniqid(mt_rand(), true));
-     store($serverId);
+     store(strtoupper($serverId));
  }
  
  function getServerId(){

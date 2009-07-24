@@ -138,7 +138,7 @@ toto titi
         $CSIDFound = substr($pushFound[0],0,-1);
         assertPageExist($this->p2pBot1->bot->wikiServer,$CSIDFound);
 
-        $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
+        $CSName = substr($CSIDFound, strlen('ChangeSet:'));
 
         //assert the changeSet created is ok
         $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FchangeSetID/-3FinPushFeed/-3FpreviousChangeSet/-3FhasPatch');
@@ -175,7 +175,7 @@ toto titi
         $CSIDFound = substr($pushFound[0],0,-1);
 
         $this->assertNotEquals($previousCS, $CSIDFound);
-        $CSName = strtolower(substr($CSIDFound, strlen('ChangeSet:')));
+        $CSName = substr($CSIDFound, strlen('ChangeSet:'));
 
         //assert that previousChangeSet is ok
         $CSFound = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[changeSetID::'.$CSName.']]','-3FpreviousChangeSet');

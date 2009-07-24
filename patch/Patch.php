@@ -114,7 +114,7 @@ class Patch {
 //                $ID = "Patch:".$articleName;
 //            }
 
-        $text = 'Patch: patchID: [[patchID::patch:'.$ID.']]
+        $text = 'Patch: patchID: [[patchID::Patch:'.$ID.']]
  onPage: [[onPage::'.$pageName.']] ';
         $i=1;//op counter
         foreach ($this->mOperations as $operation){
