@@ -85,7 +85,7 @@ class ApiQueryChangeSet extends ApiQueryBase {
     }
 
     public function getVersion() {
-        return __CLASS__ . ': $Id: ApiQueryChangeSet.php xxxxx 2009-06-26 14:00:00Z jpmuller $';
+        return __CLASS__ . ': $Id: ApiQueryChangeSet.php xxxxx 2009-06-26 14:00:00Z hantz $';
     }
 }
 ?>

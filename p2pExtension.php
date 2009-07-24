@@ -63,15 +63,18 @@ $wgAutoloadClasses['Patch'] = "$wgP2PExtensionIP/patch/Patch.php";
 $wgAutoloadClasses['persistentClock'] = "$wgP2PExtensionIP/clockEngine/persistentClock.php";
 $wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
 $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeSet.php";
+$wgAutoloadClasses['ApiPatchPush'] = "$wgP2PExtensionIP/api/ApiPatchPush.php";
 $wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
 
 
 global $wgVersion;
 if(compareMWVersion($wgVersion)==-1) {
-    $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+    $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet',
+        'patchPushed' => 'ApiPatchPush');
 }else {
 //global $wgAPIMetaModules;
-    $wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet');
+    $wgAPIMetaModules = array('patch' => 'ApiQueryPatch','changeSet' => 'ApiQueryChangeSet',
+        'patchPushed' => 'ApiPatchPush');
 }
 define ('INT_MAX', "1000000000000000000000");//22
 define ('INT_MIN', "0");
@@ -188,11 +191,16 @@ Pages concerned:
     elseif(isset ($_POST['action']) && $_POST['action']=='onpush') {
 
         /*In case we push directly from an article page*/
-        if(isset ($_POST['page']) && isset ($_POST['request'])){
-            $result = utils::createPushFeed($_POST['push'], $_POST['request']);
-            if ($result==false) {throw new MWException(
-                __METHOD__.': no Pushfeed created in utils:: createPushFeed:
+        if(isset ($_POST['page']) && isset ($_POST['request'])) {
+            $articlename = Title::newFromText($_POST['push']);
+
+            if(!$articlename->exists()) {
+                $result = utils::createPushFeed($_POST['push'], $_POST['request']);
+
+                if ($result==false) {throw new MWException(
+                    __METHOD__.': no Pushfeed created in utils:: createPushFeed:
                         name: '.$_POST['push'].' request'. $_POST['request'] );
+                }
             }
         }
 
@@ -278,7 +286,7 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
                 $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
             }
 
-$newtext.="
+            $newtext.="
 ----
 [[Special:ArticleAdminPage]]";
 
@@ -303,11 +311,17 @@ $newtext.="
         wfDebugLog('p2p','Create pull '.$_POST['pullname'].' with pushName '.$_POST['pushname'].' on '.$_POST['url']);
         $url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
         if(utils::isValidURL($url)==false)
-        throw new MWException( __METHOD__.': '.$url.' seems not to be an url' );//throws an exception if $url is invalid
+            throw new MWException( __METHOD__.': '.$url.' seems not to be an url' );//throws an exception if $url is invalid
         $pushname = $_POST['pushname'];//with ns
         $pullname = $_POST['pullname'];
 
         $newtext = "
+{{#form:action=".$urlServer."?action=onpull|method=POST|
+{{#input:type=hidden|name=pull|value=PullFeed:".$pullname."}}<br>
+{{#input:type=hidden|name=action|value=onpull}}<br>
+{{#input:type=submit|value=PULL}}
+}}
+----
 [[Special:ArticleAdminPage]]
 ----
 PullFeed:
@@ -333,6 +347,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         if(isset ($_POST['pull'])) {
             $name1 = $_POST['pull'];
             wfDebugLog('p2p','pull on ');
+            if(!is_array($name1)) $name1 = array ($name1);
             foreach ($_POST['pull'] as $pull) {
                 wfDebugLog('p2p',' - '.$pull);
             }
@@ -349,64 +364,35 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }
 
         //$name = $name1[0];//with NS
-        foreach ($name1 as $name){// for each pullfeed name==> pull
-        wfDebugLog('p2p','      -> pull : '.$name);
+        foreach ($name1 as $name) {// for each pullfeed name==> pull
+            wfDebugLog('p2p','      -> pull : '.$name);
 
-        //        $previousCSID = getPreviousPulledCSID($name);
-        //        if($previousCSID==false) {
-        //            $previousCSID = "none";
-        //        }
-        $previousCSID = getHasPullHead($name);
-        if($previousCSID==false) {
-            $previousCSID = "none";
-        }
-        wfDebugLog('p2p','      -> pullHead : '.$previousCSID);
-        $relatedPushServer = getPushURL($name);
-        if(is_null($relatedPushServer))throw new MWException( __METHOD__.': no relatedPushServer url' );
-        $namePush = getPushName($name);
-        wfDebugLog('p2p','      -> pushServer : '.$relatedPushServer);
-        wfDebugLog('p2p','      -> pushName : '.$namePush);
-        if(is_null($namePush))throw new MWException( __METHOD__.': no PushName' );
-        //split NS and name
-        preg_match( "/^(.+?)_*:_*(.*)$/S", $namePush, $m );
-        $nameWithoutNS = $m[2];
-
-
-        //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-        $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-        wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-        $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-        if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Sever (ChangeSet API)' );
-        $dom = new DOMDocument();
-        $dom->loadXML($cs);
-
-        $changeSet = $dom->getElementsByTagName('changeSet');
-        $CSID = null;
-        foreach($changeSet as $cs) {
-            if ($cs->hasAttribute("id")) {
-                $CSID = $cs->getAttribute('id');
-                $csName = $CSID;
+            //        $previousCSID = getPreviousPulledCSID($name);
+            //        if($previousCSID==false) {
+            //            $previousCSID = "none";
+            //        }
+            $previousCSID = getHasPullHead($name);
+            if($previousCSID==false) {
+                $previousCSID = "none";
             }
-        }
-        wfDebugLog('p2p','     -> changeSet found '.$CSID);
-        while($CSID!=null) {
-        //if(!utils::pageExist($CSID)) {
-            $listPatch = null;
-            $patchs = $dom->getElementsByTagName('patch');
-            foreach($patchs as $p) {
-                wfDebugLog('p2p','          -> patch '.$p->firstChild->nodeValue);
-                $listPatch[] = $p->firstChild->nodeValue;
-            }
-            // $CSID = substr($CSID,strlen('changeSet:'));
-            utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
+            wfDebugLog('p2p','      -> pullHead : '.$previousCSID);
+            $relatedPushServer = getPushURL($name);
+            if(is_null($relatedPushServer))throw new MWException( __METHOD__.': no relatedPushServer url' );
+            $namePush = getPushName($name);
+            $namePush = str_replace(' ', '_', $namePush);
+            wfDebugLog('p2p','      -> pushServer : '.$relatedPushServer);
+            wfDebugLog('p2p','      -> pushName : '.$namePush);
+            if(is_null($namePush))throw new MWException( __METHOD__.': no PushName' );
+            //split NS and name
+            preg_match( "/^(.+?)_*:_*(.*)$/S", $namePush, $m );
+            $nameWithoutNS = $m[2];
 
-            integrate($CSID, $listPatch,$relatedPushServer);
-            updatePullFeed($name, $CSID);
 
-            // }
-
-            $previousCSID = $CSID;
+            //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+            $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+            wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Sever (ChangeSet API)' );
             $dom = new DOMDocument();
             $dom->loadXML($cs);
 
@@ -415,23 +401,53 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             foreach($changeSet as $cs) {
                 if ($cs->hasAttribute("id")) {
                     $CSID = $cs->getAttribute('id');
+                    $csName = $CSID;
                 }
             }
             wfDebugLog('p2p','     -> changeSet found '.$CSID);
-        }
+            while($CSID!=null) {
+            //if(!utils::pageExist($CSID)) {
+                $listPatch = null;
+                $patchs = $dom->getElementsByTagName('patch');
+                foreach($patchs as $p) {
+                    wfDebugLog('p2p','          -> patch '.$p->firstChild->nodeValue);
+                    $listPatch[] = $p->firstChild->nodeValue;
+                }
+                // $CSID = substr($CSID,strlen('changeSet:'));
+                utils::createChangeSetPull($CSID, $name, $previousCSID, $listPatch);
 
-        if(is_null($csName)) {
-            wfDebugLog('p2p','  - redirect to Special:ArticleAdminPage');
-            $title = Title::newFromText('Special:ArticleAdminPage');
-            $article = new Article($title);
-            $article->doRedirect();
-        }
-        else {
-            wfDebugLog('p2p','  - redirect to ChangeSet:'.$csName);
-            $title = Title::newFromText($csName, CHANGESET);
-            $article = new Article($title);
-            $article->doRedirect();
-        }
+                integrate($CSID, $listPatch,$relatedPushServer);
+                updatePullFeed($name, $CSID);
+
+                // }
+
+                $previousCSID = $CSID;
+                $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+                $dom = new DOMDocument();
+                $dom->loadXML($cs);
+
+                $changeSet = $dom->getElementsByTagName('changeSet');
+                $CSID = null;
+                foreach($changeSet as $cs) {
+                    if ($cs->hasAttribute("id")) {
+                        $CSID = $cs->getAttribute('id');
+                    }
+                }
+                wfDebugLog('p2p','     -> changeSet found '.$CSID);
+            }
+
+            if(is_null($csName)) {
+                wfDebugLog('p2p','  - redirect to Special:ArticleAdminPage');
+                $title = Title::newFromText('Special:ArticleAdminPage');
+                $article = new Article($title);
+                $article->doRedirect();
+            }
+            else {
+                wfDebugLog('p2p','  - redirect to ChangeSet:'.$csName);
+                $title = Title::newFromText($csName, CHANGESET);
+                $article = new Article($title);
+                $article->doRedirect();
+            }
         }//end foreach list pullfeed
         return false;
     }
@@ -929,11 +945,11 @@ function logootIntegrate($operations, $article) {
         if ($operation!=false && is_object($operation)) {
             $listOp[]=$operation;
         //$blobInfo->integrateBlob($operation);
-        }//end if
-//    else {
-//        throw new MWException( __METHOD__.': operation problem '.$operation );
-//        wfDebugLog('p2p',' - operation problem : '.$operation);
-//    }
+    }//end if
+    //    else {
+    //        throw new MWException( __METHOD__.': operation problem '.$operation );
+    //        wfDebugLog('p2p',' - operation problem : '.$operation);
+    //    }
     }//end foreach operations
     $modelAfterIntegrate = $logoot->integrate($listOp);
     $revId = utils::getNewArticleRevId();
@@ -1144,7 +1160,7 @@ function attemptSave($editpage) {
 
     $model = manager::loadModel($rev_id);
     $logoot = new logootEngine($model);
-   
+
     //get the revision with the edittime==>V0
     $rev = Revision::loadFromTimestamp($dbr, $editpage->mTitle, $editpage->edittime);
     if(is_null($rev)) {
@@ -1169,7 +1185,7 @@ function attemptSave($editpage) {
 
         //integration: diffs between VO and V2 into V1
 
-            $modelAfterIntegrate = $logoot->integrate($listOp1);
+        $modelAfterIntegrate = $logoot->integrate($listOp1);
 
     }else {//no edition conflict
         $listOp = $logoot->generate($conctext, $actualtext);

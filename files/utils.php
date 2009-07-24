@@ -223,23 +223,24 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     static function getSemanticRequest($server,$request,$param,$sep='!') {
         $request = utils::encodeRequest($request);
         $param = utils::encodeRequest($param);
-        $url = $server.'/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
+        $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
         $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
         if($php == "") {
             return array();
         }
+        $res = explode("\n", $php);
         $array = split($sep, $php);
-        if( count($array)==1) {
-            return $array;
+        foreach ($res as $key=>$page) {
+            if($page=="") {
+                unset ($res[$key]);
+            }else {
+                $res[$key] = str_replace("\"", "", $page);
+            }
         }
-        $arrayRes[] = $array[1];
-        for ($i = 2 ; $i < count($array) ; $i++) {
-            $arrayRes[] = ereg_replace('"', '',$array[$i]);
-        }
-        return $arrayRes;
+        return $res;
     }
 
-        static function createPushFeed($name, $request){
+    static function createPushFeed($name, $request) {
         global $wgServerName, $wgScriptPath;
         $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
         $stringReq = utils::encodeRequest($request);//avoid "semantic injection"
@@ -264,17 +265,17 @@ Pages concerned:
         $title = Title::newFromText($name, PUSHFEED);
         $article = new Article($title);
         $status = $article->doEdit($newtext, $summary="");
-        if($status->isGood()) return true;
+        if((is_bool($status) && $status) || (is_object($status)&&$status->isGood())) return true;
         else return false;
     }
 
     /**
- * Our model is stored in the DB just before Mediawiki creates
- * the new revision that's why we have to get the last existing revision ID
- * and the new will be lastId+1 ...
- * @return <Integer> last revision id + 1
- */
-    static function getNewArticleRevId(){
+     * Our model is stored in the DB just before Mediawiki creates
+     * the new revision that's why we have to get the last existing revision ID
+     * and the new will be lastId+1 ...
+     * @return <Integer> last revision id + 1
+     */
+    static function getNewArticleRevId() {
         wfProfileIn( __METHOD__ );
         $dbr = wfGetDB( DB_SLAVE );
         $lastid = $dbr->selectField('revision','MAX(rev_id)');
@@ -282,5 +283,26 @@ Pages concerned:
         return $lastid + 1;
     }
 
+    static function getPulledPatches($pfname) {
+        global $wgServerName, $wgScriptPath;
+        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+        $req = '[[ChangeSet:+]] [[inPullFeed::'.$pfname.']]';
+        $req = utils::encodeRequest($req);
+        $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
+        $string = file_get_contents($url);
+        if ($string=="") return array();//false;
+        $string = str_replace("\n", ",", $string);
+        $string = str_replace("\"", "", $string);
+        $res = explode(",", $string);
+
+        foreach ($res as $key=>$resultLine) {
+            if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
+                unset($res[$key]);
+            }
+        }
+        $res = array_unique($res);
+
+        return $res;//published patch tab
+    }
 }
 ?>
