@@ -10,11 +10,10 @@ if( defined( 'MW_INSTALL_PATH' ) ) {
 require_once '../../files/utils.php';
 require_once '../p2pBot.php';
 require_once '../BasicBot.php';
-require_once '../../logootEngine/LogootId.php';
-require_once '../../logootEngine/LogootPosition.php';
-require_once '../../logootop/LogootOp.php';
-require_once '../../logootop/LogootIns.php';
-require_once '../../logootop/LogootDel.php';
+require_once '../../logootComponent/LogootId.php';
+require_once '../../logootComponent/LogootPosition.php';
+require_once '../../logootComponent/LogootIns.php';
+require_once '../../logootComponent/LogootDel.php';
 include_once '../p2pAssert.php';
 require_once '../../p2pExtension.php';
 //require_once '../../patch/Patch.php';

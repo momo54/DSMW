@@ -240,16 +240,26 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     }
 
         static function createPushFeed($name, $request){
+        global $wgServerName, $wgScriptPath;
+        $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
         $stringReq = utils::encodeRequest($request);//avoid "semantic injection"
-        $newtext = "PushFeed:
-Name: [[name::PushFeed:".$name."]]
+        $newtext = "
+{{#form:action=".$urlServer."?action=onpush|method=POST|
+{{#input:type=hidden|name=push|value=".$name."}}<br>
+{{#input:type=hidden|name=action|value=onpush}}<br>
+{{#input:type=submit|value=PUSH}}
+}}
+----
+[[Special:ArticleAdminPage]]
+----
+PushFeed:
+Name: [[name::".$name."]]
 hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
 Pages concerned:
 {{#ask: ".$request."}}
 [[deleted::false| ]]
 ";
-$newtext.="----
-[[Special:ArticleAdminPage]]";
+
         wfDebugLog('p2p','  -> push page contains : '.$newtext);
         $title = Title::newFromText($name, PUSHFEED);
         $article = new Article($title);

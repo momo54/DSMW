@@ -9,11 +9,10 @@ if( defined( 'MW_INSTALL_PATH' ) ) {
 
 require_once '../p2pBot.php';
 require_once '../BasicBot.php';
-require_once '../../logootEngine/LogootId.php';
-require_once '../../logootEngine/LogootPosition.php';
-require_once '../../logootop/LogootOp.php';
-require_once '../../logootop/LogootIns.php';
-require_once '../../logootop/LogootDel.php';
+require_once '../../logootComponent/LogootId.php';
+require_once '../../logootComponent/LogootPosition.php';
+require_once '../../logootComponent/LogootIns.php';
+require_once '../../logootComponent/LogootDel.php';
 require_once '../../p2pExtension.php';
 require_once '../../patch/Patch.php';
 require_once '../../files/utils.php';
@@ -66,7 +65,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
      */
     function testGetPatch() {
 
-        $patchName = 'Patch:localhost/wiki1';
+        $patchName = 'patch:localhost/wiki1';
         $content = '[[patchID::'.$patchName.']] [[onPage::Berlin]] [[previous::localhost/wiki0]]
         [[hasOperation::Localhost/wiki111;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page berlin]]';
         $this->assertTrue($this->p2pBot1->createPage($patchName,$content),
@@ -74,7 +73,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
 
         $this->assertTrue($this->p2pBot1->createPage($patchName,$content),
             'failed to create page '.$patchName.' ('.$this->p2pBot1->bot->results.')');
-        $patchName = 'Patch:localhost/wiki2';
+        $patchName = 'patch:localhost/wiki2';
         $content = '[[patchID::'.$patchName.']] [[onPage::Paris]] [[previous::none]]
         [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
 

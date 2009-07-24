@@ -104,8 +104,8 @@ function conflict(&$editor, &$out) {
  * @return <boolean>
  */
 function onUnknownAction($action, $article) {
-    global $wgOut;
-
+    global $wgOut, $wgServerName, $wgScriptPath;
+    $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     //    $script=javascript($_SERVER['HTTP_REFERER']);
     //    $wgOut->addHeadItem('script', $script);
 
@@ -159,15 +159,23 @@ Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=k
         //addPushSite($url, $name, $request);
 
 
-        $newtext = "PushFeed:
+        $newtext = "
+{{#form:action=".$urlServer."?action=onpush|method=POST|
+{{#input:type=hidden|name=push|value=PushFeed:".$name."}}<br>
+{{#input:type=hidden|name=action|value=onpush}}<br>
+{{#input:type=submit|value=PUSH}}
+}}
+----
+[[Special:ArticleAdminPage]]
+----
+PushFeed:
 Name: [[name::PushFeed:".$name."]]
 hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
 Pages concerned:
 {{#ask: ".$request."}}
 [[deleted::false| ]]
 ";
-$newtext.="----
-[[Special:ArticleAdminPage]]";
+
         wfDebugLog('p2p','  -> push page contains : '.$newtext);
         $title = Title::newFromText($_POST['name'], PUSHFEED);
 
@@ -299,15 +307,17 @@ $newtext.="
         $pushname = $_POST['pushname'];//with ns
         $pullname = $_POST['pullname'];
 
-        $newtext = "PullFeed:
+        $newtext = "
+[[Special:ArticleAdminPage]]
+----
+PullFeed:
 
 name: [[name::PullFeed:".$pullname."]]
 pushFeedServer: [[pushFeedServer::".$url."]]
 pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
 [[deleted::false| ]]
 ";
-$newtext.="----
-[[Special:ArticleAdminPage]]";
+
         $title = Title::newFromText($pullname, PULLFEED);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
@@ -847,7 +857,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-
+    wfDebugLog('p2p',' - function operationToLogootOp : '.$operation);
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
@@ -870,7 +880,7 @@ function operationToLogootOp($operation) {
     //    if($res[3]=="") $res[3]="\r\n";
 
     if($res[1]=="Insert") {
-        $logootOp = new LogootIns('', $logootPos, $res[3]);
+        $logootOp = new LogootIns($logootPos, $res[3]);
     }
     elseif($res[1]=="Delete") {
         $logootOp = new LogootDel($logootPos, $res[3]);
@@ -888,6 +898,8 @@ function operationToLogootOp($operation) {
  * @param <String or Object> $article
  */
 function logootIntegrate($operations, $article) {
+    wfDebugLog('p2p',' - function logootIntegrate : '.$article);
+
     if(is_string($article)) {
     //$db = wfGetDB( DB_SLAVE );
 
@@ -911,12 +923,17 @@ function logootIntegrate($operations, $article) {
     $logoot = new logootEngine($model);
 
     foreach ($operations as $operation) {
+        wfDebugLog('p2p',' - operation : '.$operation);
         $operation = operationToLogootOp($operation);
 
         if ($operation!=false && is_object($operation)) {
             $listOp[]=$operation;
         //$blobInfo->integrateBlob($operation);
-    }//end if
+        }//end if
+//    else {
+//        throw new MWException( __METHOD__.': operation problem '.$operation );
+//        wfDebugLog('p2p',' - operation problem : '.$operation);
+//    }
     }//end foreach operations
     $modelAfterIntegrate = $logoot->integrate($listOp);
     $revId = utils::getNewArticleRevId();

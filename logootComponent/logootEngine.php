@@ -21,6 +21,7 @@ class logootEngine implements logoot{
  * @param <array or object> $opList operation list or operation object
  */
     public function integrate($opList) {
+        wfDebugLog('p2p',' - function logootEngine::integrate ');
         //if it is an operation, we put it in an array, as if it was an op list
         if(!is_array($opList))$opList = array($opList);
         foreach ($opList as $operation){
@@ -485,7 +486,12 @@ $step = gmp_div_q($slot, $N);
  */
     private function dichoSearch1($position,  $fct = 'dichoComp1')
     {
-
+        wfDebugLog('p2p',' - function logootEngine::dichoSearch ');
+        if($position instanceof LogootPosition){
+            wfDebugLog('p2p',' - position instanceof logootPosition ');
+        }else{
+            wfDebugLog('p2p',' - position not instanceof logootPosition ');
+        }
         $arr = $this->model->getPositionlist();
       
         if(count($arr)==0){

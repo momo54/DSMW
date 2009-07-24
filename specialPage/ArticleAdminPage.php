@@ -456,9 +456,9 @@ function pullFeedDel(){
     //            //            }
     //            //            $wgOut->addHTML($output);
     //            return false;
-    //        } else {
-    //            return true;
-    //        }
+           /* }*/ else {
+                return true;
+            }
     }
     //
     function onSkinTemplateTabs(&$skin, &$content_actions) {

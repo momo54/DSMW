@@ -58,15 +58,15 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
 
 
     public function testSimple1() {
-        $pageName = "Paris";
-        $content='content page Paris
-[[Category:city]]';
+        $pageName = "Lambach";
+        $content='content page Lambach
+[[Category:city1]]';
         $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
             'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
         //create push on wiki1
-        $pushName = 'PushCity';
-        $pushRequest = '[[Category:city]]';
+        $pushName = 'PushCity10';
+        $pushRequest = '[[Category:city1]]';
         $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
             'Failed to create push : '.$pushName.' ('.$this->p2pBot1->bot->results.')');
 
@@ -87,11 +87,13 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         assertPageExist($this->p2pBot1->bot->wikiServer, $pageName);
 
         // assert that wiki1/paris == wiki2/paris
-        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Paris');
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
 
         //assert that there is the same patch on the 2 wikis
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
+        $PatchonWiki1 = $this->arraytolower($PatchonWiki1);
+        $PatchonWiki2 = $this->arraytolower($PatchonWiki2);
         $this->assertEquals($PatchonWiki1,$PatchonWiki2);
 
         //assert that there is the same changeSet on the 2 wikis
@@ -106,16 +108,16 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $countCSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
 
         //create push on wiki2
-        $pushName = 'PushCity';
-        $pushRequest = '[[Category:city]]';
+        $pushName = 'PushCity10';
+        $pushRequest = '[[Category:city1]]';
         $this->assertTrue($this->p2pBot2->createPush($pushName, $pushRequest),
             'Failed to create push : '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
         $this->assertTrue($this->p2pBot2->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
-        // assert that wiki1/paris == wiki2/paris
-        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Paris');
+        // assert that wiki1/Lambach == wiki2/Lambach
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
 
         //create pull on wiki1
         $pullName = 'pullCity';
@@ -130,16 +132,18 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         //assert no patch created
         $this->assertTrue($countCSonWiki1==$countCS);
 
-        // assert that wiki1/paris == wiki2/paris
-        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
-        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
-        assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
+        // assert that wiki1/Lambach == wiki2/Lambach
+        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Lambach');
+        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Lambach');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Lambach');
         $this->assertEquals($contentWiki1, $contentWiki2,
-            'Failed content page Paris');
+            'Failed content page Lambach');
 
         //assert that there is the same patch on the 2 wikis
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
+        $PatchonWiki1 = $this->arraytolower($PatchonWiki1);
+        $PatchonWiki2 = $this->arraytolower($PatchonWiki2);
         $this->assertEquals($PatchonWiki1,$PatchonWiki2);
 
         //assert that there is the same changeSet on the 2 wikis
@@ -154,7 +158,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $countCSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
         $countCSonWiki2 = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
 
-        $pushName = 'PushCity';
+        $pushName = 'PushCity10';
         $pullName = 'pullCity';
         $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot1->bot->results.')');
@@ -166,12 +170,12 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         //assert no patch created
         $this->assertTrue($countCSonWiki2==$countCS);
 
-        // assert that wiki1/paris == wiki2/paris
-        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Paris');
-        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Paris');
-        assertPageExist($this->p2pBot2->bot->wikiServer, 'Paris');
+        // assert that wiki1/Lambach == wiki2/Lambach
+        $contentWiki1 = getContentPage($this->p2pBot1->bot->wikiServer, 'Lambach');
+        $contentWiki2 = getContentPage($this->p2pBot2->bot->wikiServer, 'Lambach');
+        assertPageExist($this->p2pBot2->bot->wikiServer, 'Lambach');
         $this->assertEquals($contentWiki1, $contentWiki2,
-            'Failed content page Paris');
+            'Failed content page Lambach');
 
         //assert that there is the same changeSet on the 2 wikis
         $CSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));
@@ -183,5 +187,12 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $PatchonWiki2 = count(getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
         $this->assertEquals($PatchonWiki1,$PatchonWiki2);
     }
+
+    function arraytolower($array) {
+      foreach($array as $key => $value) {
+          $array[$key] = strtolower($value);
+      }
+    return $array;
+  }
 }
 ?>
