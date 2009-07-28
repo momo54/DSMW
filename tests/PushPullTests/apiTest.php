@@ -20,7 +20,7 @@ include_once '../p2pAssert.php';
 
 
 /**
- * apiQueryChangeSet and apiQueryPatch tests
+ * apiQueryChangeSet, apiQueryPatch and apiPatchPush tests
  *
  * @author hantz
  */
@@ -91,7 +91,8 @@ class apiTest extends PHPUnit_Framework_TestCase {
         foreach($patchs as $p) {
             $this->assertEquals('patch:localhost/wiki2', strtolower($p->getAttribute('id')));
             $this->assertEquals('paris', strtolower($p->getAttribute('onPage')));
-            $this->assertEquals('none', strtolower(substr($p->getAttribute('previous'),0,-1)));
+            $t = $p->getAttribute('previous');
+            $this->assertEquals('none', strtolower($p->getAttribute('previous')));
         }
 
         $listeOp = $dom->getElementsByTagName('operation');
@@ -110,7 +111,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
      * test ApiQueryChangeSet whithout previous changeSet
      */
     public function testGetChangeSetWhithoutPreviousCS() {
-        // test with no previousChangeSet
+    // test with no previousChangeSet
         $pageName = "ChangeSet:localhost/wiki12";
         $content='ChangeSet:
 changeSetID: [[changeSetID::localhost/wiki12]]
@@ -212,6 +213,83 @@ previousChangeSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
         foreach($listePatch as $pays)
             $patch[] = $pays->firstChild->nodeValue;
         $this->assertEquals(null, $patch);
+    }
+
+    /**
+     * test apiPatchPush with no push
+     */
+    public function testPatchPushed1() {
+        $pageName = 'Pouxeux';
+
+        $pushName = 'PushFeed:PushCity11';
+        $content = 'PushFeed:
+Name: [[name::CityPush2]]
+hasSemanticQuery: [[hasSemanticQuery::-5B-5BCategory:city-5D-5D]]
+Pages concerned:
+{{#ask: [[Category:city]]}}';
+        $this->assertTrue($this->p2pBot1->createPage($pushName, $content),'failed to create page PushFeed:PushCity11');
+
+        $published = $this->getListPatchPushed($pushName,$pageName);
+        $this->assertNull($published);
+
+        $this->assertTrue($this->p2pBot1->push($pushName),'failed to push '.$pushName.' ( '.$this->p2pBot1->bot->results.' )');
+
+        $published = $this->getListPatchPushed($pushName,$pageName);
+        $this->assertNull($published);
+
+        $this->assertTrue($this->p2pBot1->createPage('Toto','toto [[Category:city]]'));
+
+        $this->assertTrue($this->p2pBot1->push($pushName),'failed to push '.$pushName.' ( '.$this->p2pBot1->bot->results.' )');
+
+        $published = $this->getListPatchPushed($pushName, $pageName);
+        $this->assertNull($published);
+    }
+
+    /**
+     *
+     */
+    public function testPatchPushed2() {
+        $this->testPatchPushed1();
+
+        $pageName = 'Pouxeux';
+        $this->assertTrue($this->p2pBot1->createPage($pageName, 'Pouxeux [[Category:city]]'));
+        $this->assertTrue($this->p2pBot1->push('PushFeed:PushCity11'));
+
+        $published = $this->getListPatchPushed($pushName,$pageName);
+        $this->assertTrue(count($published)==1);
+
+        $onPage = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[patchID::'.$published[0].']]', '-3FonPage');
+        $this->assertEquals($pageName, $onPage[0],'failed into apiPatchPush, the patch found must be on page '.$pageName.' but is on '.$onPage[0]);
+
+        $this->p2pBot1->editPage($pageName, '....');
+
+        $published = $this->getListPatchPushed($pushName,$pageName);
+        $this->assertTrue(count($published)==1);
+
+        $onPage = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[patchID::'.$published[0].']]', '-3FonPage');
+        $this->assertEquals($pageName, $onPage[0],'failed into apiPatchPush, the patch found must be on page '.$pageName.' but is on '.$onPage[0]);
+
+        $this->assertTrue($this->p2pBot1->push('PushFeed:PushCity11'));
+        $published = $this->getListPatchPushed($pushName,$pageName);
+        $this->assertTrue(count($published)==2);
+
+        $onPage = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[patchID::'.$published[0].']]', '-3FonPage');
+        $this->assertEquals($pageName, $onPage[0],'failed into apiPatchPush, the patch found must be on page '.$pageName.' but is on '.$onPage[0]);
+
+        $onPage = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[patchID::'.$published[1].']]', '-3FonPage');
+        $this->assertEquals($pageName, $onPage[0],'failed into apiPatchPush, the patch found must be on page '.$pageName.' but is on '.$onPage[1]);
+    }
+
+    private function getListPatchPushed($pushName,$pageName) {
+        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patchPushed&pppushName='.$pushName.'&pppageName='.$pageName.'&format=xml');
+        $dom = new DOMDocument();
+        $dom->loadXML($patchXML);
+        $patchPublished = $dom->getElementsByTagName('patch');
+        $published = null;
+        foreach($patchPublished as $p) {
+            $published[] = $p->firstChild->nodeValue;
+        }
+        return $published;
     }
 }
 ?>

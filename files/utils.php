@@ -157,7 +157,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
         $string = file_get_contents($url1);//patches list
         $string = str_replace('"', '', $string);
-        $string = strtolower($string);
+        $string = $string;
         if ($string=="") return false;
         $string = explode("\n", $string);
         foreach ($string as $key=>$str1) {
@@ -170,7 +170,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
 
         $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
         $string1 = file_get_contents($url2);//previous list
-        $string1 = strtolower($string1);
+        $string1 = $string1;
         //$string1 = str_replace("patch:", "", $string1);
         if ($string1=="") return false;
         $string1 = explode("\n", $string1);

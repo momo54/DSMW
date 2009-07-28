@@ -271,7 +271,7 @@ Pages concerned:
             if ($pos === false) {
             // not found...
                 $articleName = $CSID;
-                
+                $CSID = "ChangeSet:".$articleName;
             }else {
                 $articleName = substr($CSID, 0,$pos+1);
                 $CSID = "ChangeSet:".$articleName;
@@ -349,9 +349,6 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             $name1 = $_POST['pull'];
             wfDebugLog('p2p','pull on ');
             if(!is_array($name1)) $name1 = array ($name1);
-            foreach ($_POST['pull'] as $pull) {
-                wfDebugLog('p2p',' - '.$pull);
-            }
         }
         else $name1="";//throw new MWException( __METHOD__.': no PullName' );
         /*if(count($name)>1) {
@@ -423,6 +420,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
                 // }
 
                 $previousCSID = $CSID;
+                wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
                 $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
                 $dom = new DOMDocument();
                 $dom->loadXML($cs);
@@ -711,11 +709,11 @@ function updatePushFeed($name, $CSID) {
         $value = substr( $pageContent, $startVal, $endVal - $startVal );
 
         //update hasPushHead Value
-        $result = str_replace($value, "ChangeSet:".$CSID, $pageContent);
+        $result = str_replace($value, $CSID, $pageContent);
         $pageContent = $result;
         if($result=="")return false;
     }else {//no occurence of [[hasPushHead:: , we add
-        $pageContent.= ' hasPushHead: [[hasPushHead::ChangeSet:'.$CSID.']]';
+        $pageContent.= ' hasPushHead: [[hasPushHead::'.$CSID.']]';
     }
     //save update
     $article = new Article($title);
@@ -929,7 +927,6 @@ function logootIntegrate($operations, $article) {
         $dbr = wfGetDB( DB_SLAVE );
         $pageid = $dbr->selectField('page','page_id', array(
             'page_title'=>$article));
-
         // get the page namespace
         $pageNameSpace = $dbr->selectField('page','page_namespace', array(
             'page_id'=>$pageid));
@@ -946,7 +943,8 @@ function logootIntegrate($operations, $article) {
         $lastRev = Revision::loadFromPageId($dbr, $pageid);
         if(is_null($lastRev)) $rev_id = 0;
         else $rev_id = $lastRev->getId();
-
+        wfDebugLog('p2p','      -> pageId : '.$pageid);
+        wfDebugLog('p2p','      -> rev_id : '.$rev_id);
         $title = Title::newFromText($article);
         $article = new Article($title);
     }
@@ -1119,11 +1117,11 @@ function updatePullFeed($name, $CSID) {
         $value = substr( $pageContent, $startVal, $endVal - $startVal );
 
         //update hasPullHead Value
-        $result = str_replace($value, "ChangeSet:".$CSID, $pageContent);
+        $result = str_replace($value, $CSID, $pageContent);
         $pageContent = $result;
         if($result=="")return false;
     }else {//no occurence of [[hasPushHead:: , we add
-        $pageContent.= ' hasPullHead: [[hasPullHead::ChangeSet:'.$CSID.']]';
+        $pageContent.= ' hasPullHead: [[hasPullHead::'.$CSID.']]';
     }
     //save update
     $article = new Article($title);
@@ -1219,7 +1217,7 @@ function attemptSave($editpage) {
 
     }
     $revId = utils::getNewArticleRevId();
-
+    wfDebugLog('p2p',' -> store model rev : '.$revId.' session '.session_id().' model '.$modelAfterIntegrate->getText());
     manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
 
     $editpage->textbox1 = $modelAfterIntegrate->getText();

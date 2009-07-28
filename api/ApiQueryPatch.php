@@ -45,7 +45,7 @@ class ApiQueryPatch extends ApiQueryBase {
             $result->setIndexedTagName($op, 'operation');
             $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);
             $result->addValue(array('query',$this->getModuleName()),'onPage',$data[2]);
-            $result->addValue(array('query',$this->getModuleName()),'previous',$data[4]);
+            $result->addValue(array('query',$this->getModuleName()),'previous',substr($data[4],0,-1));
             $result->addValue('query', $this->getModuleName(), $op);
         }
     }

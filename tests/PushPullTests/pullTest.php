@@ -68,7 +68,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
             'failed to create pull pullCity, pullHead must be null but '.$pullFound[0].' was found');
         $this->assertEquals('http://localhost/wiki1',strtolower($pullFound[1]),
             'failed to create pull pullCity, pushFeedServer must be http://localhost/wiki but '.strtolower($pullFound[1]).' was found');
-        $this->assertEquals('pushfeed:pushcity',strtolower(substr($pullFound[2],0,-1)),
+        $this->assertEquals('pushfeed:pushcity',strtolower($pullFound[2]),
             'failed to create pull pullCity, pushFeedName must be PushFeed:PushCity but '.$pullFound[2].' was found');
     }
 
@@ -113,7 +113,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
         assertPageExist($this->p2pBot2->bot->wikiServer, 'Patch:'.$patchName);
 
         $pullHead = getSemanticRequest($this->p2pBot2->bot->wikiServer,'[[name::PullFeed:'.$pullName.']]','-3FhasPullHead');
-        $this->assertEquals(strtolower('ChangeSet:'.$CSName),strtolower(substr($pullHead[0],0,-1)));
+        $this->assertEquals(strtolower($CSName),strtolower($pullHead[0]));
 
         // pull without update
         $countCS = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID'));

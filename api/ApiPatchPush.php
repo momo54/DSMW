@@ -6,7 +6,7 @@ if( !defined('MEDIAWIKI') ) {
 
 /**
  * Description of ApiQueryPatchPush
- * return the patch contain given by the parameter patchId
+ * 
  *
  * @author hantz
  */
@@ -29,26 +29,7 @@ class ApiPatchPush extends ApiQueryBase {
 
         $params = $this->extractRequestParams();
         wfDebugLog('p2p','ApiQueryPatchPushed params '.$params['pushName']);
-       /* $request = $this->encodeRequest('[[patchID::'.strtolower($params['patchId']).']]');
-        wfDebugLog('p2p','  -> request : '.$request);
-        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FpatchID/-3FonPage/-3FhasOperation/-3Fprevious/headers=hide/format=csv/sep=!';
-        wfDebugLog('p2p','  -> url request : '.$url);
-        $data = file_get_contents($url);
-        wfDebugLog('p2p','  -> result : '.$data);
-        $result = $this->getResult();
-        $data = str_replace('"', '', $data);
 
-        $data = split('!',$data);
-        if($data[1]) {
-            substr($data[3],0,-1);
-            $op = split(',',$data[3]);
-            $result->setIndexedTagName($op, 'operation');
-            $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);
-            $result->addValue(array('query',$this->getModuleName()),'onPage',$data[2]);
-            $result->addValue(array('query',$this->getModuleName()),'previous',$data[4]);
-            $result->addValue('query', $this->getModuleName(), $op);
-        }*/
-        //published page in pushFeed
         $publishedInPush = getPublishedPatches($params['pushName']);
         $published = null;
 

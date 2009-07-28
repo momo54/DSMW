@@ -30,6 +30,7 @@ class PatchTest1 extends PHPUnit_Framework_TestCase {
     protected function setUp() {
         exec('./initWikiTest.sh ../createDBTest.sql ../dump.sql');
         //wfDebugLog('p2p','start p2p Test');
+        exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
@@ -48,15 +49,15 @@ class PatchTest1 extends PHPUnit_Framework_TestCase {
 
         /*1st patch*/
         $pageName = "Patch:localhost/wiki1901";
-        $Patchcontent='Patch: patchID: [[patchID::patch:localhost/wiki1901]]
+        $Patchcontent='Patch: patchID: [[patchID::Patch:Localhost/wiki1901]]
  onPage: [[onPage::cooper]]  hasOperation: [[hasOperation::localhost/wiki1902;
 Insert;( 5053487913627490220,42601d9c1af38da968d697efde65a473 ) 901;content]]
 previous: [[previous::none]]';
-        $res = $this->p2pBot1->createPage($pageName,$Patchcontent);
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$Patchcontent),$this->p2pBot1->bot->results);
         //$patch = new Patch('', '', '', '');
         $lastPatchId = utils::getLastPatchId('cooper', $this->p2pBot1->bot->wikiServer);
         //assert
-        $this->assertEquals('patch:localhost/wiki1901', $lastPatchId);
+        $this->assertEquals('Patch:Localhost/wiki1901', $lastPatchId);
        // unset ($patch);
 
         /*2nd patch*/
@@ -69,7 +70,7 @@ previous: [[previous::Patch:Localhost/wiki1901]]';
         //$patch = new Patch('', '', '', '');
         $lastPatchId = utils::getLastPatchId('cooper', $this->p2pBot1->bot->wikiServer);
         //assert
-        $this->assertEquals('patch:localhost/wiki1902', $lastPatchId);
+        $this->assertEquals('Patch:Localhost/wiki1902', $lastPatchId);
         //unset ($patch);
 
         /*3rd patch*/
@@ -82,7 +83,7 @@ previous: [[previous::Patch:Localhost/wiki1902]]';
         //$patch = new Patch('', '', '', '');
         $lastPatchId = utils::getLastPatchId('cooper', $this->p2pBot1->bot->wikiServer);
         //assert
-        $this->assertEquals('patch:localhost/wiki1802', $lastPatchId);
+        $this->assertEquals('Patch:Localhost/wiki1802', $lastPatchId);
        // unset ($patch);
 
         /*4th patch*/
@@ -95,7 +96,7 @@ previous: [[previous::Patch:Localhost/wiki1802]]';
         //$patch = new Patch('', '', '', '');
         $lastPatchId = utils::getLastPatchId('cooper', $this->p2pBot1->bot->wikiServer);
         //assert
-        $this->assertEquals('patch:localhost/wiki1803', $lastPatchId);
+        $this->assertEquals('Patch:Localhost/wiki1803', $lastPatchId);
         //unset ($patch);
 
         /*5th patch*/
@@ -108,7 +109,7 @@ previous: [[previous::Patch:Localhost/wiki1803]]';
         //$patch = new Patch('', '', '', '');
         $lastPatchId = utils::getLastPatchId('cooper', $this->p2pBot1->bot->wikiServer);
         //assert
-        $this->assertEquals('patch:localhost/wiki1700', $lastPatchId);
+        $this->assertEquals('Patch:Localhost/wiki1700', $lastPatchId);
         //unset ($patch);
 
         /*6th patch*/
@@ -121,7 +122,7 @@ previous: [[previous::Patch:Localhost/wiki1700]]';
         //$patch = new Patch('', '', '', '');
         $lastPatchId = utils::getLastPatchId('cooper', $this->p2pBot1->bot->wikiServer);
         //assert
-        $this->assertEquals('patch:localhost/wiki1905', $lastPatchId);
+        $this->assertEquals('Patch:Localhost/wiki1905', $lastPatchId);
         //unset ($patch);
 
     }

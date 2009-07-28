@@ -127,7 +127,7 @@ previous: [[previous::none]]';
             'failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
         $patchId = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::Toto]]', '');
-        $patchId = substr($patchId[0],0,-1);
+        $patchId = $patchId[0];
         $dom = getPatchXML($this->p2pBot1->bot->wikiServer,$patchId);
 
         $op = $dom->getElementsByTagName('operation');

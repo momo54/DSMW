@@ -67,7 +67,7 @@ function getSemanticRequest($server,$request,$param,$sep='!') {
     $request = utils::encodeRequest($request);
     $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
     $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
-    $array = split($sep, $php);
+    $array = split($sep, substr($php,0,-1));
     if( count($array)==1) {
         return $array;
     }

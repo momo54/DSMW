@@ -56,7 +56,9 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
     // exec('./deleteTest.sh');
     }
 
-
+    /**
+     * create one page, push it on wiki1 and pull it on wiki2
+     */
     public function testSimple1() {
         $pageName = "Lambach";
         $content='content page Lambach
@@ -86,20 +88,79 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         // assert page paris exist
         assertPageExist($this->p2pBot1->bot->wikiServer, $pageName);
 
-        // assert that wiki1/paris == wiki2/paris
-        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
+        //assert that there is the same changeSet on the 2 wikis
+        $CSonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
+        $CSonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
+        $this->assertEquals($CSonWiki1,$CSonWiki2,'changeSet are not equals on the 2 wikis');
 
         //assert that there is the same patch on the 2 wikis
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki1 = $this->arraytolower($PatchonWiki1);
         $PatchonWiki2 = $this->arraytolower($PatchonWiki2);
-        $this->assertEquals($PatchonWiki1,$PatchonWiki2);
+        $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
+
+        // assert that wiki1/paris == wiki2/paris
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
+    }
+
+    /**
+     * create a page push it on wiki1, edit it on wiki1, push it again
+     * and pull it on wiki2
+     * wiki2 must receive 2 changeSet
+     */
+    function testSimple2() {
+        $pageName = "Lambach";
+        $content='content page Lambach
+[[Category:city1]]';
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
+            'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
+
+        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
+            'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
+
+        //create push on wiki1
+        $pushName = 'PushCity10';
+        $pushRequest = '[[Category:city1]]';
+        $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
+            'Failed to create push : '.$pushName.' ('.$this->p2pBot1->bot->results.')');
+
+        //push on wiki1
+        $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
+            'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
+
+        //edit on wiki1
+        $this->assertTrue($this->p2pBot1->editPage($pageName, 'create the second changeSet'),
+            'failed to edit page '.$pageName.' ( '.$this->p2pBot1->bot->results.' )');
+
+        //push on wiki1
+        $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
+            'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
+
+        //create pull on wiki2
+        $pullName = 'PullCity';
+        $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
+            'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
+
+        //pull
+        $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
+            'failed to pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
+        // assert page paris exist
+        assertPageExist($this->p2pBot1->bot->wikiServer, $pageName);
 
         //assert that there is the same changeSet on the 2 wikis
         $CSonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
         $CSonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
-        $this->assertEquals($CSonWiki1,$CSonWiki2);
+        $this->assertEquals($CSonWiki1,$CSonWiki2,'changeSet are not equals on the 2 wikis');
+
+        //assert that there is the same patch on the 2 wikis
+        $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
+        $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
+        $PatchonWiki1 = $this->arraytolower($PatchonWiki1);
+        $PatchonWiki2 = $this->arraytolower($PatchonWiki2);
+        $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
+        // assert that wiki1/paris == wiki2/paris
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
     }
 
 /*    function testSimple2() {
@@ -189,10 +250,10 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
     }
 */
     function arraytolower($array) {
-      foreach($array as $key => $value) {
-          $array[$key] = strtolower($value);
-      }
-    return $array;
-  }
+        foreach($array as $key => $value) {
+            $array[$key] = strtolower($value);
+        }
+        return $array;
+    }
 }
 ?>

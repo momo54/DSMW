@@ -27,6 +27,7 @@ class manager {
     }
 
     static function storeModel($rev_id, $sessionId, $model, $blobCB){
+        wfDebugLog('p2p',' -> store model into revid : '.$rev_id.' sessionid : '.$sessionId.' model : '.$model->getText());
         try {
             $dao = new dao();
             $dao->storeModel($rev_id, $sessionId, $model, $blobCB);

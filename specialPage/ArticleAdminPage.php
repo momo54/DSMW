@@ -186,7 +186,7 @@ function pullFeedDel(){
 
 
     function onUnknownAction($action, $article) {
-            global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle,
+        global $wgOut, $wgSitename, $wgCachePages, $wgLang, $wgUser, $wgTitle,
         $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest,$wgMessageCache,
         $wgWatchingMessages, $namespace_titles, $wgSitename,$wgServerName, $wgScriptPath;
 
@@ -218,7 +218,7 @@ function pullFeedDel(){
 
                 }
 
-                $op = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.strtolower($patch).']]','?hasOperation');
+                $op = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.$patch.']]','?hasOperation');
                 $countOp = utils::countOperation($op);
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
                 $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
@@ -617,11 +617,10 @@ function pullFeedDel(){
     /**
      * returns an array of page titles received via the request
      */
-    function getRequestedPages($request,$params="") {
+    function getRequestedPages($request) {
         global $wgServerName, $wgScriptPath;
         $req = utils::encodeRequest($request);
-        $params = utils::encodeRequest($params);
-        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/".$params."/headers=hide/format=csv/sep=,/limit=100";
+        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/headers=hide/format=csv/sep=,/limit=100";
         $string = file_get_contents($url1);
         $res = explode("\n", $string);
         foreach ($res as $key=>$page) {
@@ -670,8 +669,8 @@ function pullFeedDel(){
                 $patchs[] = $newPatch;
             }*/
         while($firstPatch) {
-            $p = split(',',$firstPatch[0]);
-            $firstPatch[0] = $p[1];
+            /*$p = split(',',$firstPatch[0]);
+            $firstPatch[0] = $p[1];*/
             $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
             foreach ($patchFound as $p) {
                 $firstPatch[] = $p;
