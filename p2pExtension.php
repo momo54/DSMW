@@ -271,6 +271,7 @@ Pages concerned:
             if ($pos === false) {
             // not found...
                 $articleName = $CSID;
+                
             }else {
                 $articleName = substr($CSID, 0,$pos+1);
                 $CSID = "ChangeSet:".$articleName;
@@ -392,7 +393,7 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
             $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-            if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Sever (ChangeSet API)' );
+            if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (ChangeSet API)' );
             $dom = new DOMDocument();
             $dom->loadXML($cs);
 
@@ -740,12 +741,18 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = file_get_contents($url);
-            if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Sever (Patch API)' );
+            if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
             $dom->loadXML($patch);
 
             $patchs = $dom->getElementsByTagName('patch');
+
+            //when the patch is not found, mostly when the id passed
+            //through the url is wrong
+            if(empty ($patchs) || is_null($patchs))
+            throw new MWException( __METHOD__.': Error: Patch not found!' );
+
             //        $patchID = null;
             foreach($patchs as $p) {
                 if ($p->hasAttribute("onPage")) {
@@ -923,6 +930,19 @@ function logootIntegrate($operations, $article) {
         $pageid = $dbr->selectField('page','page_id', array(
             'page_title'=>$article));
 
+        // get the page namespace
+        $pageNameSpace = $dbr->selectField('page','page_namespace', array(
+            'page_id'=>$pageid));
+
+        /*the ns must not be a pullfeed, pushfeed, changeset or patch namespace.
+         If the page name is the same in different ns we can get the wrong
+         * page id
+         */
+        if($pageNameSpace==PULLFEED || $pageNameSpace==PUSHFEED ||
+            $pageNameSpace==PATCH || $pageNameSpace==CHANGESET
+        ) $pageid=0;
+
+
         $lastRev = Revision::loadFromPageId($dbr, $pageid);
         if(is_null($lastRev)) $rev_id = 0;
         else $rev_id = $lastRev->getId();
@@ -936,6 +956,8 @@ function logootIntegrate($operations, $article) {
     $listOp = array();
     //$blobInfo = BlobInfo::loadBlobInfo($rev_id);
     $model = manager::loadModel($rev_id);
+    if(($model instanceof boModel)==false)
+    throw new MWException( __METHOD__.': model loading problem!');
     $logoot = new logootEngine($model);
 
     foreach ($operations as $operation) {
