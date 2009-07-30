@@ -41,7 +41,8 @@ class apiTest extends PHPUnit_Framework_TestCase {
         exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
-        $basicbot1->wikiServer = 'http://localhost/wiki1';
+        
+        $basicbot1->wikiServer = 'http://localhost/mediawiki-1.13.5';
         $this->p2pBot1 = new p2pBot($basicbot1);
 
         $basicbot2 = new BasicBot();
@@ -64,7 +65,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
      * test ApiQueryPatch
      */
     function testGetPatch() {
-
+        xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
         $patchName = 'patch:localhost/wiki1';
         $content = '[[patchID::'.$patchName.']] [[onPage::Berlin]] [[previous::localhost/wiki0]]
         [[hasOperation::Localhost/wiki111;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page berlin]]';
@@ -83,7 +84,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
 
         //ApiQueryPatch call
         $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:localhost/wiki2&format=xml');
-
+        
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
         $patchs = $dom->getElementsByTagName('patch');
