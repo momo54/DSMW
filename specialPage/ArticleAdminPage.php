@@ -191,7 +191,6 @@ function pullFeedDel(){
         $wgWatchingMessages, $namespace_titles, $wgSitename,$wgServerName, $wgScriptPath;
 
         $urlServer = 'http://'.$wgServerName.$wgScriptPath;
-        //require_once("WhoIsWatchingTabbed.i18n.php");
 
         $wgCachePages = false;
         //Verify that the action coming in is "admin"
@@ -536,13 +535,15 @@ function pullFeedDel(){
     }
     //
     function onSkinTemplateTabs(&$skin, &$content_actions) {
-        global $wgRequest, $wgUser, $wgSitename;
+        global $wgRequest, $wgServerName, $wgScriptPath;
+        $urlServer = 'http://'.$wgServerName.$wgScriptPath;
 
         $action = $wgRequest->getText("action");
         $db = &wfGetDB(DB_SLAVE);
 
-        $watcherCount = 1;
-
+        $patchCount = 0;
+        $patchList = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$skin->mTitle->getText().']]','?patchID');
+        $patchCount = count($patchList);
         if($skin->mTitle->mNamespace == PATCH
             || $skin->mTitle->mNamespace == PULLFEED
             || $skin->mTitle->mNamespace == PUSHFEED
@@ -552,7 +553,7 @@ function pullFeedDel(){
 
             $content_actions["admin"] = array(
                 "class" => ($action == "admin") ? "selected" : false,
-                "text" => "Article admin (".$watcherCount." updates)",
+                "text" => "Article admin (".$patchCount." patches)",
                 "href" => $skin->mTitle->getLocalURL("action=admin")
             );
         }
@@ -598,14 +599,6 @@ function pullFeedDel(){
 
         return true;
     }
-
-    //function getDistantPatchesCount($feed){
-    //
-    //}
-    //
-    //function getLocalPatchesCount($feed){
-    //
-    //}
 
     function getPageIdWithTitle($title) {
         $dbr = wfGetDB( DB_SLAVE );
@@ -679,94 +672,6 @@ function pullFeedDel(){
         }
         return $patchs;
     }
-
-//static function javascript(){
-//$output = '
-//<SCRIPT language="Javascript">
-//function processAdd (){
-//		var xhr_object = null;
-//	   if(window.XMLHttpRequest) // Firefox
-//	      xhr_object = new XMLHttpRequest();
-//	   else if(window.ActiveXObject) // Internet Explorer
-//	      xhr_object = new ActiveXObject("Microsoft.XMLHTTP");
-//	   else {
-//	      alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest...");
-//	      return;
-//	   }
-//	   xhr_object.open("POST", document.URL+"?site="+document.formAdd.site.value, true);
-//	   xhr_object.onreadystatechange = function() {
-//	      if(xhr_object.readyState == 4) {
-////alert(xhr_object.responseText);
-//            document.location.reload();
-//	         eval(xhr_object.responseText);
-//		  }
-//	   }
-//	   xhr_object.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//	   var data = "url="+document.formAdd.url.value+"&keyword="+document.formAdd.keyword.value+"&name="+document.formAdd.name.value;
-//	   xhr_object.send(data);
-//       document.formAdd.url.value="";
-//       document.formAdd.name.value="";
-//       document.formAdd.keyword.value="";
-//}
-//function processPull (value){
-//		//alert(value);
-//var cnt = document.formPull.checkboxcount.value;
-//var tmp;
-//var first = "true";
-//for (i=1; i<=cnt; i++) {
-//if(document.getElementById(i).checked){
-//if(first=="true"){
-//tmp="pull["+i+"]="+document.getElementById(i).value;
-//first="false";
-//}
-//else{
-//tmp = tmp+"&pull["+i+"]="+document.getElementById(i).value;
-//}
-//}
-//}//end for
-////alert(tmp);
-//
-//       var xhr_object = null;
-//	   if(window.XMLHttpRequest) // Firefox
-//	      xhr_object = new XMLHttpRequest();
-//	   else if(window.ActiveXObject) // Internet Explorer
-//	      xhr_object = new ActiveXObject("Microsoft.XMLHTTP");
-//	   else {
-//	      alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest...");
-//	      return;
-//	   }
-//	   xhr_object.open("POST", document.URL+"?value="+value, true);
-//	   xhr_object.onreadystatechange = function() {
-//	      if(xhr_object.readyState == 4) {
-////alert(xhr_object.responseText);
-//        for (i=1; i<=cnt; i++) {
-//           document.getElementById(i).checked=false;
-//        }
-//        document.location.reload();
-//        eval(xhr_object.responseText);
-//
-//		  }
-//	   }
-//	   xhr_object.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-//	   var data = tmp;
-//	   xhr_object.send(data);
-//}
-//
-//function el(value){
-//alert(value);
-//  var boxValue = "";
-//  for (var i=0; i < document.formPush.Push[].length; i++)
-//     {
-//     if (document.formPush.Push[i].checked)
-//        {
-//        boxValue = document.formPush.Push[i].value;
-//        }
-//     }
-//alert(boxValue);
-//}
-//</SCRIPT>';
-//return $output;
-//}
 
 } //end class
 

@@ -42,7 +42,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
         
-        $basicbot1->wikiServer = 'http://localhost/mediawiki-1.13.5';
+        $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
 
         $basicbot2 = new BasicBot();
