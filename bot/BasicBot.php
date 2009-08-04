@@ -76,7 +76,7 @@ if (file_exists('username.php'))
 	require_once('username.php');
 // ELSE you need to fill out the next few settings.
 if (!defined('USERID')){	define('USERID','1');} // find it at Special:Preferences
-if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
+if (!defined('USERNAME')){	define('USERNAME','wikiSysop');}
 if (!defined('PASSWORD')){	define('PASSWORD','admin');} // password in plain text. No md5 or anything.
 
 

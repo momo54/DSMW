@@ -255,7 +255,7 @@ Pages concerned:
             // wfDebugLog( 'p2p', 'page found '.$age);
                 wfDebugLog('p2p','  ->requested page '.$page);
                 $request1 = '[[Patch:+]][[onPage::'.$page.']]';
-                $tmpPatches = getRequestedPages($request1);
+                $tmpPatches = utils::orderPatchByPrevious($page);
                 $patches = array_merge($patches, $tmpPatches);
             }
             $published = getPublishedPatches($name);

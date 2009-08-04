@@ -28,7 +28,7 @@ class PatchTest2 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh  ../createDBTest.sql ../dump.sql');
+        exec('../initWikiTest.sh  ../createDBTest.sql ../dump.sql');
         //wfDebugLog('p2p','start p2p Test');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();

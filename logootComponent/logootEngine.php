@@ -9,95 +9,96 @@
  *
  * @author jean-Philippe Muller
  */
-class logootEngine implements logoot{
+class logootEngine implements logoot {
     private $model;
 
     function __construct($model) {
-     $this->model = $model;
+        $this->model = $model;
     }
 
-/**
- *
- * @param <array or object> $opList operation list or operation object
- */
+    /**
+     *
+     * @param <array or object> $opList operation list or operation object
+     */
     public function integrate($opList) {
         wfDebugLog('p2p',' - function logootEngine::integrate ');
         //if it is an operation, we put it in an array, as if it was an op list
         if(!is_array($opList))$opList = array($opList);
-        foreach ($opList as $operation){
-         if($operation instanceof LogootIns){
-            $result = $this->dichoSearch1($operation->getLogootPosition());
-            wfDebugLog('p2p',' - integrate dicho result: '.$result);
-            if(is_array($result)){
+        foreach ($opList as $operation) {
+            if($operation instanceof LogootIns) {
+                $result = $this->dichoSearch1($operation->getLogootPosition());
+                wfDebugLog('p2p',' - integrate insert dicho result: '.$result);
+                if(is_array($result)) {
         /* position array begins at key '1' which corresponds with line1
          * Lines array begins at key '0' as a normal array, because there is
          * no need to make it corresponding with line numbers
          */
 
 
-                $this->add($result[1], $operation->getLogootPosition());
-                $this->addLine($result[1], $operation->getLineContent());
+                    $this->add($result[1], $operation->getLogootPosition());
+                    $this->addLine($result[1], $operation->getLineContent());
 
-            }else{
-                if($result==-1){/* if the value is less than the first element of
+                }else {
+                    if($result==-1) {/* if the value is less than the first element of
                               the array*/
 
-                    $this->add('1', $operation->getLogootPosition());
-                    $this->addLine('1', $operation->getLineContent());
+                        $this->add('1', $operation->getLogootPosition());
+                        $this->addLine('1', $operation->getLineContent());
 
-                }
-                elseif($result==-2){/* if the value is greater than the last element of
+                    }
+                    elseif($result==-2) {/* if the value is greater than the last element of
                               the array*/
-                    $line = $this->size();
-                    $this->add($line+1, $operation->getLogootPosition());
-                    $this->addLine($line+1, $operation->getLineContent());
+                        $line = $this->size();
+                        $this->add($line+1, $operation->getLogootPosition());
+                        $this->addLine($line+1, $operation->getLineContent());
 
-                }
-                else{/*the value is found in the array. It should not be, because
+                    }
+                    else {/*the value is found in the array. It should not be, because
          * the logootid has to be unique
          */
-                    throw new MWException( __METHOD__.' Logoot algorithm error,
+                        throw new MWException( __METHOD__.' Logoot algorithm error,
                                 position exists yet!' );
+                    }
                 }
-            }
-
-        }
-        elseif ($operation instanceof LogootDel) {
-            $result = $this->dichoSearch1($operation->getLogootPosition());
-            if(is_numeric($result)){
-                $this->delete($result);
-                $this->deleteLine($result);
 
             }
-            else{
-                throw new MWException( __METHOD__.' Logoot algorithm error,
+            elseif ($operation instanceof LogootDel) {
+                $result = $this->dichoSearch1($operation->getLogootPosition());
+                wfDebugLog('p2p',' - integrate delete dicho result: '.$result);
+                if(is_numeric($result)) {
+                    $this->delete($result);
+                    $this->deleteLine($result);
+
+                }
+                else {
+                    throw new MWException( __METHOD__.' Logoot algorithm error,
                             did not find the line to delete' );
-            }
+                }
 
-        }
+            }
         }//end foreach
         return $this->model;
     }
 
-/**
- *Calculate the diff between two texts
- * Returns a list of operations applied on this blobinfo(document model)
- * For each operation (insert or delete), an operation object is created
- * an applied via the 'integrateBlob' function call. These objects are
- *  stored in an array and returned for further implementations.
- *
- * NB: the direct implementation is necessary because the generation of
- * a new position (LogootPosition) is based on the positions of the model
- * (BlobInfo) and so we have to update (immediat integration) this model after
- * each operation (that we get from the difference engine)
- * @global <Object> $wgContLang
- * @param <String> $oldtext
- * @param <String> $newtext
- * @param <Integer> $firstRev if it's the first revision
- * @return <array> list of logootOperation
- */
-    public function generate($oldText, $newText){
-        //first revision, if model is empty
+    /**
+     *Calculate the diff between two texts
+     * Returns a list of operations applied on this blobinfo(document model)
+     * For each operation (insert or delete), an operation object is created
+     * an applied via the 'integrateBlob' function call. These objects are
+     *  stored in an array and returned for further implementations.
+     *
+     * NB: the direct implementation is necessary because the generation of
+     * a new position (LogootPosition) is based on the positions of the model
+     * (BlobInfo) and so we have to update (immediat integration) this model after
+     * each operation (that we get from the difference engine)
+     * @global <Object> $wgContLang
+     * @param <String> $oldtext
+     * @param <String> $newtext
+     * @param <Integer> $firstRev if it's the first revision
+     * @return <array> list of logootOperation
+     */
+    public function generate($oldText, $newText) {
+    //first revision, if model is empty
         if(count($this->model->getPositionlist())==0
             && count($this->model->getPositionlist())==0) $firstRev=1;
         else $firstRev=0;
@@ -114,24 +115,24 @@ class logootEngine implements logoot{
         $diffs = new Diff1( $ota, $nta );
 
 /* convert 4 operations into 2 operations*/
-        foreach($diffs->edits as $operation){
+        foreach($diffs->edits as $operation) {
             switch ($operation->type) {
                 case "add":
                     $adds = $operation->closing;
                     ksort($adds, SORT_NUMERIC);
 
-                    foreach($adds as $key=>$lineins){
+                    foreach($adds as $key=>$lineins) {
 
                         $lineNb = $key;
 
-                        if($firstRev==1){
+                        if($firstRev==1) {
                             $posMin = new LogootPosition(array(LogootId::IdMin()));
                             $posMax = new LogootPosition(array(LogootId::IdMax()));
                             $positions = $this->getLogootPosition($posMin, $posMax, gmp_init("1"), $sid=session_id());
                             $position = $positions[0];
                             $firstRev = 0;
                         }
-                        else{
+                        else {
                             $start = $this->getPrevPosition($lineNb);
                             $end = $this->getNextPosition($lineNb);
                             $positions = $this->getLogootPosition($start, $end, gmp_init("1"), $sid=session_id());
@@ -146,11 +147,11 @@ class logootEngine implements logoot{
                     }
                     break;
                 case "delete":
-                    foreach($operation->orig as $key2=>$linedel){
+                    foreach($operation->orig as $key2=>$linedel) {
                         $lineNb2 = $key2 + $counter;
                         $position = $this->getPosition($lineNb2);
                         //$diffElements[]=$linedel;
-                        if(!is_null($position)){
+                        if(!is_null($position)) {
                             $LogootDel = new LogootDel($position, $linedel);
                             $this->integrate($LogootDel/*, $clock*/);
                             $listOp[] = $LogootDel;
@@ -162,11 +163,11 @@ class logootEngine implements logoot{
                 case "copy":
                     break;
                 case "change":
-                    foreach($operation->orig as $key3=>$linedel1){
+                    foreach($operation->orig as $key3=>$linedel1) {
                         $lineNb3 = $key3 + $counter;
 
                         $position = $this->getPosition($lineNb3);
-                        if(!is_null($position)){
+                        if(!is_null($position)) {
                             $LogootDel1 = new LogootDel($position, $linedel1);
                             $this->integrate($LogootDel1/*, $clock*/);
                             $listOp[] = $LogootDel1;
@@ -176,18 +177,18 @@ class logootEngine implements logoot{
                     $adds1 = $operation->closing;
                     ksort($adds1, SORT_NUMERIC);
 
-                    foreach($adds1 as $key1=>$lineins1){
+                    foreach($adds1 as $key1=>$lineins1) {
 
 
                         $lineNb4 = $key1;
-                        if($firstRev==1){
+                        if($firstRev==1) {
                             $posMin = new LogootPosition(array(LogootId::IdMin()));
                             $posMax = new LogootPosition(array(LogootId::IdMax()));
                             $positions = $this->getLogootPosition($posMin, $posMax, gmp_init("1"), $sid=session_id());
                             $position = $positions[0];
                             $firstRev = 0;
                         }
-                        else{
+                        else {
                             $start = $this->getPrevPosition($lineNb4);
                             $end = $this->getNextPosition($lineNb4);
                             $positions = $this->getLogootPosition($start, $end, gmp_init("1"), $sid=session_id());
@@ -210,15 +211,15 @@ class logootEngine implements logoot{
     }
 
     /**
- * generation of a position, logoot algorithm
- * @param <Object> $start is the previous logootPosition
- * @param <Object> $end is the next logootPosition
- * @param <Integer> $N number of positions generated (should be 1 in our case)
- * @param <Object> $sid session id
- * @return <Object> a logootPosition between $start and $end
- */
+     * generation of a position, logoot algorithm
+     * @param <Object> $start is the previous logootPosition
+     * @param <Object> $end is the next logootPosition
+     * @param <Integer> $N number of positions generated (should be 1 in our case)
+     * @param <Object> $sid session id
+     * @return <Object> a logootPosition between $start and $end
+     */
     private function getLogootPosition($start, $end, $N, $sid) {
-        //$clock = 0;
+    //$clock = 0;
         $result = array();
         $Id_Max = LogootId::IdMax();
         $Id_Min = LogootId::IdMin();
@@ -236,13 +237,13 @@ class logootEngine implements logoot{
             $inf = gmp_init($start->get($i)->getInt());
 
             if($isInf==true)
-            $sup = gmp_init(INT_MAX);
+                $sup = gmp_init(INT_MAX);
             else
-            $sup = gmp_init($end->get($i)->getInt());
+                $sup = gmp_init($end->get($i)->getInt());
 
             if (gmp_cmp(gmp_sub(gmp_sub($sup, $inf), gmp_init("1")), $N)>0) {
-                //				inf = start.get(i).getInteger();
-                //				sup = end.get(i).getInteger();
+            //				inf = start.get(i).getInteger();
+            //				sup = end.get(i).getInteger();
                 break;
             }
 
@@ -251,19 +252,19 @@ class logootEngine implements logoot{
             $i++;
 
             if ($i == $start->size())
-            $start->add($Id_Min);
+                $start->add($Id_Min);
 
             if ($i == $end->size())
-            $end->add($Id_Max);
+                $end->add($Id_Max);
 
             if(gmp_cmp($inf, $sup)<0)$isInf=true;
 
         }
 
-$binf = gmp_add($inf, gmp_init("1"));
-$bsup = gmp_sub($sup, gmp_init("1"));
-$slot = gmp_sub($bsup, $binf);
-$step = gmp_div_q($slot, $N);
+        $binf = gmp_add($inf, gmp_init("1"));
+        $bsup = gmp_sub($sup, gmp_init("1"));
+        $slot = gmp_sub($bsup, $binf);
+        $step = gmp_div_q($slot, $N);
 
         $old = clone $currentPosition;
 
@@ -277,7 +278,7 @@ $step = gmp_div_q($slot, $N);
             $result[]=$r;//result est une arraylist<Position>
             return $result;
         } else
-        $lstep = $step;
+            $lstep = $step;
 
         if (gmp_cmp($lstep, gmp_init("0")) == 0) {
             $lstep = gmp_init("1");
@@ -291,11 +292,11 @@ $step = gmp_div_q($slot, $N);
             if (!gmp_cmp($lstep, gmp_init("1")) == 0) {
 
                 $add = $this->random(gmp_init($p->get($i)->getInt()),
-                                    gmp_add(gmp_init($p->get($i)->getInt()), $lstep));
+                    gmp_add(gmp_init($p->get($i)->getInt()), $lstep));
 
                 $r->set($i, gmp_strval($add), $sid/*, $clock*/);
             } else
-            $r->add1($i, gmp_init("1"), $sid/*, $clock*/);
+                $r->add1($i, gmp_init("1"), $sid/*, $clock*/);
 
 
             $result[]=clone $r;//voir
@@ -307,19 +308,19 @@ $step = gmp_div_q($slot, $N);
     }
 
 
-     /**
+    /**
      * to get the previous position (logootPosition)
      * @param <Integer> $lineNumber
      * @return <Object> LogootPosition
      */
-    private function getPrevPosition($lineNumber){
+    private function getPrevPosition($lineNumber) {
         $listIds = $this->model->getPositionList();
         $exists = false;
         $predecessor;
 
 
-        for($i=$lineNumber-1; $i>0; $i--){
-            if(isset ($listIds[$i])){
+        for($i=$lineNumber-1; $i>0; $i--) {
+            if(isset ($listIds[$i])) {
                 $exists = true;
                 $predecessor = $i;
                 break;
@@ -327,23 +328,23 @@ $step = gmp_div_q($slot, $N);
         }
 
         //if there is a predecessor
-        if($exists==true){
+        if($exists==true) {
             return $listIds[$predecessor];
         }
-        else{
+        else {
             $posMin = new LogootPosition(array(LogootId::IdMin()));
             return $posMin;
         }
     }
 
     //to get the next position
-    private function getNextPosition($lineNumber){
+    private function getNextPosition($lineNumber) {
         $listIds = $this->model->getPositionList();
 
-        if(isset ($listIds[$lineNumber])){
+        if(isset ($listIds[$lineNumber])) {
             return $listIds[$lineNumber];
         }
-        else{
+        else {
             $posMax = new LogootPosition(array(LogootId::IdMax()));
             return $posMax;
         }
@@ -354,7 +355,7 @@ $step = gmp_div_q($slot, $N);
      * @param <Integer> $lineNumber
      * @return <Object> logootPosition
      */
-    function getPosition($lineNumber){
+    function getPosition($lineNumber) {
         $listIds = $this->model->getPositionlist();
         return $listIds[$lineNumber];
     }
@@ -364,19 +365,19 @@ $step = gmp_div_q($slot, $N);
      * @param <Integer> $lineNumber
      * @param <Object> $position
      */
-    private function add($lineNumber, $position){
+    private function add($lineNumber, $position) {
         wfDebugLog('p2p',' - function logootEngine::'.__METHOD__);
         $listIds = $this->model->getPositionlist();
-      
+
         //position shifting
         $nbLines = count($listIds);
 
-        for($i=$nbLines+1; $i>$lineNumber; $i--){
+        for($i=$nbLines+1; $i>$lineNumber; $i--) {
             $listIds[$i] = $listIds[$i-1];
         }
         unset ($listIds[$lineNumber]);
         $listIds[$lineNumber] = $position;
-        
+
         $this->model->setPositionlist($listIds);
     }
 
@@ -385,13 +386,13 @@ $step = gmp_div_q($slot, $N);
      * @param <Integer> $lineNumber
      * @param <Object> $line
      */
-    private function addLine($lineNumber, $line){
+    private function addLine($lineNumber, $line) {
         wfDebugLog('p2p',' - function logootEngine::'.__METHOD__);
         $listLines = $this->model->getLinelist();
         //position shifting
         $nbLines = count($listLines);
 
-        for($i=$nbLines+1; $i>$lineNumber; $i--){
+        for($i=$nbLines+1; $i>$lineNumber; $i--) {
             $listLines[$i] = $listLines[$i-1];
         }
         unset ($listLines[$lineNumber]);
@@ -405,7 +406,7 @@ $step = gmp_div_q($slot, $N);
      * to delete a position in the model
      * @param <Integer> $lineNb
      */
-    private function delete($lineNb){
+    private function delete($lineNb) {
         $this->model->setPositionlist(
             $this->array_delete_key($this->model->getPositionlist(), $lineNb));
         $this->keyShifting($lineNb);
@@ -415,7 +416,7 @@ $step = gmp_div_q($slot, $N);
      * to delete a line in the blobInfo (the model)
      * @param <Integr> $lineNb
      */
-    private function deleteLine($lineNb){
+    private function deleteLine($lineNb) {
         $this->model->setLinelist(
             $this->array_delete_key($this->model->getLinelist(), $lineNb));
         $this->textKeyShifting($lineNb);
@@ -440,14 +441,16 @@ $step = gmp_div_q($slot, $N);
      * it only concerns the logootPosition array
      * @param <Integer> $lineNb
      */
-    private function keyShifting($lineNb){
+    private function keyShifting($lineNb) {
         $listIds = $this->model->getPositionlist();
         $tmp = array();
-        foreach ($listIds as $key=>$value){
-            if($key>$lineNb){
+        wfDebugLog('p2p',' keySifitinh, lineNb '.$lineNb);
+        foreach ($listIds as $key=>$value) {
+            wfDebugLog('p2p', 'key : '.$key);
+            if($key>$lineNb) {
                 $tmp[$key-1]=$value;
             }
-            else{
+            else {
                 $tmp[$key]=$value;
             }
         }
@@ -459,14 +462,14 @@ $step = gmp_div_q($slot, $N);
      * it only concerns the text array
      * @param <Integer> $lineNb
      */
-    private function textKeyShifting($lineNb){
+    private function textKeyShifting($lineNb) {
         $listLines = $this->model->getLinelist();
         $tmp = array();
-        foreach ($listLines as $key=>$value){
-            if($key>$lineNb){
+        foreach ($listLines as $key=>$value) {
+            if($key>$lineNb) {
                 $tmp[$key-1]=$value;
             }
-            else{
+            else {
                 $tmp[$key]=$value;
             }
         }
@@ -474,58 +477,53 @@ $step = gmp_div_q($slot, $N);
     }
 
     /**
- * adapted binary search
- * $arr is the positions'array of the document (this blobInfo)
- * "$position" is ressearched in this $arr, the function returns:
- * ->the position in the array if it is found,
- * ->'-1' if $position is before the first element,
- * ->'-2' if $position is after the last element or
- * -> an array with both positions in the array surrounding $position
- * @param <Object> $position LogootPosition
- * @param <function> $fct
- * @return <array or Integer>
- */
-    private function dichoSearch1($position,  $fct = 'dichoComp1')
-    {
+     * adapted binary search
+     * $arr is the positions'array of the document (this blobInfo)
+     * "$position" is ressearched in this $arr, the function returns:
+     * ->the position in the array if it is found,
+     * ->'-1' if $position is before the first element,
+     * ->'-2' if $position is after the last element or
+     * -> an array with both positions in the array surrounding $position
+     * @param <Object> $position LogootPosition
+     * @param <function> $fct
+     * @return <array or Integer>
+     */
+    private function dichoSearch1($position,  $fct = 'dichoComp1') {
         wfDebugLog('p2p',' - function logootEngine::dichoSearch ');
-        if($position instanceof LogootPosition){
+        if($position instanceof LogootPosition) {
             wfDebugLog('p2p',' - position instanceof logootPosition ');
-        }else{
+        }else {
             wfDebugLog('p2p',' - position not instanceof logootPosition ');
         }
         $arr = $this->model->getPositionlist();
-      
-        if(count($arr)==0){
+
+        if(count($arr)==0) {
             return -1;
-        }else{
+        }else {
             $gauche = 1;
             $droite = count($arr);
             $centre = round(($droite+$gauche)/2);
 
-            if(count($arr)>2){
-                while($centre != $droite && $centre != $gauche )
-                {
+            if(count($arr)>2) {
+                while($centre != $droite && $centre != $gauche ) {
 
-                    if($this->$fct($position, $arr[$centre]) == -1)
-                    {
+                    if($this->$fct($position, $arr[$centre]) == -1) {
                         $droite = $centre;
                         $centre = floor(($droite+$gauche)/2);
                     }
-                    if($this->$fct($position, $arr[$centre]) == 1)
-                    {
+                    if($this->$fct($position, $arr[$centre]) == 1) {
                         $gauche = $centre;
                         $centre = round(($droite+$gauche)/2);
                     }
-                    if($this->$fct($position, $arr[$centre]) == 0)
-                    {
+                    if($this->$fct($position, $arr[$centre]) == 0) {
                         return $centre;
                     }
 
                 }
-            }else{/*with an array<=2*/
+            }else {/*with an array<=2*/
                 if($this->$fct($position, $arr[$gauche]) == 0) return $gauche;
                 elseif($this->$fct($position, $arr[$droite]) == 0)
-                                                               return $droite;
+                    return $droite;
             }
 
             // if there is no occurence
@@ -535,15 +533,17 @@ $step = gmp_div_q($slot, $N);
             end($arr);
             $lastElementKey = key($arr);
 
-            if($this->$fct($position, $arr[$firstElementKey]) == -1)
-            return -1; /* if the value is less than the first element of
-                              the array*/
-            elseif($this->$fct($position, $arr[$lastElementKey]) == 1)
-            return -2;/* if the value is greater than the last element of
-                              the array*/
+            if($this->$fct($position, $arr[$firstElementKey]) == -1) {
+                wfDebugLog('p2p', '     - the value is less than the first element');
+                return -1; /// if the value is less than the first element of the array
+            }
+            elseif($this->$fct($position, $arr[$lastElementKey]) == 1){
+                wfDebugLog('p2p','      - the value is greater than the last element');
+                return -2;/* if the value is greater than the last element of the array*/
+            }
             else  /*else we return the values surrounding the ressearched
                     value */
-            return array(0=>$gauche, 1=>$droite);
+                return array(0=>$gauche, 1=>$droite);
         }
     }
 
@@ -553,42 +553,41 @@ $step = gmp_div_q($slot, $N);
      * @param <Object> $position2 LogootPosition
      * @return <Integer> -1, 0 or 1
      */
-    private function dichoComp1($position1, $position2)
-    {
+    private function dichoComp1($position1, $position2) {
 
-        //if both positions are 1 vector Ids
-        if($position1->size()==1 && $position2->size()==1){
+    //if both positions are 1 vector Ids
+        if($position1->size()==1 && $position2->size()==1) {
             $tab1= $position1->getThisPosition();
             $tab2= $position2->getThisPosition();
-            if($position1->lessThan($tab1[0], $tab2[0])){
+            if($position1->lessThan($tab1[0], $tab2[0])) {
                 return -1;
             }
-            if($position1->greaterThan($tab1[0], $tab2[0])){
+            if($position1->greaterThan($tab1[0], $tab2[0])) {
                 return 1;
             }
-            if($position1->equals($tab1[0], $tab2[0])){
+            if($position1->equals($tab1[0], $tab2[0])) {
                 return 0;
             }
         }
-        else{//else if both logootIds are n vectors Ids
-            if($position1->nLessThan($position2)){
+        else {//else if both logootIds are n vectors Ids
+            if($position1->nLessThan($position2)) {
                 return -1;
             }
-            if($position1->nGreaterThan($position2)){
+            if($position1->nGreaterThan($position2)) {
                 return 1;
             }
-            if($position1->nEquals($position2)){
+            if($position1->nEquals($position2)) {
                 return 0;
             }
         }
     }
 
     /**
- * to get a random value between $min and $max
- * @param <gmp_ressource> $min
- * @param <gmp_ressource> $max
- * @return <gmp_ressource> random value
- */
+     * to get a random value between $min and $max
+     * @param <gmp_ressource> $min
+     * @param <gmp_ressource> $max
+     * @return <gmp_ressource> random value
+     */
     private function random ($min,$max) {
         $min = gmp_add($min, gmp_init("1"));
         $rdm = gmp_add($min, gmp_mod(gmp_random(2), gmp_sub($max, $min)));
@@ -599,14 +598,14 @@ $step = gmp_div_q($slot, $N);
      * Size of the logootPosition array
      * @return <Integer>
      */
-    private function size(){
+    private function size() {
         return count($this->model->getPositionlist());
     }
 
-/**
- *
- * @return <Object> model
- */
+    /**
+     *
+     * @return <Object> model
+     */
     public function getModel() {
         return $this->model;
     }

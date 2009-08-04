@@ -41,9 +41,10 @@ class apiTest extends PHPUnit_Framework_TestCase {
         exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
-        
+
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
+        $this->p2pBot1->updateProperies($this->p2pBot1->bot->wikiServer);
 
         $basicbot2 = new BasicBot();
         $basicbot2->wikiServer = 'http://localhost/wiki2';
@@ -65,7 +66,6 @@ class apiTest extends PHPUnit_Framework_TestCase {
      * test ApiQueryPatch
      */
     function testGetPatch() {
-        xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
         $patchName = 'patch:localhost/wiki1';
         $content = '[[patchID::'.$patchName.']] [[onPage::Berlin]] [[previous::localhost/wiki0]]
         [[hasOperation::Localhost/wiki111;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page berlin]]';
@@ -84,7 +84,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
 
         //ApiQueryPatch call
         $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:localhost/wiki2&format=xml');
-        
+
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
         $patchs = $dom->getElementsByTagName('patch');
@@ -106,6 +106,47 @@ class apiTest extends PHPUnit_Framework_TestCase {
 
         $contentOp = str_replace(" ", "",'Localhost/wiki121; Insert; (15555995255933583146:900c17ebee311fb6dd00970d26727577); content page Paris');
         $this->assertEquals($contentOp,str_replace(" ","", $op[0]));
+    }
+
+    /*
+     * test apiQueryPatch with a long content operation
+     */
+    public function testGetPatchWithLongOp() {
+        $this->assertTrue($this->p2pBot1->createPage('Patch:46B0DDA330CB057434586A52435CE43222','Patch: patchID: [[patchID::Patch:46B0DDA330CB057434586A52435CE43222]]
+ onPage: [[onPage::Moldova]]
+[[hasOperation::46B0DDA330CB057434586A52435CE43223;Delete;(6394517056216502886:26a70380f78f203e27ed3db9322b2f78) ;JycnTW9sZG92YScnJyB7e0F1ZGlvLUlQQXxlbi11cy1Nb2xkb3ZhLm9nZ3wvbcmSbMuIZG/KinbJmS99fSwgb2ZmaWNpYWxseSB0aGUgJycnUmVwdWJsaWMgb2YgTW9sZG92YScnJyAoJydSZXB1YmxpY2EgTW9sZG92YScnKSBpcyBhIFtbbGFuZGxvY2tlZF1dIGNvdW50cnkgaW4gW1tsb2NhdGVkX2luOjpFdXJvcF1dLCBsb2NhdGVkIGJldHdlZW4gW1tSb21hbmlhXV0gdG8gdGhlIHdlc3QgYW5kIFtbVWtyYWluZV1dIHRvIHRoZSBub3J0aCwgZWFzdCBhbmQgc291dGgu]]
+hasOperation: [[hasOperation::46B0DDA330CB057434586A52435CE43224;Insert;(587539302497374424:26a70380f78f203e27ed3db9322b2f78) ;JycnTW9sZG92YScnJywgb2ZmaWNpYWxseSB0aGUgJycnUmVwdWJsaWMgb2YgTW9sZG92YScnJyAoJydSZXB1YmxpY2EgTW9sZG92YScnKSBpcyBhIFtbbGFuZGxvY2tlZF1dIGNvdW50cnkgaW4gW1tsb2NhdGVkX2luOjpFdXJvcF1dLCBsb2NhdGVkIGJldHdlZW4gW1tSb21hbmlhXV0gdG8gdGhlIHdlc3QgYW5kIFtbVWtyYWluZV1dIHRvIHRoZSBub3J0aCwgZWFzdCBhbmQgc291dGgus]]
+previous: [[previous::Patch:46B0DDA330CB057434586A52435CE4329]]'),'failed to create page Patch : ('.$this->p2pBot1->bot->results.')');
+
+       /* $this->p2pBot1->createPage('Toto','Moldova en-us-Moldova.ogg /mɒlˈdoʊvə/ (help·info), officially the Republic of Moldova (Republica Moldova) is a landlocked country in Eastern Europe, located between Romania to the west and Ukraine to the north, east and south.
+
+In the Middle Ages, most of the present territory of Moldova was part of the Principality of Moldavia. In 1812, it was annexed by the Russian Empire, and became known as Bessarabia. Between 1856 and 1878, the southern part was returned to Moldavia. In 1859 it united with Wallachia to form modern Romania.
+
+Upon the dissolution of the Russian Empire in 1917, an autonomous, then-independent Moldavian Democratic Republic was formed, which joined Romania in 1918. In 1940, Bessarabia was occupied by the Soviet Union and was split between the Ukrainian SSR and the newly created Moldavian SSR.
+
+After changing hands in 1941 and 1944 during World War II, the territory of the modern country was subsumed by the Soviet Union until its declaration of independence on August 27, 1991. Moldova was admitted to the UN in March 1992.
+
+In September 1990, a breakaway government was formed in Transnistria, a strip of Moldavian SSR on the east bank of the river Dniester. After a brief war in 1992, it became de facto independent, although no UN member has recognized its independence.
+
+The country is a parliamentary democracy with a president as head of state and a prime minister as head of government. Moldova is a member state of the United Nations, Council of Europe, WTO, OSCE, GUAM, CIS, BSEC and other international organizations. Moldova currently aspires to join the European Union,[4] and has implemented the first three-year Action Plan within the framework of the European Neighbourhood Policy (ENP).[5] About a quarter of the population lives on less than US$ 2 a day.');*/
+
+      //  $patchId = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::Toto', '-3FpatchID');
+
+        $patchXML = file_get_contents($this->p2pBot1->bot->wikiServer.'/api.php?action=query&meta=patch&papatchId=Patch:46B0DDA330CB057434586A52435CE43222&format=xml');
+
+        $dom = new DOMDocument();
+        $dom->loadXML($patchXML);
+
+        $listeOp = $dom->getElementsByTagName('operation');
+
+        $op = null;
+        foreach($listeOp as $o)
+            $op[] = $o->firstChild->nodeValue;
+
+      $this->assertTrue(count($op)==2);
+      $this->assertEquals(str_replace(' ', '', $op[0]),'46B0DDA330CB057434586A52435CE43223;Delete;(6394517056216502886:26a70380f78f203e27ed3db9322b2f78);JycnTW9sZG92YScnJyB7e0F1ZGlvLUlQQXxlbi11cy1Nb2xkb3ZhLm9nZ3wvbcmSbMuIZG/KinbJmS99fSwgb2ZmaWNpYWxseSB0aGUgJycnUmVwdWJsaWMgb2YgTW9sZG92YScnJyAoJydSZXB1YmxpY2EgTW9sZG92YScnKSBpcyBhIFtbbGFuZGxvY2tlZF1dIGNvdW50cnkgaW4gW1tsb2NhdGVkX2luOjpFdXJvcF1dLCBsb2NhdGVkIGJldHdlZW4gW1tSb21hbmlhXV0gdG8gdGhlIHdlc3QgYW5kIFtbVWtyYWluZV1dIHRvIHRoZSBub3J0aCwgZWFzdCBhbmQgc291dGgu');
+      $this->assertEquals(str_replace(' ', '', $op[1]),'46B0DDA330CB057434586A52435CE43224;Insert;(587539302497374424:26a70380f78f203e27ed3db9322b2f78);JycnTW9sZG92YScnJywgb2ZmaWNpYWxseSB0aGUgJycnUmVwdWJsaWMgb2YgTW9sZG92YScnJyAoJydSZXB1YmxpY2EgTW9sZG92YScnKSBpcyBhIFtbbGFuZGxvY2tlZF1dIGNvdW50cnkgaW4gW1tsb2NhdGVkX2luOjpFdXJvcF1dLCBsb2NhdGVkIGJldHdlZW4gW1tSb21hbmlhXV0gdG8gdGhlIHdlc3QgYW5kIFtbVWtyYWluZV1dIHRvIHRoZSBub3J0aCwgZWFzdCBhbmQgc291dGgus');
+
     }
 
     /**

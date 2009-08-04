@@ -34,13 +34,14 @@ class ApiQueryPatch extends ApiQueryBase {
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FpatchID/-3FonPage/-3FhasOperation/-3Fprevious/headers=hide/format=csv/sep=!';
         wfDebugLog('p2p','  -> url request : '.$url);
         $data = file_get_contents($url);
-        wfDebugLog('p2p','  -> result : '.$data);
+
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 
         $data = split('!',$data);
         if($data[1]) {
             substr($data[3],0,-1);
+            wfDebugLog('p2p', ' -> operation : '.$data[3]);
             $op = split(',',$data[3]);
             $result->setIndexedTagName($op, 'operation');
             $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);

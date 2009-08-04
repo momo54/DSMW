@@ -221,9 +221,11 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     }
 
     static function getSemanticRequest($server,$request,$param,$sep='!') {
+        wfDebugLog('p2p','- function getSemanticRequest');
         $request = utils::encodeRequest($request);
         $param = utils::encodeRequest($param);
         $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
+        wfDebugLog('p2p','  -> request url : '.$url);
         $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
         if($php == "") {
             return array();
@@ -303,6 +305,35 @@ Pages concerned:
         $res = array_unique($res);
 
         return $res;//published patch tab
+    }
+
+    static function orderPatchByPrevious($title,$previousPatch='none') {
+        global $wgServerName, $wgScriptPath;
+        $firstPatch = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]', '-3FpatchID');
+
+        /*while($firstPatch) {
+            $p = split(',',$firstPatch[0]);
+            $firstPatch[0] = $p[1];
+            $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
+            foreach ($patchFound as $p) {
+                $firstPatch[] = $p;
+            }
+
+            $newPatch = array_shift($firstPatch);
+            if(!$marque[$newPatch]) {
+                $marque[$newPatch] = 1;
+                $patchs[] = $newPatch;
+            }*/
+        while($firstPatch) {
+            /*$p = split(',',$firstPatch[0]);
+            $firstPatch[0] = $p[1];*/
+            $patchFound = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]', '-3FpatchID');
+            foreach ($patchFound as $p) {
+                $firstPatch[] = $p;
+            }
+            $patchs[] = array_shift($firstPatch);
+        }
+        return $patchs;
     }
 }
 ?>

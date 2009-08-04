@@ -138,6 +138,27 @@ class p2pBot {
             return false;
         }
     }
+
+    function updateProperies($server) {
+        $post_vars['server'] = $server;
+        if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/extensions/p2pExtension/bot/DSMWBot.php',$post_vars) ) {
+        // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
+            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+            if ('200'==$code) {
+                echo "updated properies failed with error 200:(".$this->bot->results.")";
+                return false;
+            }
+            elseif ('302'==$code)
+                return true;
+            else {
+                echo "updated properies failed error not 200:(".$this->bot->results.")";
+                return false;
+            }
+        }else {
+            echo "updated properies submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
+            return false;
+        }
+    }
 }
 
 function callbackTestFct($content1,$content2) {

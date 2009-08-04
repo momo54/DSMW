@@ -26,6 +26,7 @@ class ArticleAdminPage extends SpecialPage {
         global $wgOut, $wgServerName, $wgScriptPath;/*, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;*/
 
         $url = 'http://'.$wgServerName.$wgScriptPath."/index.php";
+        $urlServer = 'http://'.$wgServerName.$wgScriptPath;
         //$wgOut->addHeadItem('script', ArticleAdminPage::javascript());
 
 
@@ -173,10 +174,10 @@ function pullFeedDel(){
 
         if (!$this->getArticle('Property:ChangeSetID')->exists()) {
             $output .='
-<FORM METHOD="POST" ACTION="'.dirname(dirname($_SERVER['HTTP_REFERER'])).'/extensions/p2pExtension/bot/DSMWBot.php" name="scriptExec">
+<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/p2pExtension/bot/DSMWBot.php" name="scriptExec">
 <table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
 </td></table>
-<input type="hidden" name="server" value="'.dirname(dirname($_SERVER['HTTP_REFERER'])).'">
+<input type="hidden" name="server" value="'.$urlServer.'">
 </form>';
         }
 
@@ -201,7 +202,7 @@ function pullFeedDel(){
             $wgOut->setPagetitle('DSMW on '.$title);
 
             //part list of patch
-            $patchs = $this->orderPatchByPrevious($title);
+            $patchs = utils::orderPatchByPrevious($title);
 
             $output = '<div><table><caption>List of patchs</caption>';
             foreach ($patchs as $patch) {
@@ -645,33 +646,6 @@ function pullFeedDel(){
         return $article;
     }
 
-    function orderPatchByPrevious($title,$previousPatch='none') {
-        $firstPatch = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]','?patchID');
-
-        /*while($firstPatch) {
-            $p = split(',',$firstPatch[0]);
-            $firstPatch[0] = $p[1];
-            $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
-            foreach ($patchFound as $p) {
-                $firstPatch[] = $p;
-            }
-            
-            $newPatch = array_shift($firstPatch);
-            if(!$marque[$newPatch]) {
-                $marque[$newPatch] = 1;
-                $patchs[] = $newPatch;
-            }*/
-        while($firstPatch) {
-            /*$p = split(',',$firstPatch[0]);
-            $firstPatch[0] = $p[1];*/
-            $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
-            foreach ($patchFound as $p) {
-                $firstPatch[] = $p;
-            }
-            $patchs[] = array_shift($firstPatch);
-        }
-        return $patchs;
-    }
 
 } //end class
 
