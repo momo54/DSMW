@@ -139,8 +139,8 @@ class p2pBot {
         }
     }
 
-    function updateProperies($server) {
-        $post_vars['server'] = $server;
+    function updateProperies() {
+        $post_vars['server'] = $this->bot->wikiServer;
         if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/extensions/p2pExtension/bot/DSMWBot.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
