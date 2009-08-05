@@ -86,4 +86,11 @@ function getPatchXML($server,$patchId) {
     return $dom;
 }
 
+    function arraytolower($array) {
+        foreach($array as $key => $value) {
+            $array[$key] = strtolower($value);
+        }
+        return $array;
+    }
+
 ?>

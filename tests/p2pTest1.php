@@ -96,8 +96,8 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         //assert that there is the same patch on the 2 wikis
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
-        $PatchonWiki1 = $this->arraytolower($PatchonWiki1);
-        $PatchonWiki2 = $this->arraytolower($PatchonWiki2);
+        $PatchonWiki1 = arraytolower($PatchonWiki1);
+        $PatchonWiki2 = arraytolower($PatchonWiki2);
         $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
 
         // assert that wiki1/paris == wiki2/paris
@@ -156,8 +156,8 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         //assert that there is the same patch on the 2 wikis
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
-        $PatchonWiki1 = $this->arraytolower($PatchonWiki1);
-        $PatchonWiki2 = $this->arraytolower($PatchonWiki2);
+        $PatchonWiki1 = arraytolower($PatchonWiki1);
+        $PatchonWiki2 = arraytolower($PatchonWiki2);
         $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
         // assert that wiki1/paris == wiki2/paris
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
@@ -249,11 +249,6 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $this->assertEquals($PatchonWiki1,$PatchonWiki2);
     }
 */
-    function arraytolower($array) {
-        foreach($array as $key => $value) {
-            $array[$key] = strtolower($value);
-        }
-        return $array;
-    }
+
 }
 ?>
