@@ -31,12 +31,12 @@ class p2pTest3 extends PHPUnit_Framework_TestCase {
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
-        $this->p2pBot1->updateProperies($this->p2pBot1->bot->wikiServer);
+        $this->p2pBot1->updateProperies();
 
         $basicbot2 = new BasicBot();
         $basicbot2->wikiServer = 'http://localhost/wiki2';
         $this->p2pBot2 = new p2pBot($basicbot2);
-        $this->p2pBot2->updateProperies($this->p2pBot2->bot->wikiServer);
+        $this->p2pBot2->updateProperies();
 
         $basicbot3 = new BasicBot();
         $basicbot3->wikiServer = 'http://localhost/wiki3';
