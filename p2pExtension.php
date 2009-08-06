@@ -92,7 +92,9 @@ function conflict(&$editor, &$out) {
 }
 
 //function performAction($output, $article, $title, $user, $request, $wiki) {
-//    if($wiki->params['action']!='view') return true;
+//     $dbr = wfGetDB( DB_SLAVE );
+//    $lastRevision = Revision::loadFromTitle($dbr, $title);
+//    $rawtext = $lastRevision->getRawText();
 //    return true;
 //}
 
@@ -256,10 +258,15 @@ Pages concerned:
                 wfDebugLog('p2p','  ->requested page '.$page);
                 $request1 = '[[Patch:+]][[onPage::'.$page.']]';
                 $tmpPatches = utils::orderPatchByPrevious($page);
+                if(!is_array($tmpPatches))
+                throw new MWException( __METHOD__.': $tmpPatches is not an array' );
                 $patches = array_merge($patches, $tmpPatches);
+                 wfDebugLog('p2p','  -> '.count($tmpPatches).'patchs were found for the page '.$page);
             }
+            wfDebugLog('p2p','  -> '.count($patches).' patchs were found for the pushfeed '.$name);
             $published = getPublishedPatches($name);
             $unpublished = array_diff($patches, $published);/*unpublished = patches-published*/
+            wfDebugLog('p2p','  -> '.count($published).' patchs were published for the pushfeed '.$name.' and '.count($unpublished).' unpublished patchs');
             if(empty ($unpublished)) {
                 $title = Title::newFromText('Special:ArticleAdminPage');
                 $article = new Article($title);
