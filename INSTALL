@@ -26,7 +26,7 @@ For more details, see those extensions'own
 installation requirements.
 
 The PHP extension GMP (GNU Multiple Precision) must be installed (or activated)
-(also available on Windows platforms since PHP5.1.0)
+(also available on Windows platforms since PHP5.1.0) 
 
 Important: If you want to run the DSMW tests, you must make a dump of your 
 database immediatly (before using DSMW), for more details, see the readme file
@@ -44,7 +44,7 @@ in the tests directory [wikipath]/extensions/p2pExtension/tests.
 
 (2) Edit LocalSettings.php in the root of your MediaWiki installation,
     and add the following lines near the bottom but BEFORE THE LINES THAT
-    ACTIVATE SEMANTIC MEDIAWIKI:
+    ACTIVATE SEMANTIC MEDIAWIKI(cf. requirements):
 
   require_once "$IP/extensions/p2pExtension/p2pExtension.php";
   $wgGroupPermissions['*']['ArticleAdminPage']       = true;
@@ -59,34 +59,23 @@ These two lines:
 if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
 if (!defined('PASSWORD')){	define('PASSWORD','admin');}
 
-(3) Creation of a new tables in the Mediawiki database:
+(3) Creation of new tables in the Mediawiki database:
         Create the database tables, executing the script on your MySQL
         administration tool.
         Substitute `wikidb` for the name of your database.
         The script can be found in the file: /p2pExtension/db/addedTables.sql
 
-(4) If you're using a Mediawiki version below 1.14.0, you have to replace the
-    following line in the p2pExtension.php file:
-
-        $wgAPIMetaModules = array('patch' => 'ApiQueryPatch',
-                                    'changeSet' => 'ApiQueryChangeSet');
-
-        by this line:
-
-        $wgApiQueryMetaModules = array('patch' => 'ApiQueryPatch',
-                                    'changeSet' => 'ApiQueryChangeSet');
-
-(5) The "cache" directory should exist and be writeable by the server
+(4) The "cache" directory should exist and be writeable by the server
     ([wikipath]/extensions/p2pExtension/bot/cache)
 
-(6) Edit the LocalSettings.php and add these lines AFTER THE P2PEXTENSION
+(5) Edit the LocalSettings.php and add these lines AFTER THE P2PEXTENSION
     ACTIVATION (see point (2)) and BEFORE THE LINES THAT ACTIVATE SEMANTIC
     MEDIAWIKI:
 
     $wgLogo = "{$wgScriptPath}/extensions/p2pExtension/files/Logo.jpeg";
     require_once "$IP/extensions/p2pExtension/files/DSMWSettingsInc.inc";
 
-    and these line THE LINES THAT ACTIVATE SEMANTIC MEDIAWIKI:
+    and these line after THE LINES THAT ACTIVATE SEMANTIC MEDIAWIKI:
 
     global $smwgNamespacesWithSemanticLinks;
     $smwgNamespacesWithSemanticLinks = $smwgNamespacesWithSemanticLinks + array(

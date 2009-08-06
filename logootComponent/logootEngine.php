@@ -30,8 +30,7 @@ class logootEngine implements logoot {
                 wfDebugLog('p2p',' - integrate insert dicho result: '.$result);
                 if(is_array($result)) {
         /* position array begins at key '1' which corresponds with line1
-         * Lines array begins at key '0' as a normal array, because there is
-         * no need to make it corresponding with line numbers
+         * array begins at key '1' which corresponds with line1
          */
 
 
