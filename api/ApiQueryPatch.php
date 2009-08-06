@@ -38,11 +38,10 @@ class ApiQueryPatch extends ApiQueryBase {
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 
-        $data = split('!',$data);
+        $data = explode('!',$data);
         if($data[1]) {
             substr($data[3],0,-1);
-            wfDebugLog('p2p', ' -> operation : '.$data[3]);
-            $op = split(',',$data[3]);
+            $op = explode(',',$data[3]);
             $result->setIndexedTagName($op, 'operation');
             $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);
             $result->addValue(array('query',$this->getModuleName()),'onPage',$data[2]);

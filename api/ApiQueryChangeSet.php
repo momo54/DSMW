@@ -39,11 +39,11 @@ class ApiQueryChangeSet extends ApiQueryBase {
         $result = $this->getResult();
         $data = str_replace('"', '', $data);
 
-        $data = split('!',$data);
+        $data = explode('!',$data);
         $CSID = $data[1];
         wfDebugLog('p2p','  -> CSID : '.$CSID);
         if($CSID) {
-            $data = split(',',$data[2]);
+            $data = explode(',',$data[2]);
             for ($i = 0 ; $i < count($data) ; $i++) {
                 wfDebugLog('p2p','  -> patch : '.$data[$i]);
             }
