@@ -158,7 +158,7 @@ previous: [[previous::none]]');
         $this->assertTrue($this->p2pBot1->push('PushFeed:PushPage_Moldova'),
             'failed to push PushPage_Moldova : ('.$this->p2pBot1->bot->results.')');
 
-        $CS = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushPage_Moldova]]','-3FhasPushHead');
+        $CS = getSemanticRequest($this->p2pBot1->bot->wikiServer,'[[name::PushFeed:PushPage_Moldova]]','-3FhasPushHead');
         $CS = $CS[0];
 
         $patchs = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[changeSetID::'.$CS.']]', '-3FhasPatch');
@@ -199,7 +199,7 @@ previous: [[previous::none]]');
         $this->assertEquals('none',strtolower($CSFound[2]),
             'failed to push PushCity11, ChangeSet previous must be None but '.$CSFound[2].' was found');
 
-        $patchCS = split(',',$CSFound[3]);
+        $patchCS = explode(',',$CSFound[3]);
         $this->assertTrue(count($patchCS)==2,
             'failed to push PushCity11, ChangeSet must contains 2 patchs but '.count($patchCS).' patchs were found');
 

@@ -224,14 +224,14 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         wfDebugLog('p2p','- function getSemanticRequest');
         $request = utils::encodeRequest($request);
         $param = utils::encodeRequest($param);
-        $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/format=csv/sep='.$sep.'/limit=100';
+        $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100';
         wfDebugLog('p2p','  -> request url : '.$url);
         $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
         if($php == "") {
             return array();
         }
         $res = explode("\n", $php);
-        $array = split($sep, $php);
+        $array = explode($sep, $php);
         foreach ($res as $key=>$page) {
             if($page=="") {
                 unset ($res[$key]);
