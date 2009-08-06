@@ -231,7 +231,7 @@ function pullFeedDel(){
             $pushs = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPushFeed::+]]','?inPushFeed');
             $output .= '<div><table><caption>List of pushs</caption>';
             foreach ($pushs as $push) {
-                $pushName = split('!',$push);
+                $pushName = explode('!',$push);
                 $pushName = $pushName[1];
                 $pushName = str_replace(' ', '_', $pushName);
                 //all published patch in pushName
@@ -275,7 +275,7 @@ function pullFeedDel(){
             $pulls = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPullFeed::+]]','?inPullFeed');
             $output .= '<div><table><caption>List of pull</caption>';
             foreach ($pulls as $pull) {
-                $pullName = split('!',$pull);
+                $pullName = explode('!',$pull);
                 $pullName = $pullName[1];
                 $pushServer = getPushURL($pullName);
                 $pushName = getPushName($pullName);
