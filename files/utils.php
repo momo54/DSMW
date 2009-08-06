@@ -324,6 +324,7 @@ Pages concerned:
                 $marque[$newPatch] = 1;
                 $patchs[] = $newPatch;
             }*/
+        $patchs = array();
         while($firstPatch) {
             /*$p = split(',',$firstPatch[0]);
             $firstPatch[0] = $p[1];*/
