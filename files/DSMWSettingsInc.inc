@@ -37,13 +37,23 @@ $wgGroupPermissions['sysop']['editchangeset'] = true;
      $serverId = md5(uniqid(mt_rand(), true));
      store(strtoupper($serverId));
  }
- 
+
+ /**
+  * Gets the Server id (unique)
+  *
+  * @return <String>
+  */
  function getServerId(){
         $db = wfGetDB( DB_SLAVE );
         $res = $db->selectField('p2p_params','server_id');
         return $res;
  }
 
+/**
+ * Stores the server id
+ *
+ * @param <String> $serverId
+ */
  function store($serverId){
         $dbw = wfGetDB( DB_MASTER );
         $dbw->update( 'p2p_params', array(

@@ -1,11 +1,7 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of dao
+ * DAO used to load and store the boModel
  *
  * @author Jean-Philippe Muller
  */

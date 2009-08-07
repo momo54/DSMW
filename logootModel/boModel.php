@@ -1,13 +1,11 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of boModel
+ * Model of a wiki page.
+ * Represented by a list of page's lines and a list of the logootPositions
+ * associated to each line
  *
- * @author CUCUTEANU
+ * @author Muller Jean-Philippe
  */
 class boModel {
     private $positionList = array();

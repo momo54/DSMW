@@ -111,10 +111,8 @@ function conflict(&$editor, &$out) {
 function onUnknownAction($action, $article) {
     global $wgOut, $wgServerName, $wgScriptPath;
     $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    //    $script=javascript($_SERVER['HTTP_REFERER']);
-    //    $wgOut->addHeadItem('script', $script);
-
-    //////////pull form page////////Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
+   
+    //////////pull form page////////
     if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
         wfDebugLog('p2p','addPullPage ');
         $newtext = "Add a new site:
@@ -457,126 +455,6 @@ pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
         }//end foreach list pullfeed
         return false;
     }
-
-
-    //    elseif($action == "admin") {
-    //
-    //        if(isset($_POST['wiki'])&& isset ($_POST['title'])&& isset ($_POST['id'])) {
-    //
-    //            $patchArray = $this->getPatches($_POST['id'], $_POST['title'], $_POST['wiki']);
-    //            foreach ($patchArray as $patch) {
-    //                $this->integratePatch($patch, $article);
-    //            }$style = ' style="border-bottom: 2px solid #000;"';
-    //            $tableStyle = ' style="float: left; margin-left: 40px;"';
-    //            $output = "";
-    //
-    //            $tables = array("site");
-    //            $columns = array("site_id", "site_url", "site_name");
-    //            $conditions = '';
-    //            $fname = "Database::select";
-    //            $options = array(
-    //                "ORDER BY" => "site_id",
-    //            );
-    //            if ($page_limit > 0) {
-    //                $options["LIMIT"] = $page_limit;
-    //            }
-    //            if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-    //                $output .= '<p>Error accessing list.</p>';
-    //            } else if($db->numRows($result) == 0) {
-    //                    $output .= '<p>No remote site.</p>';
-    //                } else {
-    //                    $output .= '
-    //<FORM METHOD="POST" ACTION="">
-    //<table'.$tableStyle.' border>
-    //  <tr>
-    //    <th colspan="5"'.$style.'>'.$db->numRows($result).' Remote Sites</th>
-    //  </tr>
-    //  <tr>
-    //    <th colspan="2" >Site</th>
-    //
-    //    <th><input type="submit" value="Push"></th>
-    //    <th><input type="submit" value="Pull"></th>
-    //    <th><input type="submit" value="Remove"></th>
-    //    <input type="hidden" name="ppc" value="true">
-    //  </tr>';
-    //                    while ($row = $db->fetchRow($result)) {
-    //                        $i = $i + 1;
-    //                        $output .= '
-    //  <tr>
-    //    <td>'.$row["site_id"].'</td>
-    //    <td title="'.$row["site_url"].'">'.$row["site_name"].'</td>
-    //    <td colspan="3" align="center"><input type="checkbox" name="push['.$i.']"/></td>
-    //  </tr>';
-    //                    }
-    //                    $output .= '
-    //
-    //
-    //</table>$id
-    //</FORM>';
-    //                }
-    //
-    //        }
-    //
-    //
-    //        $page_title=$_GET['title'];
-    //
-    //
-    //        $wgOut->setPagetitle($page_title.": Administration page");
-    //
-    //        //adding javascript to page header
-    //        $file = dirname($_SERVER['PHP_SELF']).'/extensions/p2pExtension/specialPage/SPFunctions.js';
-    //        $wgOut->addScriptFile($file);
-    //
-    //        $db = &wfGetDB(DB_SLAVE);
-    //        $tables = array("site", "site_cnt", "page");
-    //        $conditions = array("site.site_id = site_cnt.site_id", "site_cnt.page_title = page.page_title",
-    //            "page.page_title='".$_GET['title']."'");
-    //        $fname = "Database::select";
-    //        $columns = array("site.site_id","site_url","site_name","counter","page.page_title");
-    //        $options = array("ORDER BY site.site_id");
-    //
-    //        $output = "";
-    //        if (false == $result = $db->select($tables, $columns, $conditions, $fname, $options)) {
-    //            $output .= '<p>Error accessing database.</p>';
-    //        } else if($db->numRows($result) == 0) {
-    //                $output .= '<p>This page is up to date.</p>';
-    //            } else {
-    //                $style = ' style="border-bottom:2px solid #000; text-align:left;"';
-    //                $output .= '<table border cellspacing="0" cellpadding="5"><tr>';
-    //
-    //
-    //
-    //                $output .= '<th'.$style.'>Remote site</th><th'.$style.'>Info</th><th'.$style.'>Action</th>';
-    //
-    //
-    //                $output .= '</tr>';
-    //
-    //                //Display the data--display some data differently than others.
-    //                while ($row = $db->fetchRow($result)) {
-    //                    $output .= '<tr>';
-    //
-    //                    $output .= "<td title='yop'>";
-    //                    $output .= htmlspecialchars($row['site_name']).'&nbsp;';
-    //                    $output .= "</td>";
-    //                    $output .= "<td>";
-    //                    $output .= htmlspecialchars($row['counter']).'&nbsp;';
-    //                    $output .= "</td>";
-    //                    $output .= "<td>";
-    //                    //                                        $output .= "<button type='button' onclick=\"document.location='".$_SERVER["PHP_SELF"]."?title="
-    //                    //                                        .$row['page_title']."&action=admin&wiki=".$row['site_url']."&id=".$row['counter']."'\">PULL</button>".'&nbsp;';
-    //                    $output .= "<button type='button' onclick=\"document.location='javascript:process(\'".$row['counter']."\', \'".$row['page_title']."\', \'".$row['site_url']."\')'\">PULL</button>".'&nbsp;';
-    //                    $output .= "</td>";
-    //                    $output .= '</tr>';
-    //                }
-    //
-    //                $output .= '</table>';
-    //            }
-    //
-    //
-    //        $wgOut->addHTML($output);
-    //
-    //        return false;
-    // }
     else {
         return true;
     }
@@ -789,94 +667,6 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
 }
 
 /**
- * used to get an patchId list contained in the changeSet that have the id:
- * $changeSetId
- *
- * @global <Object> $wgServerName
- * @global <Object> $wgScriptPath
- * @param <String> $changeSetId with NS
- * @return <array> a PatchId list
- *
- function getPatchIdList($changeSetId) {
- global $wgServerName, $wgScriptPath;
- $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
- $req = '[[changeSetID::'.$changeSetId.']]';
- $req = utils::encodeRequest($req);
- $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
- $string = file_get_contents($url);
- if ($string=="") return false;
- $string = str_replace("\n", ",", $string);
- $string = str_replace("\"", "", $string);
- $res = explode(",", $string);
-
- foreach ($res as $key=>$resultLine) {
- if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
- unset($res[$key]);
- }
- }
- $patchIdList = array_unique($res);
- return $patchIdList;
- }
- *
- /**
- *
- * @global <Object> $wgServerName
- * @global <Object> $wgScriptPath
- * @param <String> $patchId
- * @return <array> an operations list
- *
- function getOperations($patchId) {
- global $wgServerName, $wgScriptPath;
- $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
- $req = '[[patchID::'.$patchId.']]';
- $req = utils::encodeRequest($req);
- $url = $url."/Special:Ask/".$req."/-3FhasOperation/headers=hide/format=csv/sep=,/limit=100";
- $string = file_get_contents($url);
- if ($string=="") return false;
- $string = str_replace("\n", ",", $string);
- $string = str_replace("\"", "", $string);
- $res = explode(",", $string);
-
- foreach ($res as $key=>$resultLine) {
- if(strpos($resultLine, 'Patch:')!==false || $resultLine=="") {
- unset($res[$key]);
- }
- }
- $operations = array_unique($res);
- return $operations;
- }
- *
- 
-
- /**
- *
- * @global <Object> $wgServerName
- * @global <Object> $wgScriptPath
- * @param <String> $patchId
- * @return <String> article title;
- *
- function getArticleTitleFromPatch($patchId) {
- global $wgServerName, $wgScriptPath;
- $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
- $req = '[[patchID::'.$patchId.']]';
- $req = utils::encodeRequest($req);
- $url = $url."/Special:Ask/".$req."/-3FonPage/headers=hide/format=csv/sep=,/limit=100";
- $string = file_get_contents($url);
- if ($string=="") return false;
- $string = str_replace("\n", ",", $string);
- $string = str_replace("\"", "", $string);
- $res = explode(",", $string);
-
- foreach ($res as $key=>$resultLine) {
- if(strpos($resultLine, 'Patch:')!==false || $resultLine=="") {
- unset($res[$key]);
- }
- }
- $article = array_unique($res);
- return $article;
- }
- */
-/**
  *transforms a string operation from a patch page into a logoot operation
  * insertion or deletion
  * returns false if there is a problem with the type of the operation
@@ -985,28 +775,13 @@ function logootIntegrate($operations, $article) {
 }
 
 /**
+ * Gets the last changeset(haspullhead) linked with the given pullfeed
  *
- *
- * @global <Object> $wgServerName
- * @global <Object> $wgScriptPath
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
  * @param <String> $pfName pullfeed name
- * @return <String> ChanSetId of the last changeset pulled
+ * @return <String or bool> false if no pullhead
  */
-//function getPreviousPulledCSID($pfName) {
-//    global $wgServerName, $wgScriptPath;
-//    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-//    $req = '[[ChangeSet:+]] [[inPullFeed::'.$pfName.']]';
-//    $req = utils::encodeRequest($req);
-//    $url = $url."/Special:Ask/".$req."/-3FchangeSetID/headers=hide/order=desc/format=csv/limit=1";
-//    $string = file_get_contents($url);
-//    if ($string=="") return false;
-//    $string = explode(",", $string);
-//    $string = $string[0];
-//    $string = str_replace(',', '', $string);
-//    $string = str_replace("\"", "", $string);
-//    return $string;
-//}
-
 function getHasPullHead($pfName) {//pullfeed name with ns
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -1028,6 +803,15 @@ function getHasPullHead($pfName) {//pullfeed name with ns
     else return $res[1];
 }
 
+/**
+ * Gets the last changeset(haspushhead) linked with the given pushfeed
+ *
+ *
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
+ * @param <String> $pfName pushfeed name
+ * @return <String or bool> false if no pushhead
+ */
 function getHasPushHead($pfName) {//pushfeed name with ns
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -1049,6 +833,14 @@ function getHasPushHead($pfName) {//pushfeed name with ns
     else return $res[1];
 }
 
+/**
+ *Gest the name of the push where the pullfeed has subscribed
+ *
+ * @global <type> $wgServerName
+ * @global <type> $wgScriptPath
+ * @param <type> $name pullfeed name
+ * @return <type> pushfeed name
+ */
 function getPushName($name) {//pullfeed name with NS
     global $wgServerName, $wgScriptPath;
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -1070,6 +862,14 @@ function getPushName($name) {//pullfeed name with NS
     else return $res[1];
 }
 
+/**
+ * Gets the URL of the pushfeed where the pullfeed has subscribed
+ *
+ * @global <String> $wgServerName
+ * @global <String> $wgScriptPath
+ * @param <String> $name pullfeed name
+ * @return <String> Pushfeed Url
+ */
 function getPushURL($name) {//pullfeed name with NS
     global $wgServerName, $wgScriptPath;
     wfDebugLog('p2p',' - function getPushURL');
@@ -1229,136 +1029,4 @@ function attemptSave($editpage) {
 
     $editpage->textbox1 = $modelAfterIntegrate->getText();
     return true;
-}
-
-/**
- * Our model is stored in the DB just before Mediawiki creates
- * the new revision that's why we have to get the last existing revision ID
- * and the new will be lastId+1 ...
- * @return <Integer> last revision id + 1
- */
-//    function getNewArticleRevId(){
-//        wfProfileIn( __METHOD__ );
-//        $dbr = wfGetDB( DB_SLAVE );
-//        $lastid = $dbr->selectField('revision','MAX(rev_id)');
-//        wfProfileOut( __METHOD__ );
-//        return $lastid + 1;
-//    }
-
-
-////////////////////OLD VERSION (logoot component modified)/////////////////////
-//function attemptSave($editpage) {
-//    $ns = $editpage->mTitle->getNamespace();
-//    if( ($ns == PATCH) || ($ns == PUSHFEED) || ($ns == PULLFEED) || ($ns == CHANGESET))return true;
-//
-//    //    $pc = new persistentClock();
-//    //    $pc->load();
-//
-//
-//    $firstRev = 0;
-//    $actualtext = $editpage->textbox1;//V2
-//
-//    $dbr = wfGetDB( DB_SLAVE );
-//    $lastRevision = Revision::loadFromTitle($dbr, $editpage->mTitle);
-//    if(is_null($lastRevision)) {
-//        $conctext = "";
-//        $rev_id = 0;
-//        $firstRev = 1;
-//    }
-//    else {
-//        $conctext= $lastRevision->getText();//V1 conc
-//        $rev_id = $lastRevision->getId();
-//    }
-//
-//    $blobInfo = BlobInfo::loadBlobInfo($rev_id);//V1
-//    $blobInfo->setTextImage($conctext);
-//
-//
-//
-//    //get the revision with the edittime==>V0
-//    $rev = Revision::loadFromTimestamp($dbr, $editpage->mTitle, $editpage->edittime);
-//    if(is_null($rev)) {
-//        $text = "";
-//        $rev_id1=0;
-//        $firstRev = 1;
-//    }
-//    else {
-//        $text = $rev->getText();//VO
-//        $rev_id1 = $rev->getId();
-//    }
-//
-//
-//    if($conctext!=$text) {//if last revision is not V0, there is editing conflict
-//
-//        $blobInfo1 = BlobInfo::loadBlobInfo($rev_id1);
-//        $listPos = $blobInfo1->handleDiff($text/*V0*/, $actualtext/*V2*/, $firstRev/*, $pc*/);
-//
-//        //creation Patch P2
-//        $tmp = serialize($listPos);
-//        $patchid = sha1($tmp);
-//        $patch = new Patch($patchid, $listPos, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-//        //$patch->store();//stores the patch in the DB
-//        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
-//
-//        //integration: diffs between VO and V2 into V1
-//        foreach ($listPos as $operation) {
-//            $blobInfo->integrateBlob($operation/*, $pc*/);
-//        }
-//    }else {//no edition conflict
-//        $diffs = $blobInfo->handleDiff($conctext, $actualtext, $firstRev/*, $pc*/);
-//        $tmp = serialize($diffs);
-//        $patchid = sha1($tmp);
-//        $patch = new Patch($patchid, $diffs, $blobInfo->getNewArticleRevId(), $editpage->mArticle->getId());
-//        //$patch->store();//stores the patch in the DB
-//        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
-//
-//    }
-//    $revId = $blobInfo->getNewArticleRevId();
-//
-//    //before integration into DB, we must update the "haslastPatch" property
-//    //$blobInfo->lastPatchPropertyUpdate();
-//
-//    $blobInfo->integrate($revId, $sessionId=session_id(), $blobCB=0);
-//
-//
-//    //    $pc->store();
-//    //    unset($pc);
-//    $editpage->textbox1 = $blobInfo->getTextImage();
-//    return true;
-//}
-////////////////////OLD VERSION (logoot component modified)/////////////////////
-
-
-
-function javascript($url) {
-    $output = '
-<SCRIPT language="Javascript">
-function processAdd ('.$url.'){
-		var xhr_object = null;
-	   if(window.XMLHttpRequest) // Firefox
-	      xhr_object = new XMLHttpRequest();
-	   else if(window.ActiveXObject) // Internet Explorer
-	      xhr_object = new ActiveXObject("Microsoft.XMLHTTP");
-	   else {
-	      alert("Votre navigateur ne supporte pas les objets XMLHTTPRequest...");
-	      return;
-	   }
-	   xhr_object.open("POST", '.$url.'+"?site="+document.formAdd.site.value, true);
-	   xhr_object.onreadystatechange = function() {
-	      if(xhr_object.readyState == 4) {
-//alert(xhr_object.responseText);
-            //document.location.reload();
-	         eval(xhr_object.responseText);
-		  }
-	   }
-	   xhr_object.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	   var data = "url="+document.formAdd.url.value+"&keyword="+document.formAdd.keyword.value+"&name="+document.formAdd.name.value;
-	   xhr_object.send(data);
-       document.formAdd.url.value="";
-       document.formAdd.name.value="";
-       document.formAdd.keyword.value="";
-}
-
-</SCRIPT>';
-    return $output;
 }

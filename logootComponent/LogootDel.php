@@ -1,14 +1,19 @@
 <?php
 
 /**
- * Description of LogootDel
+ * Deletion operation used in the logoot algorithm
  *
- * @author mullejea
+ * @author muller jean-philippe
  */
 class LogootDel {
     private $mLogootPosition;
     private $mLineContent;
 
+    /**
+     *
+     * @param <Object> $position LogootPosition
+     * @param <String> $content line content 
+     */
     public function __construct($position, $content) {
         $this->setLogootPosition($position);
         $this->setLineContent($content);

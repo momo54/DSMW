@@ -2,9 +2,9 @@
 require_once 'Clock.php';
 
 /**
- * Description of persistentClock
+ * Persistent clock
  *
- * @author mullejea
+ * @author muller jean-philippe
  */
 class persistentClock implements Clock{
 

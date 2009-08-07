@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Bot that add types to DSMW new semantic properties
+ *
+ * @author muller jean-philippe
+ */
 require_once('BasicBot.php');
 
 /** 	callback addType is almost identical to addTemplate. Pass it an array with this arg:

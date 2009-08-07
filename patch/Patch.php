@@ -1,13 +1,10 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of Patch
+ * Object that wraps an operation list and other features concerning an article
+ * page.
  *
- * @author mullejea
+ * @author muller jean-philippe
  */
 class Patch {
     private $mId;

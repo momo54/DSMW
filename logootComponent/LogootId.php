@@ -4,7 +4,7 @@
  * logootId is used to compose a logootPosition, necessary for the
  * logoot algorithm
  *
- * @author mullejea
+ * @author muller jean-philippe
  */
 class LogootId {
     private $mInt;

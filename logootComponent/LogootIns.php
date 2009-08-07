@@ -1,13 +1,18 @@
 <?php
 /**
- * Description of LogootIns
+ * Insertion operation used in the logoot algorithm
  *
- * @author mullejea
+ * @author muller jean-philippe
  */
 class LogootIns {
     private $mLogootPosition;
     private $mLineContent;
 
+    /**
+     *
+     * @param <Object> $position LogootPosition
+     * @param <String> $content line content
+     */
     function  __construct($position, $content) {
         $this->setLogootPosition($position);
         $this->setLineContent($content);

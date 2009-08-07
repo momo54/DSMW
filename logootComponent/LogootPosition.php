@@ -4,7 +4,7 @@
  * logootPosition is an array of logootId(s) which is assigned to a line
  * of an article
  *
- * @author mullejea
+ * @author muller jean-philippe
  */
 
 class LogootPosition {
@@ -93,7 +93,9 @@ class LogootPosition {
        return new LogootPosition($this->mPosition);
    }
 
-    /**position size comparison, returns size of the smallest position*/
+    /**
+     * position size comparison, returns size of the smallest position
+     */
     function vectorMinSizeComp($position){
         if($this->size()>$position->size()){
             return $position->size();
@@ -104,7 +106,9 @@ class LogootPosition {
         else return $this->size();
     }
 
-/**postion size comparison, returns size of the position(if same) or -1*/
+/**
+ * postion size comparison, returns size of the position(if same) or -1
+ */
     function vectorSizeComp($position){
         if($this->size()>$position->size()){
             return -1;
@@ -115,7 +119,9 @@ class LogootPosition {
         else return $this->size();
     }
 
-    //id comparison
+    /**
+     * id comparison
+     */
     function equals($id1, $id2){
         
         if($id1->compareTo($id2)==0){
@@ -126,7 +132,9 @@ class LogootPosition {
         }
     }
 
-    //position comparison (n ids position)
+    /**
+     * position comparison (n ids position)
+     */
     function nEquals($position){
 
         //length test
@@ -151,7 +159,9 @@ class LogootPosition {
         return $eq;
     }
 
-    //id comparison
+    /**
+     * id comparison
+     */
     function greaterThan($id1, $id2){
        
         if($id1->compareTo($id2)==1){
@@ -162,7 +172,9 @@ class LogootPosition {
         }
     }
 
-    //position comparison (n ids position)
+    /**
+     * position comparison (n ids position)
+     */
     function nGreaterThan($position){
 
         $lt = 0;
@@ -194,7 +206,9 @@ class LogootPosition {
         }
     }
 
-    //position comparison (n ids position)
+    /**
+     * position comparison (n ids position)
+     */
     function nLessThan($position){
 
         $lt = 0;

@@ -1,16 +1,17 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of manager
+ * Used to seperated the data access layer
  *
  * @author CUCUTEANU
  */
 class manager {
-    
+
+    /**
+     *
+     * @param <String> $rev_id Revision id
+     * @return boModel
+     */
     static function loadModel($rev_id) {
         try {
             if($rev_id!=0){
@@ -26,6 +27,14 @@ class manager {
 
     }
 
+    /**
+     *
+     * @param <String> $rev_id
+     * @param <String> $sessionId
+     * @param <Object> $model boModel
+     * @param <Object> $blobCB=0 (should have been a causal barrier object but
+     * not used yet)
+     */
     static function storeModel($rev_id, $sessionId, $model, $blobCB){
         wfDebugLog('p2p',' -> store model into revid : '.$rev_id.' sessionid : '.$sessionId.' model : '.$model->getText());
         try {

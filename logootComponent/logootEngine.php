@@ -1,11 +1,7 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of logootEngine
+ * Implementation of the logoot algorithm
  *
  * @author jean-Philippe Muller
  */

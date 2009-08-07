@@ -1,19 +1,30 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of logoot
+ * The interface of the logootComponent
  *
  * @author Jean-Philippe Muller
  */
 interface  logoot {
     
-     //generate includes integrate
-    function generate($oldText, $newText);//{return (array)$opList;}
-    function integrate($opList);//{return (object)$modelafterIntegrate;}
+     /*
+      * Generates a list of operations and integrates it to the model
+      * (generate includes integrate)
+      * @param <String> $oldText
+      * @param <String> $newText
+      *
+      * return (array)$opList
+      */
+    function generate($oldText, $newText);
+
+    /**
+     * Integrates an operation list to the model
+     * @param <array> $opList logootIns or logootDel array
+     *
+     * return (object)$modelafterIntegrate
+     */
+    function integrate($opList);
+    
     function getModel();
 }
 ?>

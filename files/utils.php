@@ -1,13 +1,9 @@
 <?php
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of utils
+ * Static utility methods used in the whole DSMW extension
  *
- * @author mullejea
+ * @author muller jean-philippe - hantz
  */
 class utils {
 
@@ -26,6 +22,11 @@ class utils {
         return $id;
     }
 
+   /**
+    * String encoding
+    * @param <String> $request
+    * @return <String>
+    */
     static function encodeRequest($request) {
         $req = str_replace(
             array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'),
@@ -33,6 +34,11 @@ class utils {
         return $req;
     }
 
+    /**
+     * String decoding
+     * @param <String> $req
+     * @return <String>
+     */
     static function decodeRequest($req) {
         $request = str_replace(
             array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
@@ -60,6 +66,14 @@ class utils {
         return $res;
     }
 
+    /**
+     * Checks if page exists
+     *
+     * @global <String> $wgServerName
+     * @global <String> $wgScriptPath
+     * @param <String> $pageName
+     * @return <bool>
+     */
     static function pageExist($pageName) {
         global $wgServerName, $wgScriptPath;
         $url = 'http://'.$wgServerName.$wgScriptPath;
@@ -71,6 +85,15 @@ class utils {
     //PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
     }
 
+
+    /**
+     *Creates a new ChangeSet linked with a pushfeed (page)
+     *
+     * @param <String> $CSID
+     * @param <String> $inPushFeed
+     * @param <String> $previousCS
+     * @param <array> $listPatch
+     */
     static function createChangeSetPush($CSID,$inPushFeed,$previousCS,$listPatch) {
         $newtest = 'ChangeSet:
 changeSetID: [[changeSetID::'.$CSID.']]
@@ -89,6 +112,14 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         $article->doEdit($newtext, $summary="");
     }
 
+    /**
+     *
+     * Creates a new ChangeSet linked with a pullfeed (page)
+     * @param <String> $CSID
+     * @param <String> $inPullFeed
+     * @param <String> $previousCS
+     * @param <array> $listPatch
+     */
     static function createChangeSetPull($CSID,$inPullFeed,$previousCS,$listPatch) {
         $newtext = 'ChangeSet:
 changeSetID: [[changeSetID::'.$CSID.']]
@@ -106,6 +137,15 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         $article->doEdit($newtext, $summary="");
     }
 
+
+    /**
+     * create a new patch (page)
+     *
+     * @param <String> $patchId
+     * @param <String> $onPage
+     * @param <String> $previousPatch
+     * @param <array> $operations
+     */
     static function createPatch($patchId, $onPage, $previousPatch, $operations) {
         $text = 'Patch: patchID: [[patchID::'.$patchId.']]
  onPage: [[onPage::'.$onPage.']] ';
@@ -149,6 +189,17 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     //        $edit = $article->doEdit($newtext, $summary="");
     //    }
 
+
+    /**
+     *Used to get the id of the last patch(es) of the given article
+     *
+     * @global <String> $wgServerName
+     * @global <String> $wgScriptPath
+     * @param <String> $pageName
+     * @param <String> $url
+     * @return <array or String> the la patch id
+     * or an array of the last patches id
+     */
     static function getLastPatchId($pageName, $url='') {
         global $wgServerName, $wgScriptPath;
         $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
@@ -193,6 +244,12 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         else return array_shift($result);
     }
 
+    /**
+     * verifies if the url has a protocol (exp: http) and a host name
+     *
+     * @param <String> $url
+     * @return <bool>
+     */
     static function isValidURL($url) {
         $arr = parse_url($url);
         if(!isset ($arr['scheme']) || !isset ($arr['host']))
@@ -200,6 +257,11 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         else return true;
     }
 
+    /**
+     *
+     * @param <String> $patchId
+     * @return <int or bool> false if no occurence 
+     */
     static function isRemote($patchId) {
         return strpos(strtolower($patchId), strtolower(getServerId()));
     }
@@ -220,6 +282,15 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         return $res;
     }
 
+    /**
+     * Used to execute a semantic request on a DSMW server
+     *
+     * @param <String> $server
+     * @param <String> $request semantic query
+     * @param <String> $param parameters to display
+     * @param <String> $sep separator
+     * @return <array>
+     */
     static function getSemanticRequest($server,$request,$param,$sep='!') {
         wfDebugLog('p2p','- function getSemanticRequest');
         $request = utils::encodeRequest($request);
@@ -242,6 +313,15 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
         return $res;
     }
 
+    /**
+     * Creates a pushfeed
+     *
+     * @global <String> $wgServerName
+     * @global <String> $wgScriptPath
+     * @param <String> $name pushfeed name
+     * @param <String> $request
+     * @return <bool> true if creation successful, false if not
+     */
     static function createPushFeed($name, $request) {
         global $wgServerName, $wgScriptPath;
         $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -285,6 +365,14 @@ Pages concerned:
         return $lastid + 1;
     }
 
+    /**
+     *Gets the pulled patches for a given pullfeed
+     *
+     * @global <String> $wgServerName
+     * @global <String> $wgScriptPath
+     * @param <String> $pfname pullfeed name
+     * @return <array> pulled patches
+     */
     static function getPulledPatches($pfname) {
         global $wgServerName, $wgScriptPath;
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
@@ -307,6 +395,15 @@ Pages concerned:
         return $res;//published patch tab
     }
 
+    /**
+     * returns an array of patches ordered by previous
+     *
+     * @global <String> $wgServerName
+     * @global <String> $wgScriptPath
+     * @param <String> $title of an article page
+     * @param <String> $previousPatch
+     * @return <array> patch list
+     */
     static function orderPatchByPrevious($title,$previousPatch='none') {
         global $wgServerName, $wgScriptPath;
         $firstPatch = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]', '-3FpatchID');
