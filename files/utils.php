@@ -433,5 +433,18 @@ Pages concerned:
         }
         return $patchs;
     }
+
+    static function getPageConcernedByPull($pfname) {
+        global $wgServerName, $wgScriptPath;
+        $patchs = utils::getPulledPatches($pfname);
+        $tabPage = array();
+        foreach ($patchs as $patch) {
+            $onPage = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']]','?onPage');
+            $onPage = explode('!', $onPage[0]);
+            $tabPage[$onPage[1]] = 0;
+        }
+        return $tabPage;
+    }
+
 }
 ?>

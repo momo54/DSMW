@@ -6,7 +6,7 @@ if( !defined('MEDIAWIKI') ) {
 
 /**
  * Description of ApiQueryPatchPush
- * 
+ *
  *
  * @author hantz
  */
@@ -34,10 +34,14 @@ class ApiPatchPush extends ApiQueryBase {
         $published = null;
 
         //filtered on published patch on page title
-        foreach ($publishedInPush as $patch) {
-            if(count(utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$params['pageName'].']]',''))) {
-                $published[] = $patch;
+        if(isset ($params['pageName'])) {
+            foreach ($publishedInPush as $patch) {
+                if(count(utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$params['pageName'].']]',''))) {
+                    $published[] = $patch;
+                }
             }
+        }else{
+            $published = $publishedInPush;
         }
         $result = $this->getResult();
         if(!is_null($published)) {

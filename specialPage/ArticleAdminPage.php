@@ -117,14 +117,45 @@ function pullFeedDel(){
   ';
             foreach ($pullFeeds as $pullFeed) {
                 $i = $i + 1;
+                $pullFeed = str_replace(' ', '_', $pullFeed);
+                $tabPage = utils::getPageConcernedByPull($pullFeed);
+
+                $pageConcerned = count($tabPage);
+
+                $pushServer = getPushURL($pullFeed);
+                $pushName = getPushName($pullFeed);
+                $pushName = str_replace(' ', '_', $pushName);
+
+                $url = $pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
+                    $pushName.'&format=xml';
+                $patchXML = file_get_contents($pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
+                    $pushName.'&format=xml');
+                $dom = new DOMDocument();
+                $dom->loadXML($patchXML);
+                $patchPublished = $dom->getElementsByTagName('patch');
+                $published = null;
+                foreach($patchPublished as $p) {
+                    $published[] = $p->firstChild->nodeValue;
+                }
+
+                $countRemotePatch = count($published);
+
+                $pulledCS = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]','?hasPatch');
+                $countPulledPatch = 0;
+                foreach ($pulledCS as $CS) {
+                    $res = explode('!', $CS);
+                    $res = explode(',',$res[1]);
+                    $countPulledPatch += count($res);
+                }
+
                 $data = //$this->getAwarenessData($row["site_url"]);
                     $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
     <td >'.$pullFeed.'</td>
-    <td align="center">[]</td>
-    <td align="center">[]</td>
-    <td align="center">[]</td>
+    <td align="center">['.$pageConcerned.']</td>
+    <td align="center">['. $countRemotePatch.']</td>
+    <td align="center">['.$countPulledPatch.']</td>
   </tr>';
             }
         }
@@ -160,20 +191,49 @@ function pullFeedDel(){
   <tr>
     <th colspan="2" >Site</th>
     <th >Pages</th>
-    <th>Remote <br>Patchs</th>
-    <th >Local <br>Patchs</th>
+    <th>Published <br>Patchs</th>
+    <th >Unpublished <br>Patchs</th>
 
 
   </tr>
   ';
             foreach ($pushFeeds as $pushFeed) {
                 $i = $i + 1;
+
+                $pushName = str_replace(' ', '_', $pushName);
+
+                $request = getPushFeedRequest($pushName);
+                $tabPage = utils::getSemanticRequest($urlServer,$request,'');
+                $countConcernedPage = count($tabPage);
+
+                $url = $urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
+                    $pushName.'&pppageName='.$title.'&format=xml';
+                $patchXML = file_get_contents($urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
+                    $pushName.'&pppageName='.$title.'&format=xml');
+
+                $pushName = str_replace(' ', '_', $pushName);
+                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
+                $dom = new DOMDocument();
+                $dom->loadXML($patchXML);
+                $patchPublished = $dom->getElementsByTagName('patch');
+                $published = null;
+                foreach($patchPublished as $p) {
+                    $published[] = $p->firstChild->nodeValue;
+                }
+                $countPatchs = count($patchs);
+                $countUnpublished = 0;
+                //$publishedInPush = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '', $param);
+                if(!is_null($published)) {
+                    $unpublished = array_diff($patchs, $published);
+                    $countUnpublished = count($unpublished);
+                }
+
                 //$this->getAwarenessData($row["site_url"]);
                 $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="push[]" value="'.$pushFeed.'" /></td>
     <td >'.$pushFeed.'</td>
-    <td align="center">[]</td>
+    <td align="center">['.$countConcernedPage.']</td>
     <td align="center">[]</td>
     <td align="center">[]</td>
   </tr>';
@@ -260,26 +320,16 @@ function pullFeedDel(){
             foreach ($pushs as $push) {
                 $pushName = explode('!',$push);
                 $pushName = $pushName[1];
-                $pushName = str_replace(' ', '_', $pushName);
-                //all published patch in pushName
-               /* $publishedInPush = getPublishedPatches($pushName);
-                $pushName = str_replace(' ', '_', $pushName);
-                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
-                $published = null;
 
-                //filtered on published patch on page title
-                foreach ($publishedInPush as $patch) {
-                    if(count(utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$title.']]',''))) {
-                        $published[] = $patch;
-                    }
-                }*/
+                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
+               /* $pushName = str_replace(' ', '_', $pushName);
                 $url = $urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
                     $pushName.'&pppageName='.$title.'&format=xml';
                 $patchXML = file_get_contents($urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
                     $pushName.'&pppageName='.$title.'&format=xml');
-                
+
                 $pushName = str_replace(' ', '_', $pushName);
-                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
+
                 $dom = new DOMDocument();
                 $dom->loadXML($patchXML);
                 $patchPublished = $dom->getElementsByTagName('patch');
@@ -294,7 +344,7 @@ function pullFeedDel(){
                     $output .= '<td>'.count($unpublished).'/'.count($patchs).' unpublished patchs </td></tr>';
                 }else {
                     $output .= '<td> '.count($patchs).'/'.count($patchs).' unpublished patchs </td></tr>';
-                }
+                }*/
             }
             $output .= '</table></div>';
 
@@ -311,7 +361,7 @@ function pullFeedDel(){
                 $pullName = $pullName[1];
                 $pushServer = getPushURL($pullName);
                 $pushName = getPushName($pullName);
-                $pushName = str_replace(' ', '_', $pushName);
+               /* $pushName = str_replace(' ', '_', $pushName);
                 $url = $pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
                     $pushName.'&pppageName='.$title.'&format=xml';
                 $patchXML = file_get_contents($pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
@@ -335,7 +385,7 @@ function pullFeedDel(){
                     $output .= '<td> '.count($patchs).' patchs and '.$count.' unpulled patchs </td></tr>';
                 }else {
                     $output .= '<td> up to date </td></tr>';
-                }
+                }*/
             }
             $output .= '</table></div>';
 
