@@ -191,6 +191,7 @@ function pullFeedDel(){
   <tr>
     <th colspan="2" >Site</th>
     <th >Pages</th>
+    <th>All patchs</th>
     <th>Published <br>Patchs</th>
     <th >Unpublished <br>Patchs</th>
 
@@ -200,33 +201,33 @@ function pullFeedDel(){
             foreach ($pushFeeds as $pushFeed) {
                 $i = $i + 1;
 
-                $pushName = str_replace(' ', '_', $pushName);
+                $pushName = str_replace(' ', '_', $pushFeed);
 
                 $request = getPushFeedRequest($pushName);
                 $tabPage = utils::getSemanticRequest($urlServer,$request,'');
                 $countConcernedPage = count($tabPage);
 
+                $countPatchs = 0;
+                foreach ($tabPage as $page) {
+                    $patchs = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$page.']]','?patchID');
+                    $countPatchs += count($patchs);
+                }
+
                 $url = $urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&pppageName='.$title.'&format=xml';
+                    $pushName.'&format=xml';
                 $patchXML = file_get_contents($urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&pppageName='.$title.'&format=xml');
+                    $pushName.'&format=xml');
 
                 $pushName = str_replace(' ', '_', $pushName);
-                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
                 $dom = new DOMDocument();
                 $dom->loadXML($patchXML);
                 $patchPublished = $dom->getElementsByTagName('patch');
-                $published = null;
+                $published = array();
                 foreach($patchPublished as $p) {
                     $published[] = $p->firstChild->nodeValue;
                 }
-                $countPatchs = count($patchs);
-                $countUnpublished = 0;
-                //$publishedInPush = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '', $param);
-                if(!is_null($published)) {
-                    $unpublished = array_diff($patchs, $published);
-                    $countUnpublished = count($unpublished);
-                }
+                $countPublished = count($published);
+                $countUnpublished = $countPatchs - $countPublished;
 
                 //$this->getAwarenessData($row["site_url"]);
                 $output .= '
@@ -234,8 +235,9 @@ function pullFeedDel(){
     <td align="center"><input type="checkbox" id="'.$i.'" name="push[]" value="'.$pushFeed.'" /></td>
     <td >'.$pushFeed.'</td>
     <td align="center">['.$countConcernedPage.']</td>
-    <td align="center">[]</td>
-    <td align="center">[]</td>
+    <td align="center">['.$countPatchs.']</td>
+    <td align="center">['.$countPublished.']</td>
+    <td align="center">['.$countUnpublished.']</td>
   </tr>';
             }
         }
@@ -314,14 +316,14 @@ function pullFeedDel(){
             //part list of push
             $pushs = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPushFeed::+]]','?inPushFeed');
 
-            if(!empty ($pushs)){
+            if(!empty ($pushs)) {
 
-            $output .= '<br><div><table style="border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
-            foreach ($pushs as $push) {
-                $pushName = explode('!',$push);
-                $pushName = $pushName[1];
+                $output .= '<br><div><table style="border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
+                foreach ($pushs as $push) {
+                    $pushName = explode('!',$push);
+                    $pushName = $pushName[1];
 
-                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
+                    $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
                /* $pushName = str_replace(' ', '_', $pushName);
                 $url = $urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
                     $pushName.'&pppageName='.$title.'&format=xml';
@@ -345,22 +347,22 @@ function pullFeedDel(){
                 }else {
                     $output .= '<td> '.count($patchs).'/'.count($patchs).' unpublished patchs </td></tr>';
                 }*/
-            }
-            $output .= '</table></div>';
+                }
+                $output .= '</table></div>';
 
             }//end if empty $pushs
 
             //part list of pull
             $pulls = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPullFeed::+]]','?inPullFeed');
 
-            if(!empty ($pulls)){
+            if(!empty ($pulls)) {
 
-            $output .= '<div><table width=100><caption><b>List of pull</b></caption>';
-            foreach ($pulls as $pull) {
-                $pullName = explode('!',$pull);
-                $pullName = $pullName[1];
-                $pushServer = getPushURL($pullName);
-                $pushName = getPushName($pullName);
+                $output .= '<div><table width=100><caption><b>List of pull</b></caption>';
+                foreach ($pulls as $pull) {
+                    $pullName = explode('!',$pull);
+                    $pullName = $pullName[1];
+                    $pushServer = getPushURL($pullName);
+                    $pushName = getPushName($pullName);
                /* $pushName = str_replace(' ', '_', $pushName);
                 $url = $pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
                     $pushName.'&pppageName='.$title.'&format=xml';
@@ -386,8 +388,8 @@ function pullFeedDel(){
                 }else {
                     $output .= '<td> up to date </td></tr>';
                 }*/
-            }
-            $output .= '</table></div>';
+                }
+                $output .= '</table></div>';
 
             }//end if empty $pulls
 
@@ -406,7 +408,7 @@ function pullFeedDel(){
             $wgOut->addHTML($output);
             return false;
         }
-         else {
+        else {
             return true;
         }
     }
