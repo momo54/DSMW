@@ -252,7 +252,6 @@ Pages concerned:
 
             $pages = getRequestedPages($request);//ce sont des pages et non des patches
             foreach ($pages as $page) {
-            // wfDebugLog( 'p2p', 'page found '.$age);
                 wfDebugLog('p2p','  ->requested page '.$page);
                 $request1 = '[[Patch:+]][[onPage::'.$page.']]';
                 $tmpPatches = utils::orderPatchByPrevious($page);

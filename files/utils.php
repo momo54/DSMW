@@ -22,11 +22,11 @@ class utils {
         return $id;
     }
 
-   /**
-    * String encoding
-    * @param <String> $request
-    * @return <String>
-    */
+    /**
+     * String encoding
+     * @param <String> $request
+     * @return <String>
+     */
     static function encodeRequest($request) {
         $req = str_replace(
             array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'),
@@ -260,7 +260,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     /**
      *
      * @param <String> $patchId
-     * @return <int or bool> false if no occurence 
+     * @return <int or bool> false if no occurence
      */
     static function isRemote($patchId) {
         return strpos(strtolower($patchId), strtolower(getServerId()));
@@ -444,6 +444,26 @@ Pages concerned:
             $tabPage[$onPage[1]] = 0;
         }
         return $tabPage;
+    }
+
+    static function getPublishedPatchs($server,$pushName,$title=null) {
+        $published = array();
+        $pushName = str_replace(' ', '_', $pushName);
+        if(isset ($title)) {
+            $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
+                $pushName.'&pppageName='.$title.'&format=xml');
+        }else {
+            $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
+                $pushName.'&format=xml');
+        }
+        $dom = new DOMDocument();
+        $dom->loadXML($patchXML);
+        $patchPublished = $dom->getElementsByTagName('patch');
+        $published = null;
+        foreach($patchPublished as $p) {
+            $published[] = $p->firstChild->nodeValue;
+        }
+        return $published;
     }
 
 }

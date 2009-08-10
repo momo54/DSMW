@@ -118,28 +118,18 @@ function pullFeedDel(){
             foreach ($pullFeeds as $pullFeed) {
                 $i = $i + 1;
                 $pullFeed = str_replace(' ', '_', $pullFeed);
-                $tabPage = utils::getPageConcernedByPull($pullFeed);
 
+                //count the number of local page concerned by the current pullFeed
+                $tabPage = utils::getPageConcernedByPull($pullFeed);
                 $pageConcerned = count($tabPage);
 
+                //count the number of remote patch concerned by the current pullFeed
                 $pushServer = getPushURL($pullFeed);
                 $pushName = getPushName($pullFeed);
-                $pushName = str_replace(' ', '_', $pushName);
-
-                $url = $pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&format=xml';
-                $patchXML = file_get_contents($pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&format=xml');
-                $dom = new DOMDocument();
-                $dom->loadXML($patchXML);
-                $patchPublished = $dom->getElementsByTagName('patch');
-                $published = null;
-                foreach($patchPublished as $p) {
-                    $published[] = $p->firstChild->nodeValue;
-                }
-
+                $published = utils::getPublishedPatchs($pushServer, $pushName);
                 $countRemotePatch = count($published);
 
+                //count the number of local patch concerned by the current pullFeed
                 $pulledCS = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]','?hasPatch');
                 $countPulledPatch = 0;
                 foreach ($pulledCS as $CS) {
@@ -202,31 +192,23 @@ function pullFeedDel(){
                 $i = $i + 1;
 
                 $pushName = str_replace(' ', '_', $pushFeed);
-
+                //count the number of page concerned by the current pushFeed
                 $request = getPushFeedRequest($pushName);
                 $tabPage = utils::getSemanticRequest($urlServer,$request,'');
                 $countConcernedPage = count($tabPage);
 
+                //count the number of patchs from the page concerned
                 $countPatchs = 0;
                 foreach ($tabPage as $page) {
                     $patchs = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$page.']]','?patchID');
                     $countPatchs += count($patchs);
                 }
 
-                $url = $urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&format=xml';
-                $patchXML = file_get_contents($urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&format=xml');
-
-                $pushName = str_replace(' ', '_', $pushName);
-                $dom = new DOMDocument();
-                $dom->loadXML($patchXML);
-                $patchPublished = $dom->getElementsByTagName('patch');
-                $published = array();
-                foreach($patchPublished as $p) {
-                    $published[] = $p->firstChild->nodeValue;
-                }
+                //count the number of patchs published by the current pushFeed
+                $published = utils::getPublishedPatchs($urlServer, $pushName);
                 $countPublished = count($published);
+
+                //count the number of patchs unpublished
                 $countUnpublished = $countPatchs - $countPublished;
 
                 //$this->getAwarenessData($row["site_url"]);
@@ -291,6 +273,8 @@ function pullFeedDel(){
             $output = '<div style="width:60%;height:40%;overflow:auto;">
 <table style="border-bottom: 2px solid #000;">
 <caption><b>List of patchs</b></caption>';
+
+            //color the remote patch
             foreach ($patchs as $patch) {
                 wfDebugLog('p2p','  -> patchId : '.$patch);
                 if(!utils::isRemote($patch)) {
@@ -304,6 +288,7 @@ function pullFeedDel(){
 
                 }
 
+                //count the number of delete and insert operation into the patch
                 $op = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.$patch.']]','?hasOperation');
                 $countOp = utils::countOperation($op);
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
@@ -318,35 +303,24 @@ function pullFeedDel(){
 
             if(!empty ($pushs)) {
 
-                $output .= '<br><div><table style="border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
+                $output .= '<br><div style="width:60%;height:40%;overflow:auto;"><table style="width:100%;border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
                 foreach ($pushs as $push) {
                     $pushName = explode('!',$push);
                     $pushName = $pushName[1];
 
-                    $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
-               /* $pushName = str_replace(' ', '_', $pushName);
-                $url = $urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&pppageName='.$title.'&format=xml';
-                $patchXML = file_get_contents($urlServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&pppageName='.$title.'&format=xml');
+                    $output .= '<tr><td align="right" width="50%"><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
 
-                $pushName = str_replace(' ', '_', $pushName);
+                    //count the number of published patchs by the current pushFeed for the current page
+                    $published = utils::getPublishedPatchs($urlServer, $pushName, $title);
 
-                $dom = new DOMDocument();
-                $dom->loadXML($patchXML);
-                $patchPublished = $dom->getElementsByTagName('patch');
-                $published = null;
-                foreach($patchPublished as $p) {
-                    $published[] = $p->firstChild->nodeValue;
-                }
-
-                //$publishedInPush = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '', $param);
-                if(!is_null($published)) {
+                    //$publishedInPush = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '', $param);
+                    //count the number of unpublished patchs
                     $unpublished = array_diff($patchs, $published);
-                    $output .= '<td>'.count($unpublished).'/'.count($patchs).' unpublished patchs </td></tr>';
-                }else {
-                    $output .= '<td> '.count($patchs).'/'.count($patchs).' unpublished patchs </td></tr>';
-                }*/
+                    if(!is_null($unpublished) && count($unpublished)>0) {
+                        $output .= '<td align="left" width="50%">'.count($unpublished).' unpublished patchs on '.count($patchs).' </td></tr>';
+                    }else {
+                        $output .= '<td align="left" width="50%"> all '.$title."'".'patchs are pushed </td></tr>';
+                    }
                 }
                 $output .= '</table></div>';
 
@@ -357,37 +331,35 @@ function pullFeedDel(){
 
             if(!empty ($pulls)) {
 
-                $output .= '<div><table width=100><caption><b>List of pull</b></caption>';
+                $output .= '<div style="width:60%;height:40%;overflow:auto;"><table style="width:100%;border-bottom: 2px solid #000;"><caption><b>List of pull</b></caption>';
                 foreach ($pulls as $pull) {
                     $pullName = explode('!',$pull);
                     $pullName = $pullName[1];
                     $pushServer = getPushURL($pullName);
                     $pushName = getPushName($pullName);
-               /* $pushName = str_replace(' ', '_', $pushName);
-                $url = $pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&pppageName='.$title.'&format=xml';
-                $patchXML = file_get_contents($pushServer.'/api.php?action=query&meta=patchPushed&pppushName='.
-                    $pushName.'&pppageName='.$title.'&format=xml');
+                    $output .= '<tr><td align="right" width="50%"><a href="'.$_SERVER['PHP_SELF'].'?title='.$pullName.'">'.$pullName.'</a> : </td>';
 
-                $output .= '<tr><td><a href="'.$_SERVER['PHP_SELF'].'?title='.$pullName.'">'.$pullName.'</a> : </td>';
-                $dom = new DOMDocument();
-                $dom->loadXML($patchXML);
-                $patchPublished = $dom->getElementsByTagName('patch');
-                $published = null;
-                foreach($patchPublished as $p) {
-                    $published[] = $p->firstChild->nodeValue;
-                }
+                    $pulledPatch = utils::getPulledPatches($pullName);
+                    $patchs = array();
+                    foreach ($pulledPatch as $patch) {
+                        $onPage = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.$patch.']]','?onPage');
+                        $onPage = explode('!',$onPage[0]);
+                        if($onPage[1]==$title){
+                            $patchs[] = $patch;
+                        }
+                    }
 
-                //$publishedInPush = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '', $param);
-                if(!is_null($published)) {
-                    $unpublished = array_diff($patchs, $published);
-                    $t = count($published);
-                    $t = count($patchs);
-                    $count = count($published) - count($patchs);
-                    $output .= '<td> '.count($patchs).' patchs and '.$count.' unpulled patchs </td></tr>';
-                }else {
-                    $output .= '<td> up to date </td></tr>';
-                }*/
+                    $published = utils::getPublishedPatchs($pushServer, $pushName, $title);
+
+                    if(!is_null($published)) {
+                        $unpublished = array_diff($patchs, $published);
+                        $t = count($published);
+                        $t = count($patchs);
+                        $count = count($published) - count($patchs);
+                        $output .= '<td align="left" width="50%"> '.$count.' unpulled patchs </td></tr>';
+                    }else {
+                        $output .= '<td align="left" width="50%"> up to date </td></tr>';
+                    }
                 }
                 $output .= '</table></div>';
 
