@@ -995,6 +995,9 @@ function attemptSave($editpage) {
         $rev_id = $lastRevision->getId();
     }
 
+    //if there is no modification on the text
+    if($actualtext==$conctext) return true;
+
     $model = manager::loadModel($rev_id);
     $logoot = new logootEngine($model);
 
