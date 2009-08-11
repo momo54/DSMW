@@ -180,7 +180,7 @@ function pullFeedDel(){
 <FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPush">
 <table'.$tableStyle.' >
   <tr>
-    <th colspan="5"'.$style.'>PUSH:
+    <th colspan="6"'.$style.'>PUSH:
   <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_push_site_addition&action=addpushpage>[Add]</a>';
         if ($pushFeeds!=false) {
 
@@ -351,7 +351,7 @@ function pullFeedDel(){
 
             if(!empty ($pulls)) {
 
-                $output .= '<div style="width:60%;height:40%;overflow:auto;"><table style="border-bottom: 2px solid #000;"><caption><b>List of pull</b></caption>';
+                $output .= '<br><div style="width:60%;height:40%;overflow:auto;"><table style="border-bottom: 2px solid #000;"><caption><b>List of pull</b></caption>';
                 foreach ($pulls as $pull) {
                     $pullName = explode('!',$pull);
                     $pullName = $pullName[1];

@@ -652,7 +652,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             $lastPatch = utils::getLastPatchId($onPage);
             if ($lastPatch==false) $lastPatch='none';
 
-            utils::createPatch($patchId, $onPage, $lastPatch, $operations);
+           
 
             //            foreach ($operations as $operation) {
             //                $operation = operationToLogootOp($operation);
@@ -660,7 +660,13 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             //                    logootIntegrate($operation, $onPage);
             //                }
             //            }
-            logootIntegrate($operations, $onPage);
+            if(logootIntegrate($operations, $onPage)===true)
+            {
+             utils::createPatch($patchId, $onPage, $lastPatch, $operations);
+            }
+            else{
+                throw new MWException( __METHOD__.': article not saved!');
+            }
     }//end if pageExists
     }
 }
@@ -771,6 +777,8 @@ function logootIntegrate($operations, $article) {
     $revId = utils::getNewArticleRevId();
     manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
     $status = $article->doEdit($modelAfterIntegrate->getText(), $summary="");
+    if(is_bool($status)) return $status;
+    else return $status->isGood();
 }
 
 /**

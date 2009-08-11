@@ -294,7 +294,7 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
     static function getSemanticRequest($server,$request,$param,$sep='!') {
         $ctx = stream_context_create(array(
     'http' => array(
-        'timeout' => 1
+        'timeout' => 10
         )
     )
 );
@@ -468,7 +468,7 @@ Pages concerned:
                 $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
         }else {
             $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
-                $pushName.'&format=xml',0, $ctx);
+                $pushName.'&format=xml'/*,0, $ctx*/);
         }
         if($patchXML===false)return false;
         $dom = new DOMDocument();
