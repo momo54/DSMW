@@ -292,18 +292,18 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
      * @return <array>
      */
     static function getSemanticRequest($server,$request,$param,$sep='!') {
-        $ctx = stream_context_create(array(
-    'http' => array(
-        'timeout' => 10
-        )
-    )
-);
+//        $ctx = stream_context_create(array(
+//    'http' => array(
+//        'timeout' => 10
+//        )
+//    )
+//);
         wfDebugLog('p2p','- function getSemanticRequest');
         $request = utils::encodeRequest($request);
         $param = utils::encodeRequest($param);
         $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100';
         wfDebugLog('p2p','  -> request url : '.$url);
-        $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100', 0, $ctx);
+        $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100'/*, 0, $ctx*/);
         if($php == "") {
             return array();
         }
