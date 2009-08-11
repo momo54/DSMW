@@ -455,17 +455,17 @@ Pages concerned:
     }
 
     static function getPublishedPatchs($server,$pushName,$title=null) {
-        $ctx = stream_context_create(array(
-    'http' => array(
-        'timeout' => 1
-        )
-    )
-);
+//        $ctx = stream_context_create(array(
+//    'http' => array(
+//        'timeout' => 1
+//        )
+//    )
+//);
         $published = array();
         $pushName = str_replace(' ', '_', $pushName);
         if(isset ($title)) {
             $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
-                $pushName.'&pppageName='.$title.'&format=xml',0, $ctx);
+                $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
         }else {
             $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
                 $pushName.'&format=xml',0, $ctx);

@@ -323,7 +323,7 @@ function pullFeedDel(){
 
             if(!empty ($pushs)) {
 
-                $output .= '<br><div style="width:60%;height:40%;overflow:auto;"><table style="width:100%;border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
+                $output .= '<br><div style="width:60%;height:40%;overflow:auto;"><table style="border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
                 foreach ($pushs as $push) {
                     $pushName = explode('!',$push);
                     $pushName = $pushName[1];
@@ -351,7 +351,7 @@ function pullFeedDel(){
 
             if(!empty ($pulls)) {
 
-                $output .= '<div style="width:60%;height:40%;overflow:auto;"><table style="width:100%;border-bottom: 2px solid #000;"><caption><b>List of pull</b></caption>';
+                $output .= '<div style="width:60%;height:40%;overflow:auto;"><table style="border-bottom: 2px solid #000;"><caption><b>List of pull</b></caption>';
                 foreach ($pulls as $pull) {
                     $pullName = explode('!',$pull);
                     $pullName = $pullName[1];
