@@ -228,7 +228,7 @@ function pullFeedDel(){
                 else $countPublished = count($published);
 
                 //count the number of patchs unpublished
-                if($countPatchs=="-" || $countPublished=="-") $countUnpublished="-";
+                if($tabPage===false || $published===false) $countUnpublished="-";
                 else $countUnpublished = $countPatchs - $countPublished;
 
                 //$this->getAwarenessData($row["site_url"]);
@@ -294,7 +294,7 @@ function pullFeedDel(){
 <table style="border-bottom: 2px solid #000;">
 <caption><b>List of patchs</b></caption>';
 
-            //color the remote patch
+            //color the remote patch of the current page
             foreach ($patchs as $patch) {
                 wfDebugLog('p2p','  -> patchId : '.$patch);
                 if(!utils::isRemote($patch)) {
@@ -308,7 +308,7 @@ function pullFeedDel(){
 
                 }
 
-                //count the number of delete and insert operation into the patch
+                //count the number of delete and insert operations into the patch
                 $op = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.$patch.']]','?hasOperation');
                 $countOp = utils::countOperation($op);
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
@@ -318,7 +318,7 @@ function pullFeedDel(){
             }
             $output .= '</table></div>';
 
-            //part list of push
+            //list of push
             $pushs = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPushFeed::+]]','?inPushFeed');
 
             if(!empty ($pushs)) {

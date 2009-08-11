@@ -544,10 +544,12 @@ function getPushFeedRequest($pfName) {
  */
 function getPublishedPatches($pfname) {
     global $wgServerName, $wgScriptPath;
+    wfDebugLog('p2p',' - getPublishedPatches params pfName '.$pfname);
     $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
     $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfname.']]';
     $req = utils::encodeRequest($req);
     $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
+    wfDebugLog('p2p','  -> url : '.$url);
     $string = file_get_contents($url);
     if ($string=="") return array();//false;
     $string = str_replace("\n", ",", $string);
@@ -558,6 +560,7 @@ function getPublishedPatches($pfname) {
         if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
             unset($res[$key]);
         }
+        wfDebugLog('p2p','  -> res : '.$resultLine);
     }
     $res = array_unique($res);
 

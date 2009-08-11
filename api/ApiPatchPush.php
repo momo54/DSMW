@@ -28,7 +28,7 @@ class ApiPatchPush extends ApiQueryBase {
         global $wgServerName, $wgScriptPath;
 
         $params = $this->extractRequestParams();
-        wfDebugLog('p2p','ApiQueryPatchPushed params '.$params['pushName']);
+        wfDebugLog('p2p',' - ApiQueryPatchPushed params '.$params['pushName']);
 
         $publishedInPush = getPublishedPatches($params['pushName']);
         $published = null;
@@ -40,8 +40,10 @@ class ApiPatchPush extends ApiQueryBase {
                     $published[] = $patch;
                 }
             }
+            wfDebugLog('p2p','  -> isset($params[pageName]');
         }else{
             $published = $publishedInPush;
+            wfDebugLog('p2p','  -> not isset($params[pageName]');
         }
         $result = $this->getResult();
         if(!is_null($published)) {

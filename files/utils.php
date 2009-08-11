@@ -474,7 +474,7 @@ Pages concerned:
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
         $patchPublished = $dom->getElementsByTagName('patch');
-        $published = null;
+        $published = array();
         foreach($patchPublished as $p) {
             $published[] = $p->firstChild->nodeValue;
         }
