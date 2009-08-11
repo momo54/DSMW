@@ -109,8 +109,8 @@ function pullFeedDel(){
   <tr>
     <th colspan="2" >Site</th>
     <th >Pages</th>
-    <th>Remote <br>Patchs</th>
-    <th >Local <br>Patchs</th>
+    <th>Remote <br>Patches</th>
+    <th >Local <br>Patches</th>
 
 
   </tr>
@@ -121,31 +121,41 @@ function pullFeedDel(){
 
                 //count the number of local page concerned by the current pullFeed
                 $tabPage = utils::getPageConcernedByPull($pullFeed);
-                $pageConcerned = count($tabPage);
+
+                //if connection failed
+                if($tabPage===false)$pageConcerned="-";
+                else $pageConcerned = count($tabPage);
 
                 //count the number of remote patch concerned by the current pullFeed
                 $pushServer = getPushURL($pullFeed);
                 $pushName = getPushName($pullFeed);
+
                 $published = utils::getPublishedPatchs($pushServer, $pushName);
-                $countRemotePatch = count($published);
+                //if connection failed
+                if($published===false) $countRemotePatch="-";
+                else $countRemotePatch = count($published);
 
                 //count the number of local patch concerned by the current pullFeed
                 $pulledCS = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]','?hasPatch');
+
+                //if connection failed
+                if($pulledCS===false) $countPulledPatch="-";
+                else{
                 $countPulledPatch = 0;
                 foreach ($pulledCS as $CS) {
                     $res = explode('!', $CS);
                     $res = explode(',',$res[1]);
                     $countPulledPatch += count($res);
                 }
-
-                $data = //$this->getAwarenessData($row["site_url"]);
+                }
+               
                     $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
     <td >'.$pullFeed.'</td>
-    <td align="center">['.$pageConcerned.']</td>
-    <td align="center">['. $countRemotePatch.']</td>
-    <td align="center">['.$countPulledPatch.']</td>
+    <td align="center" title="Number of locally concerned pages">['.$pageConcerned.']</td>
+    <td align="center" title="Published patches">['. $countRemotePatch.']</td>
+    <td align="center" title="Local patches">['.$countPulledPatch.']</td>
   </tr>';
             }
         }
@@ -181,9 +191,9 @@ function pullFeedDel(){
   <tr>
     <th colspan="2" >Site</th>
     <th >Pages</th>
-    <th>All patchs</th>
-    <th>Published <br>Patchs</th>
-    <th >Unpublished <br>Patchs</th>
+    <th>All patches</th>
+    <th>Published <br>Patches</th>
+    <th >Unpublished <br>Patches</th>
 
 
   </tr>
@@ -195,6 +205,13 @@ function pullFeedDel(){
                 //count the number of page concerned by the current pushFeed
                 $request = getPushFeedRequest($pushName);
                 $tabPage = utils::getSemanticRequest($urlServer,$request,'');
+                
+                //if connection failed
+                if($tabPage===false){
+                    $countConcernedPage="-";
+                    $countPatchs="-";
+                }
+                else {
                 $countConcernedPage = count($tabPage);
 
                 //count the number of patchs from the page concerned
@@ -203,23 +220,26 @@ function pullFeedDel(){
                     $patchs = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$page.']]','?patchID');
                     $countPatchs += count($patchs);
                 }
-
+                }
                 //count the number of patchs published by the current pushFeed
                 $published = utils::getPublishedPatchs($urlServer, $pushName);
-                $countPublished = count($published);
+
+                if($published===false) $countPublished="-";
+                else $countPublished = count($published);
 
                 //count the number of patchs unpublished
-                $countUnpublished = $countPatchs - $countPublished;
+                if($countPatchs=="-" || $countPublished=="-") $countUnpublished="-";
+                else $countUnpublished = $countPatchs - $countPublished;
 
                 //$this->getAwarenessData($row["site_url"]);
                 $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="push[]" value="'.$pushFeed.'" /></td>
     <td >'.$pushFeed.'</td>
-    <td align="center">['.$countConcernedPage.']</td>
-    <td align="center">['.$countPatchs.']</td>
-    <td align="center">['.$countPublished.']</td>
-    <td align="center">['.$countUnpublished.']</td>
+    <td align="center" title="Number of concerned pages">['.$countConcernedPage.']</td>
+    <td align="center" title="Sum of all the patches">['.$countPatchs.']</td>
+    <td align="center" title="Published patches">['.$countPublished.']</td>
+    <td align="center" title="Unpublished patches">['.$countUnpublished.']</td>
   </tr>';
             }
         }

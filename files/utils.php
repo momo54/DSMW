@@ -292,15 +292,22 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
      * @return <array>
      */
     static function getSemanticRequest($server,$request,$param,$sep='!') {
+        $ctx = stream_context_create(array(
+    'http' => array(
+        'timeout' => 1
+        )
+    )
+);
         wfDebugLog('p2p','- function getSemanticRequest');
         $request = utils::encodeRequest($request);
         $param = utils::encodeRequest($param);
         $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100';
         wfDebugLog('p2p','  -> request url : '.$url);
-        $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
+        $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100', 0, $ctx);
         if($php == "") {
             return array();
         }
+        elseif($php===false)return false;
         $res = explode("\n", $php);
         $array = explode($sep, $php);
         foreach ($res as $key=>$page) {
@@ -440,6 +447,7 @@ Pages concerned:
         $tabPage = array();
         foreach ($patchs as $patch) {
             $onPage = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']]','?onPage');
+            if($onPage===false)return false;
             $onPage = explode('!', $onPage[0]);
             $tabPage[$onPage[1]] = 0;
         }
@@ -447,15 +455,22 @@ Pages concerned:
     }
 
     static function getPublishedPatchs($server,$pushName,$title=null) {
+        $ctx = stream_context_create(array(
+    'http' => array(
+        'timeout' => 1
+        )
+    )
+);
         $published = array();
         $pushName = str_replace(' ', '_', $pushName);
         if(isset ($title)) {
             $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
-                $pushName.'&pppageName='.$title.'&format=xml');
+                $pushName.'&pppageName='.$title.'&format=xml',0, $ctx);
         }else {
             $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
-                $pushName.'&format=xml');
+                $pushName.'&format=xml',0, $ctx);
         }
+        if($patchXML===false)return false;
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
         $patchPublished = $dom->getElementsByTagName('patch');
