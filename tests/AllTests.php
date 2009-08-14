@@ -1,7 +1,6 @@
 <?php
 
 define( 'MEDIAWIKI', true );
-//ini_set("include_path", "..".PATH_SEPARATOR);
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once '../../../includes/GlobalFunctions.php';
 require_once 'p2pTest1.php';
@@ -12,7 +11,7 @@ require_once 'p2pTest3.php';
 
 /**
  * Description of AllTests
- *
+ * execute all functionnal tests
  * @author hantz
  */
 
@@ -31,6 +30,6 @@ class AllTests {
     }
 }
 
-AllTests::main();
+//AllTests::main();
 
 ?>

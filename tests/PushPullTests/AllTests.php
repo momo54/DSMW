@@ -36,6 +36,4 @@ class AllTests {
     }
 }
 
-AllTests::main();
-
 ?>
