@@ -6,8 +6,11 @@ if( !defined('MEDIAWIKI') ) {
 
 /**
  * Description of ApiQueryPatchPush
- *
- *
+ * return the list of all patch pushed by the pushName given by the pushName parameters
+ * 
+ * if pageName parameter is given, api return the list of patch concerned by this pageName
+ * pushed by the pushName
+ * 
  * @author hantz
  */
 class ApiPatchPush extends ApiQueryBase {
@@ -45,6 +48,7 @@ class ApiPatchPush extends ApiQueryBase {
             $published = $publishedInPush;
             wfDebugLog('p2p','  -> not isset($params[pageName]');
         }
+        
         $result = $this->getResult();
         if(!is_null($published)) {
             $result->setIndexedTagName($published,'patch');
@@ -75,7 +79,8 @@ class ApiPatchPush extends ApiQueryBase {
     }
 
     public function getDescription() {
-        return 'Return information of patches.';
+        return 'return the list of all patch pushed by the pushName given by the pushName parameters.
+if pageName parameter is given, api return the list of patch concerned by this pageName pushed by the pushName';
     }
 
     protected function getExamples() {

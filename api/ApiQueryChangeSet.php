@@ -8,7 +8,7 @@ if( !defined('MEDIAWIKI') ) {
 /**
  * Description of ApiQueryPatch
  * return the changeSet which has the previous changeSet given by
- * the parametere changeSet
+ * the parametere changeSet 
  *
  * @author hantz
  */

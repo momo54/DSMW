@@ -30,6 +30,7 @@ class ApiQueryPatch extends ApiQueryBase {
         $params = $this->extractRequestParams();
         wfDebugLog('p2p','ApiQueryPatch params '.$params['patchId']);
         $request = $this->encodeRequest('[[patchID::'.$params['patchId'].']]');
+        
         wfDebugLog('p2p','  -> request : '.$request);
         $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FpatchID/-3FonPage/-3FhasOperation/-3Fprevious/headers=hide/format=csv/sep=!';
         wfDebugLog('p2p','  -> url request : '.$url);
@@ -67,7 +68,7 @@ class ApiQueryPatch extends ApiQueryBase {
     }
 
     public function getDescription() {
-        return 'Return information of patches.';
+        return 'Return information of patch.';
     }
 
     protected function getExamples() {
