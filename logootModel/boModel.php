@@ -32,7 +32,7 @@ class boModel {
  * @return <String>
  */
     public function getText(){
-
+        $textImage="";
         $tmp = $this->lineList;
         $nb=0;
 

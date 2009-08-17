@@ -117,8 +117,8 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
             'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
-        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
-            'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
+//        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
+//            'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
         //create push on wiki1
         $pushName = 'PushCity10';

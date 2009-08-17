@@ -147,7 +147,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
         $patchName = 'Testpatch11';
         $patchContent = 'Patch: patchID: [[patchID::Patch:Testpatch11]]
- onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
+ onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::46c8a54b5793cea6e2de75cacbab89e31072;Insert;(31093912328563252139:0cd3731e772d2fe6bcdc48d53ce59543) ;Testline]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch1 ('.$this->p2pBot1->bot->results.')');
 
@@ -169,7 +169,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
         $patchName = 'Testpatch12';
         $patchContent = 'Patch: patchID: [[patchID::Patch:Testpatch12]]
- onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::op;test;(55:5ed);test]] previous: [[previous::none]]';
+ onPage: [[onPage::Pouxeux]]  hasOperation: [[hasOperation::46c8a54b5793cea6e2de75cacbab89e31073;Insert;(21093912328563252139:0cd3731e772d2fe6bcdc48d53ce59543) ;testline]] previous: [[previous::none]]';
         $this->assertTrue($this->p2pBot1->createPage('Patch:'.$patchName,$patchContent),
             'failed on create page testPatch12 ('.$this->p2pBot1->bot->results.')');
 
