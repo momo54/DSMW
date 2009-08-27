@@ -2,6 +2,7 @@
 /**
  * Insertion operation used in the logoot algorithm
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 class LogootIns {

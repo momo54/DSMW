@@ -3,6 +3,7 @@
 /**
  * Implementation of the logoot algorithm
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author jean-Philippe Muller
  */
 class logootEngine implements logoot {

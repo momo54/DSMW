@@ -3,6 +3,7 @@
 /**
  * The interface of the logootComponent
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author Jean-Philippe Muller
  */
 interface  logoot {

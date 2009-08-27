@@ -4,6 +4,7 @@
  * logootId is used to compose a logootPosition, necessary for the
  * logoot algorithm
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 class LogootId {

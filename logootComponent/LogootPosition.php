@@ -4,6 +4,7 @@
  * logootPosition is an array of logootId(s) which is assigned to a line
  * of an article
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 

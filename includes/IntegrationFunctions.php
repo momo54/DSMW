@@ -1,5 +1,10 @@
 <?php
 /**
+ * @author jean-philippe muller
+ * @copyright INRIA-LORIA-ECOO project
+ */
+
+/**
  * A ChangeSet has patches which has operations
  * this function is used to integrate these operations
  * It's a local changeSet (downloaded from a remote site)

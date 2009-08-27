@@ -3,6 +3,7 @@
 /**
  * Used to seperated the data access layer
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author CUCUTEANU
  */
 class manager {
