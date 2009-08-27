@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @copyright INRIA-LORIA-ECOO project
+ * @author jean-philippe muller
+ */
+
 if ( !defined( 'MEDIAWIKI' ) ) {
     exit;
 }
@@ -15,30 +20,6 @@ $wgHooks['UnknownAction'][] = 'onUnknownAction';
 
 $wgHooks['EditPage::attemptSave'][] = 'attemptSave';
 $wgHooks['EditPageBeforeConflictDiff'][] = 'conflict';
-
-////////////////////OLD VERSION (logoot component modified)/////////////////////
-//$wgAutoloadClasses['BlobInfo'] = "$wgP2PExtensionIP/logootEngine/BlobInfo.php";
-//$wgAutoloadClasses['LogootId'] = "$wgP2PExtensionIP/logootEngine/LogootId.php";
-//$wgAutoloadClasses['LogootPosition'] =
-//    "$wgP2PExtensionIP/logootEngine/LogootPosition.php";
-//$wgAutoloadClasses['Diff1']
-//    = $wgAutoloadClasses['_DiffEngine1']
-//    = $wgAutoloadClasses['_DiffOp1']
-//    = $wgAutoloadClasses['_DiffOp_Add1']
-//    = $wgAutoloadClasses['_DiffOp_Change1']
-//    = $wgAutoloadClasses['_DiffOp_Copy1']
-//    = $wgAutoloadClasses['_DiffOp_Delete1']
-//    = "$wgP2PExtensionIP/differenceEngine/DiffEngine.php";
-//
-//$wgAutoloadClasses['LogootOp'] = "$wgP2PExtensionIP/logootop/LogootOp.php";
-//$wgAutoloadClasses['LogootIns'] = "$wgP2PExtensionIP/logootop/LogootIns.php";
-//$wgAutoloadClasses['LogootDel'] = "$wgP2PExtensionIP/logootop/LogootDel.php";
-//$wgAutoloadClasses['Patch'] = "$wgP2PExtensionIP/patch/Patch.php";
-//$wgAutoloadClasses['persistentClock'] = "$wgP2PExtensionIP/clockEngine/persistentClock.php";
-//$wgAutoloadClasses['ApiQueryPatch'] = "$wgP2PExtensionIP/api/ApiQueryPatch.php";
-//$wgAutoloadClasses['ApiQueryChangeSet'] = "$wgP2PExtensionIP/api/ApiQueryChangeSet.php";
-//$wgAutoloadClasses['utils'] = "$wgP2PExtensionIP/files/utils.php";
-////////////////////OLD VERSION (logoot component modified)/////////////////////
 
 
 $wgAutoloadClasses['logootEngine'] = "$wgP2PExtensionIP/logootComponent/logootEngine.php";
@@ -113,18 +94,27 @@ function conflict(&$editor, &$out) {
 function onUnknownAction($action, $article) {
     global $wgOut, $wgServerName, $wgScriptPath;
     $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-   
+
     //////////pull form page////////
     if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
         wfDebugLog('p2p','addPullPage ');
         $newtext = "Add a new site:
 
-{{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pullpage|method=POST|
-Server Url:<br>        {{#input:type=text|name=url}}<br>
+{{#form:action=".$urlServer."?action=pullpage|method=POST|
+Server Url: {{#input:type=button|value=Url test|onClick=
+var url = document.getElementsByName('url')[0].value;
+var v = new RegExp();
+    v.compile('^[A-Za-z]+://[A-Za-z0-9-_]+\\.[A-Za-z0-9-_%&\?\/.=]+$');
+if(!v.test(url)){
+alert ('You must supply a valid URL.');
+        document.getElementsByName('url')[0].focus();}
+else{alert('URL valid (this does not check if it is a DSMW server)');}
+}}<br>        {{#input:type=text|name=url}} <b>e.g. http://server/path</b><br>
 PushFeed Name:<br>        {{#input:type=text|name=pushname}}<br>
 PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
 {{#input:type=submit|value=ADD}}
 }}";
+
         //if article doesn't exist insertNewArticle
         if($article->mTitle->exists()) {
             $article->updateArticle($newtext, $summary="", false, false);
@@ -140,11 +130,16 @@ PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
     /////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
     elseif(isset ($_GET['action']) && $_GET['action']=='addpushpage') {
         wfDebugLog('p2p','addPushPage');
+        $specialAsk = $urlServer.'/Special:Ask';
         $newtext = "Add a new pushfeed:
 
-{{#form:action=".dirname($_SERVER['HTTP_REFERER'])."?action=pushpage|method=POST|
+{{#form:action=".$urlServer."?action=pushpage|method=POST|
 PushFeed Name:   <br>    {{#input:type=text|name=name}}<br>
-Request:    <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}}<br>
+Request: {{#input:type=button|value=Test your query|title=click here to test your query results|onClick=
+var query = document.getElementsByName('keyword')[0].value;
+var query1 = encodeURI(query);
+window.open('".$specialAsk."?q='+query1+'&eq=yes','querywindow','menubar=no, status=no, scrollbars=yes, menubar=no, width=700, height=400');}}
+  <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}} <b>e.g. [[Category:city]][[locatedIn::France]]</b><br>
 {{#input:type=submit|value=ADD}}
 }}";
 
