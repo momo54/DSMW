@@ -1,7 +1,7 @@
 <?php
 
 /**
- *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 interface Clock {

@@ -5,6 +5,7 @@
  * Represented by a list of page's lines and a list of the logootPositions
  * associated to each line
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author Muller Jean-Philippe
  */
 class boModel {
