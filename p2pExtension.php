@@ -108,7 +108,32 @@ var v = new RegExp();
 if(!v.test(url)){
 alert ('You must supply a valid URL.');
         document.getElementsByName('url')[0].focus();}
-else{alert('URL valid (this does not check if it is a DSMW server)');}
+else{
+var xhr_object = null;
+
+	   if(window.XMLHttpRequest) // Firefox
+	      xhr_object = new XMLHttpRequest();
+	   else if(window.ActiveXObject) // Internet Explorer
+	      xhr_object = new ActiveXObject('Microsoft.XMLHTTP');
+	   else {
+	      alert('Votre navigateur ne supporte pas les objets XMLHTTPRequest...');
+	      return;
+	   }
+
+	  try{ xhr_object.open('GET', url+'/api.php?action=query&meta=patch&papatchId=1&format=xml', true);}
+          catch(e){
+                    alert('There is no DSMW Server responding at this URL');
+                  }
+           xhr_object.onreadystatechange = function() {
+
+if(xhr_object.readyState == 4) {
+            if(xhr_object.status==200)
+                alert('URL valid, there is a DSMW Server responding');
+		  }
+	   }
+
+	   xhr_object.send(null);
+}
 }}<br>        {{#input:type=text|name=url}} <b>e.g. http://server/path</b><br>
 PushFeed Name:<br>        {{#input:type=text|name=pushname}}<br>
 PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
