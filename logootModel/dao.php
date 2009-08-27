@@ -3,6 +3,7 @@
 /**
  * DAO used to load and store the boModel
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author Jean-Philippe Muller
  */
 class dao {

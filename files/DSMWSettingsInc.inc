@@ -1,4 +1,8 @@
 <?php
+/**
+ * @copyright INRIA-LORIA-ECOO project
+ * @author jean-philippe muller
+ */
 # create namespace
 define("PATCH",110);
 define("PUSHFEED",200);

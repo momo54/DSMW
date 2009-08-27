@@ -2,6 +2,7 @@
 /**
  * Bot that add types to DSMW new semantic properties
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 require_once('BasicBot.php');
