@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @author jean-philippe muller
+ * @copyright INRIA-LORIA-ECOO project
+ */
+
+/**
  * Returns an array of page titles received via the request
  *
  * @global <String> $wgServerName

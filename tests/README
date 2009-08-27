@@ -3,7 +3,7 @@ Mediawiki P2P test :
     * install 3 mediawiki wiki1, wiki2, wiki3 with all extensions require by P2P extension (see the README about the P2P installation).
     * The admin user must be "wikiSysop" and the password "admin", for each mediawiki
     * Database name must be wikidbTest1 for wiki1, wikidbTest2 for wiki2 and wikidbTest3 for wiki3
-    * Before execute the tests, you have to create a dump of the database :
+    * Before executing the tests, you have to create a dump of the database :
         mysqldump -u "myUser" -p"MyPassword" wikidbTest3 > dump.sql
     * dump.sql must be in [wikiPath]/extensions/p2pextension/tests
     * you have to replace the  following lines in the initWikiTest.sh file:

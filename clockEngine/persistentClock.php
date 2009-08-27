@@ -4,6 +4,7 @@ require_once 'Clock.php';
 /**
  * Persistent clock
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 class persistentClock implements Clock{

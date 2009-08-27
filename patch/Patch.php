@@ -4,6 +4,7 @@
  * Object that wraps an operation list and other features concerning an article
  * page.
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author muller jean-philippe
  */
 class Patch {
