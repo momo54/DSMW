@@ -10,7 +10,8 @@ if( !defined('MEDIAWIKI') ) {
  * 
  * if pageName parameter is given, api return the list of patch concerned by this pageName
  * pushed by the pushName
- * 
+ *
+ * @copyright INRIA-LORIA-ECOO project
  * @author hantz
  */
 class ApiPatchPush extends ApiQueryBase {

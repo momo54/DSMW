@@ -10,6 +10,7 @@ if( !defined('MEDIAWIKI') ) {
  * return the changeSet which has the previous changeSet given by
  * the parametere changeSet 
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author hantz
  */
 class ApiQueryChangeSet extends ApiQueryBase {

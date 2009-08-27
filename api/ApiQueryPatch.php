@@ -8,6 +8,7 @@ if( !defined('MEDIAWIKI') ) {
  * Description of ApiQueryPatch
  * return the patch contain given by the parameter patchId
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author hantz
  */
 class ApiQueryPatch extends ApiQueryBase {

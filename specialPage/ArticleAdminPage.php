@@ -3,6 +3,7 @@
 /**
  * DSMW Special page
  *
+ * @copyright INRIA-LORIA-ECOO project
  * @author  Hantz Marlene - jean-Philippe Muller
  */
 require_once "$IP/includes/SpecialPage.php";

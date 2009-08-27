@@ -15,4 +15,4 @@ PRIMARY KEY ( `rev_id` , `session_id` )
  `server_id` VARCHAR( 40 ) NOT NULL DEFAULT '0'
 ) ENGINE = InnoDB  DEFAULT CHARSET = latin1;
 
-INSERT INTO `p2p_params` (`value`, `server_id`) VALUES ('0', '0');
+INSERT INTO `wikidb`.`p2p_params` (`value`, `server_id`) VALUES ('0', '0');
