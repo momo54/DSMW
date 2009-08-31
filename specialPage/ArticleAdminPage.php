@@ -7,7 +7,7 @@
  * @author  Hantz Marlene - jean-Philippe Muller
  */
 require_once "$IP/includes/SpecialPage.php";
-require_once "$wgP2PExtensionIP/files/utils.php";
+require_once "$wgDSMWExtensionIP/files/utils.php";
 
 /* Extension variables */
 $wgExtensionFunctions[] = "wfSetupAdminPage";
@@ -74,7 +74,7 @@ function pullFeedDel(){
         ///Special:ArticleAdminPage?FeedDel=true&feed=document.getElementsByName("push[]")[i].value
         if(isset($_GET['FeedDel'])) $this->deleteFeed($_GET['feed']);
 
-        $wgOut->setPagetitle("P2P Administration");
+        $wgOut->setPagetitle("DSMW Administration");
 
 
         //Set the limit of rows returned
@@ -252,7 +252,7 @@ function pullFeedDel(){
 
         if (!$this->getArticle('Property:ChangeSetID')->exists()) {
             $output .='
-<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/p2pExtension/bot/DSMWBot.php" name="scriptExec">
+<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/DSMWExtension/bot/DSMWBot.php" name="scriptExec">
 <table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
 </td></table>
 <input type="hidden" name="server" value="'.$urlServer.'">

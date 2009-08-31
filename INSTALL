@@ -30,7 +30,7 @@ The PHP extension GMP (GNU Multiple Precision) must be installed (or activated)
 
 Important: If you want to run the DSMW tests, you must make a dump of your 
 database immediatly (before using DSMW), for more details, see the readme file
-in the tests directory [wikipath]/extensions/p2pExtension/tests.
+in the tests directory [wikipath]/extensions/DSMWExtension/tests.
 
 
 == Installation ==
@@ -39,22 +39,22 @@ in the tests directory [wikipath]/extensions/p2pExtension/tests.
                installation and do not copy-paste from the example.
 
 (1) Download the zip file and extract it
-    Paste the folder named p2pExtension into the Mediawiki extension folder
+    Paste the folder named DSMWExtension into the Mediawiki extension folder
     "[wikipath]/extensions/".
 
 (2) Edit LocalSettings.php in the root of your MediaWiki installation,
     and add the following lines near the bottom but BEFORE THE LINES THAT
     ACTIVATE SEMANTIC MEDIAWIKI(cf. requirements):
 
-  require_once "$IP/extensions/p2pExtension/p2pExtension.php";
+  require_once "$IP/extensions/DSMWExtension/DSMWExtension.php";
   $wgGroupPermissions['*']['ArticleAdminPage']       = true;
-  require_once("$IP/extensions/p2pExtension/specialPage/ArticleAdminPage.php" );
+  require_once("$IP/extensions/DSMWExtension/specialPage/ArticleAdminPage.php" );
 
 
 '''Remark:'''  The admin user of the wiki must be "WikiSysop" and
 the password "admin", if it isn't so, you have to modify those credentials
 in the "BasicBot.php" file.
-"[wikipath]/extensions/p2pExtension/bot/BasicBot.php" (line 79-80)
+"[wikipath]/extensions/DSMWExtension/bot/BasicBot.php" (line 79-80)
 These two lines:
 if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
 if (!defined('PASSWORD')){	define('PASSWORD','admin');}
@@ -63,17 +63,17 @@ if (!defined('PASSWORD')){	define('PASSWORD','admin');}
         Create the database tables, executing the script on your MySQL
         administration tool.
         Substitute `wikidb` for the name of your database.
-        The script can be found in the file: /p2pExtension/db/addedTables.sql
+        The script can be found in the file: /DSMWExtension/db/addedTables.sql
 
 (4) The "cache" directory should exist and be writeable by the server
-    ([wikipath]/extensions/p2pExtension/bot/cache)
+    ([wikipath]/extensions/DSMWExtension/bot/cache)
 
-(5) Edit the LocalSettings.php and add these lines AFTER THE P2PEXTENSION
+(5) Edit the LocalSettings.php and add these lines AFTER THE DSMWEXTENSION
     ACTIVATION (see point (2)) and BEFORE THE LINES THAT ACTIVATE SEMANTIC
     MEDIAWIKI:
 
-    $wgLogo = "{$wgScriptPath}/extensions/p2pExtension/files/Logo.jpeg";
-    require_once "$IP/extensions/p2pExtension/files/DSMWSettingsInc.inc";
+    $wgLogo = "{$wgScriptPath}/extensions/DSMWExtension/files/Logo.jpeg";
+    require_once "$IP/extensions/DSMWExtension/files/DSMWSettingsInc.inc";
 
     and these line after THE LINES THAT ACTIVATE SEMANTIC MEDIAWIKI:
 
@@ -91,13 +91,13 @@ if (!defined('PASSWORD')){	define('PASSWORD','admin');}
 The end of this file should look like this:
 
 
-require_once "$IP/extensions/p2pExtension/p2pExtension.php"
+require_once "$IP/extensions/DSMWExtension/DSMWExtension.php"
 $wgGroupPermissions['*']['ArticleAdminPage']       = true;//sysop
-require_once("$IP/extensions/p2pExtension/specialPage/ArticleAdminPage.php" );
+require_once("$IP/extensions/DSMWExtension/specialPage/ArticleAdminPage.php" );
 
-$wgLogo = "{$wgScriptPath}/extensions/p2pExtension/files/Logo.jpeg";
+$wgLogo = "{$wgScriptPath}/extensions/DSMWExtension/files/Logo.jpeg";
 
-require_once "$IP/extensions/p2pExtension/files/DSMWSettingsInc.inc";
+require_once "$IP/extensions/DSMWExtension/files/DSMWSettingsInc.inc";
 
 include_once("$IP/extensions/SemanticMediaWiki/includes/SMW_Settings.php");
 enableSemantics($_SERVER['SERVER_NAME']);
