@@ -64,7 +64,7 @@ $abspath = dirname(__FILE__);
 // adjust as necessary
 define('SITECHARSET','UTF-8');
 define('SERVER','http://wikisum.com');
-define('PREFIX','/wiki'); // no trailing slash. The prefix you use for index.php?title= links (e.g. editing links). Set to '' if you use no prefix other than what's in SERVER.
+define('PREFIX',''); // no trailing slash. The prefix you use for index.php?title= links (e.g. editing links). Set to '' if you use no prefix other than what's in SERVER.
 define('ALTPREFIX','/w'); // no trailing slash. The prefix on valid links that visitors usually see. Might be the same as PREFIX if you don't use "pretty" links.
 define('CACHE', $abspath.'/cache/'); // a path where we can store cache files to. SHOULD EXIST and be writeable by the server. Stored for longer than files in TEMP.
 define('TEMP',$abspath.'/temp/'); // a path where we can store temp files to. SHOULD EXIST and be writeable by the server. Can be the same as CACHE if you want.
@@ -76,8 +76,8 @@ if (file_exists('username.php'))
 	require_once('username.php');
 // ELSE you need to fill out the next few settings.
 if (!defined('USERID')){	define('USERID','1');} // find it at Special:Preferences
-if (!defined('USERNAME')){	define('USERNAME','wikiSysop');}
-if (!defined('PASSWORD')){	define('PASSWORD','admin');} // password in plain text. No md5 or anything.
+if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
+if (!defined('PASSWORD')){	define('PASSWORD','Muller.3');} // password in plain text. No md5 or anything.
 
 
 ##########################################################

@@ -1,7 +1,6 @@
 #!/bin/sh
-mysql -u root -padmin < $1
+mysql -u root -pMuller.3 < $1
 
-mysql -u root -padmin wikidbTest1 < $2
-mysql -u root -padmin wikidbTest2 < $2
-mysql -u root -padmin wikidbTest3 < $2
-mysql -u root -padmin wikidb < $2
+mysql -u root -pMuller.3 wikidbTest1 < $2
+mysql -u root -pMuller.3 wikidbTest2 < $2
+mysql -u root -pMuller.3 wikidbTest3 < $2
