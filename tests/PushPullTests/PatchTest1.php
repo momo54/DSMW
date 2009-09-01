@@ -1,5 +1,5 @@
 <?php
-//require_once('../DSMWExtension.php');
+//require_once('../DSMW.php');
 require_once('../../patch/Patch.php');
 require_once('../../files/utils.php');
 require_once('../../clockEngine/persistentClock.php');

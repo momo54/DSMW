@@ -7,7 +7,7 @@
  * @author  Hantz Marlene - jean-Philippe Muller
  */
 require_once "$IP/includes/SpecialPage.php";
-require_once "$wgDSMWExtensionIP/files/utils.php";
+require_once "$wgDSMWIP/files/utils.php";
 
 /* Extension variables */
 $wgExtensionFunctions[] = "wfSetupAdminPage";
@@ -252,7 +252,7 @@ function pullFeedDel(){
 
         if (!$this->getArticle('Property:ChangeSetID')->exists()) {
             $output .='
-<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/DSMWExtension/bot/DSMWBot.php" name="scriptExec">
+<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/DSMW/bot/DSMWBot.php" name="scriptExec">
 <table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
 </td></table>
 <input type="hidden" name="server" value="'.$urlServer.'">

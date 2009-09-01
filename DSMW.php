@@ -10,7 +10,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 }
 require_once "$IP/includes/GlobalFunctions.php";
 
-$wgDSMWExtensionIP = dirname( __FILE__ );
+$wgDSMWIP = dirname( __FILE__ );
 
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
@@ -22,11 +22,11 @@ $wgHooks['EditPage::attemptSave'][] = 'attemptSave';
 $wgHooks['EditPageBeforeConflictDiff'][] = 'conflict';
 
 
-$wgAutoloadClasses['logootEngine'] = "$wgDSMWExtensionIP/logootComponent/logootEngine.php";
-$wgAutoloadClasses['logoot'] = "$wgDSMWExtensionIP/logootComponent/logoot.php";
-$wgAutoloadClasses['LogootId'] = "$wgDSMWExtensionIP/logootComponent/LogootId.php";
+$wgAutoloadClasses['logootEngine'] = "$wgDSMWIP/logootComponent/logootEngine.php";
+$wgAutoloadClasses['logoot'] = "$wgDSMWIP/logootComponent/logoot.php";
+$wgAutoloadClasses['LogootId'] = "$wgDSMWIP/logootComponent/LogootId.php";
 $wgAutoloadClasses['LogootPosition'] =
-    "$wgDSMWExtensionIP/logootComponent/LogootPosition.php";
+    "$wgDSMWIP/logootComponent/LogootPosition.php";
 $wgAutoloadClasses['Diff1']
     = $wgAutoloadClasses['_DiffEngine1']
     = $wgAutoloadClasses['_DiffOp1']
@@ -34,20 +34,20 @@ $wgAutoloadClasses['Diff1']
     = $wgAutoloadClasses['_DiffOp_Change1']
     = $wgAutoloadClasses['_DiffOp_Copy1']
     = $wgAutoloadClasses['_DiffOp_Delete1']
-    = "$wgDSMWExtensionIP/logootComponent/DiffEngine.php";
+    = "$wgDSMWIP/logootComponent/DiffEngine.php";
 
-$wgAutoloadClasses['LogootIns'] = "$wgDSMWExtensionIP/logootComponent/LogootIns.php";
-$wgAutoloadClasses['LogootDel'] = "$wgDSMWExtensionIP/logootComponent/LogootDel.php";
-$wgAutoloadClasses['boModel'] = "$wgDSMWExtensionIP/logootModel/boModel.php";
-$wgAutoloadClasses['dao'] = "$wgDSMWExtensionIP/logootModel/dao.php";
-$wgAutoloadClasses['manager'] = "$wgDSMWExtensionIP/logootModel/manager.php";
+$wgAutoloadClasses['LogootIns'] = "$wgDSMWIP/logootComponent/LogootIns.php";
+$wgAutoloadClasses['LogootDel'] = "$wgDSMWIP/logootComponent/LogootDel.php";
+$wgAutoloadClasses['boModel'] = "$wgDSMWIP/logootModel/boModel.php";
+$wgAutoloadClasses['dao'] = "$wgDSMWIP/logootModel/dao.php";
+$wgAutoloadClasses['manager'] = "$wgDSMWIP/logootModel/manager.php";
 
-$wgAutoloadClasses['Patch'] = "$wgDSMWExtensionIP/patch/Patch.php";
-$wgAutoloadClasses['persistentClock'] = "$wgDSMWExtensionIP/clockEngine/persistentClock.php";
-$wgAutoloadClasses['ApiQueryPatch'] = "$wgDSMWExtensionIP/api/ApiQueryPatch.php";
-$wgAutoloadClasses['ApiQueryChangeSet'] = "$wgDSMWExtensionIP/api/ApiQueryChangeSet.php";
-$wgAutoloadClasses['ApiPatchPush'] = "$wgDSMWExtensionIP/api/ApiPatchPush.php";
-$wgAutoloadClasses['utils'] = "$wgDSMWExtensionIP/files/utils.php";
+$wgAutoloadClasses['Patch'] = "$wgDSMWIP/patch/Patch.php";
+$wgAutoloadClasses['persistentClock'] = "$wgDSMWIP/clockEngine/persistentClock.php";
+$wgAutoloadClasses['ApiQueryPatch'] = "$wgDSMWIP/api/ApiQueryPatch.php";
+$wgAutoloadClasses['ApiQueryChangeSet'] = "$wgDSMWIP/api/ApiQueryChangeSet.php";
+$wgAutoloadClasses['ApiPatchPush'] = "$wgDSMWIP/api/ApiPatchPush.php";
+$wgAutoloadClasses['utils'] = "$wgDSMWIP/files/utils.php";
 
 
 global $wgVersion;

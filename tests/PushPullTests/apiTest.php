@@ -13,7 +13,7 @@ require_once '../../logootComponent/LogootId.php';
 require_once '../../logootComponent/LogootPosition.php';
 require_once '../../logootComponent/LogootIns.php';
 require_once '../../logootComponent/LogootDel.php';
-require_once '../../DSMWExtension.php';
+require_once '../../DSMW.php';
 require_once '../../patch/Patch.php';
 require_once '../../files/utils.php';
 include_once '../p2pAssert.php';
