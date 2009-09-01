@@ -449,8 +449,10 @@ Pages concerned:
         foreach ($patchs as $patch) {
             $onPage = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']]','?onPage');
             if($onPage===false)return false;
-            $onPage = explode('!', $onPage[0]);
-            $tabPage[$onPage[1]] = 0;
+            if(!empty ($onPage)){
+                $onPage = explode('!', $onPage[0]);
+                $tabPage[$onPage[1]] = 0;
+            }
         }
         return $tabPage;
     }
