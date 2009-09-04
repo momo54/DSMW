@@ -67,7 +67,14 @@ function pullFeedDel(){
         }
      }
 }
-
+function displayRemotePatch(test){
+alert(test);
+if(test==true){
+  window.location.href = "'.$url.'/Special:ArticleAdminPage?display=true";
+}else{
+  window.location.href = "'.$url.'/Special:ArticleAdminPage";
+}
+}
 </SCRIPT>';
         $wgOut->addScript($script1);
 
@@ -98,20 +105,25 @@ function pullFeedDel(){
 
         $output .= '
 <FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPull">
-<table'.$tableStyle.' >
-  <tr>
-    <th colspan="5"'.$style.'>PULL:
-  <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>';
 
+<table'.$tableStyle.' >
+  <a href="javascript:displayRemotePatch(true);">[Display]</a><a href="javascript:displayRemotePatch(false);">[Hide]</a> remote patches
+  <tr>';
+if(isset ($_GET['display'])){$output .= '    <th colspan="5"'.$style.'>PULL:
+  <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>';
+}else{
+    $output .= '    <th colspan="4"'.$style.'>PULL:
+  <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>';
+}
         if ($pullFeeds!=false) {
             $output .='<a href="javascript:pullFeedDel();">[Remove]</a>
   <button type="submit">[Pull]</button></th>
   </tr>
   <tr>
     <th colspan="2" >Site</th>
-    <th >Pages</th>
-    <th>Remote <br>Patches</th>
-    <th >Local <br>Patches</th>
+    <th >Pages</th>';
+if(isset ($_GET['display'])){$output .='    <th>Remote <br>Patches</th>';}
+$output .='    <th >Local <br>Patches</th>
 
 
   </tr>
@@ -127,6 +139,7 @@ function pullFeedDel(){
                 if($tabPage===false)$pageConcerned="-";
                 else $pageConcerned = count($tabPage);
 
+                if(isset ($_GET['display'])){
                 //count the number of remote patch concerned by the current pullFeed
                 $pushServer = getPushURL($pullFeed);
                 $pushName = getPushName($pullFeed);
@@ -135,6 +148,7 @@ function pullFeedDel(){
                 //if connection failed
                 if($published===false) $countRemotePatch="-";
                 else $countRemotePatch = count($published);
+                }
 
                 //count the number of local patch concerned by the current pullFeed
                 $pulledCS = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]','?hasPatch');
@@ -154,9 +168,10 @@ function pullFeedDel(){
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
     <td >'.$pullFeed.'</td>
-    <td align="center" title="Number of locally concerned pages">['.$pageConcerned.']</td>
-    <td align="center" title="Published patches">['. $countRemotePatch.']</td>
-    <td align="center" title="Local patches">['.$countPulledPatch.']</td>
+    <td align="center" title="Number of locally concerned pages">['.$pageConcerned.']</td>';
+               if(isset ($_GET['display'])){ $output .= '
+    <td align="center" title="Published patches">['. $countRemotePatch.']</td>';}
+$output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']</td>
   </tr>';
             }
         }
