@@ -14,6 +14,8 @@ $wgDSMWIP = dirname( __FILE__ );
 
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
+$wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
+$wgExtensionMessagesFiles['DSMW'] = $wgDSMWIP . '/languages/DSMW_Messages.php';
 
 $wgHooks['UnknownAction'][] = 'onUnknownAction';
 //$wgHooks['MediaWikiPerformAction'][] = 'performAction';

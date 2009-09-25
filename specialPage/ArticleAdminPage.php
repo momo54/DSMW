@@ -20,10 +20,11 @@ class ArticleAdminPage extends SpecialPage {
         $wgHooks["UnknownAction"][] = $this;
         $wgHooks["SkinTemplateTabs"][] = $this;
         SpecialPage::SpecialPage('ArticleAdminPage'/*, "block"*/);// avec block => pasges speciales restreintes
+        wfLoadExtensionMessages('DSMW');
     }
-
+    
     function getDescription() {
-        return "Article Administration Page";
+        return "DSMW Admin functions";
     }
 
     /**

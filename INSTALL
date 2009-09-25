@@ -112,6 +112,6 @@ $smwgNamespacesWithSemanticLinks = $smwgNamespacesWithSemanticLinks + array(
 
 == Contact ==
 
-If you have any issues or questions, please send them to
-jeanphilippe.muller12@gmail.com.
+If you have any issues or questions, please consult:
+https://gforge.inria.fr/projects/m3p/
 
