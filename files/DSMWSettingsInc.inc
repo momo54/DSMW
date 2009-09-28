@@ -31,6 +31,9 @@ $wgNamespacesWithSubpages[CHANGESET] = true;
 $wgGroupPermissions['*']['editchangeset'] = false;
 $wgGroupPermissions['sysop']['editchangeset'] = true;
 
+//Simple forms extension
+include("$IP/extensions/DSMW/SimpleForms/SimpleForms.php");
+
 //semantic mediawiki extension
  $smwgNamespaceIndex = 120;
 

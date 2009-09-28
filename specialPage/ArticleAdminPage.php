@@ -69,7 +69,7 @@ function pullFeedDel(){
      }
 }
 function displayRemotePatch(test){
-alert(test);
+//alert(test);
 if(test==true){
   window.location.href = "'.$url.'/Special:ArticleAdminPage?display=true";
 }else{
