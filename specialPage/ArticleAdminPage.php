@@ -168,7 +168,7 @@ $output .='    <th >Local <br>Patches</th>
                     $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
-    <td >'.$pullFeed.'</td>
+    <td ><a href='.$url.'?title='.$pullFeed.'>'.$pullFeed.'</a></td>
     <td align="center" title="Number of locally concerned pages">['.$pageConcerned.']</td>';
                if(isset ($_GET['display'])){ $output .= '
     <td align="center" title="Published patches">['. $countRemotePatch.']</td>';}
@@ -252,7 +252,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="push[]" value="'.$pushFeed.'" /></td>
-    <td >'.$pushFeed.'</td>
+    <td ><a href='.$url.'?title='.$pushFeed.'>'.$pushFeed.'</a></td>
     <td align="center" title="Number of concerned pages">['.$countConcernedPage.']</td>
     <td align="center" title="Sum of all the patches">['.$countPatchs.']</td>
     <td align="center" title="Published patches">['.$countPublished.']</td>
@@ -450,7 +450,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
             $content_actions["admin"] = array(
                 "class" => ($action == "admin") ? "selected" : false,
-                "text" => "Article admin (".$patchCount." patches)",
+                "text" => "DSMW (".$patchCount." patches)",
                 "href" => $skin->mTitle->getLocalURL("action=admin")
             );
         }

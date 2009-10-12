@@ -51,7 +51,11 @@ function getPushFeedRequest($pfName) {
     $string = file_get_contents($url);
     if ($string=="") return false;
     $res = explode(",", $string);
+    if (count($res)==2){
     $res = utils::decodeRequest($res[1]);
+    }else{
+        $res = utils::decodeRequest($res[0]);
+    }
     return $res;
 }
 
