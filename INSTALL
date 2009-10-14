@@ -15,8 +15,8 @@ the software without much risk (though no dedicated uninstall mechanism is
 provided).
 
 == Requirements ==
-DSMW has been developped on MW 1.14.0. It has been tested with version 1.13.2,
-1.14.0, 1.15.0 and 1.15.1 of MW.
+DSMW has been developped on MW 1.14.0. DSMW-0.3.1 as been tested with version MW-1.13.2,
+MW-1.14.0, MW-1.15.0 and MW-1.15.1.
 The DSMW extension requires an install of Semantic MediaWiki 1.4.2 or 1.4.3
 (cf: http://semantic-mediawiki.org/wiki/Semantic_MediaWiki)
 (in the LocalSettings.php file, set the memory limit
