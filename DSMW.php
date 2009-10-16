@@ -103,7 +103,7 @@ function onUnknownAction($action, $article) {
         $newtext = "Add a new site:
 
 {{#form:action=".$urlServer."?action=pullpage|method=POST|
-Server Url: {{#input:type=button|value=Url test|onClick=
+PushServer Url: {{#input:type=button|value=Url test|onClick=
 var url = document.getElementsByName('url')[0].value;
 var v = new RegExp();
     v.compile('^[A-Za-z]+://[A-Za-z0-9-_]+\\.[A-Za-z0-9-_%&\?\/.=]+$');

@@ -404,14 +404,14 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
             //part push page
             $url = "http://".$wgServerName.$wgScriptPath."/index.php";
-            $output .= '
-<div><FORM METHOD="POST" ACTION='.$url.' name="formPush">
-<table >
-  <tr><td> <button type="submit">[Push page : "'.$title.'"]</button></td></tr>
-<input type="hidden" name="action" value="onpush"/>
-<input type="hidden" name="push" value="PushFeed:PushPage_'.$title.'"/>
-<input type="hidden" name="request" value="[['.$title.']]"/>
-<input type="hidden" name="page" value="'.$title.'"/></table></form></div>';
+//            $output .= '
+//<div><FORM METHOD="POST" ACTION='.$url.' name="formPush">
+//<table >
+//  <tr><td> <button type="submit">[Push page : "'.$title.'"]</button></td></tr>
+//<input type="hidden" name="action" value="onpush"/>
+//<input type="hidden" name="push" value="PushFeed:PushPage_'.$title.'"/>
+//<input type="hidden" name="request" value="[['.$title.']]"/>
+//<input type="hidden" name="page" value="'.$title.'"/></table></form></div>';
 
 
             $wgOut->addHTML($output);
