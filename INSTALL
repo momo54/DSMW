@@ -59,11 +59,8 @@ These two lines:
 if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
 if (!defined('PASSWORD')){	define('PASSWORD','admin');}
 
-(3) Creation of new tables in the Mediawiki database:
-        Create the database tables, executing the script on your MySQL
-        administration tool.
-        Substitute `wikidb` for the name of your database.
-        The script can be found in the file: /DSMW/db/addedTables.sql
+(3) The "addedTables.sql" file must be writeable by the server
+    ([wikipath]/extensions/DSMW/db/addedTables.sql)
 
 (4) The "cache" directory should exist and be writeable by the server
     ([wikipath]/extensions/DSMW/bot/cache)

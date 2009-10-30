@@ -44,9 +44,10 @@ class ApiQueryPatch extends ApiQueryBase {
         if($data[1]) {
             substr($data[3],0,-1);
             $op = explode(',',$data[3]);
+            $title = trim($data[2],":");
             $result->setIndexedTagName($op, 'operation');
             $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);
-            $result->addValue(array('query',$this->getModuleName()),'onPage',$data[2]);
+            $result->addValue(array('query',$this->getModuleName()),'onPage',$title);
             $result->addValue(array('query',$this->getModuleName()),'previous',substr($data[4],0,-1));
             $result->addValue('query', $this->getModuleName(), $op);
         }

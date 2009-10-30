@@ -119,14 +119,27 @@ function operationToLogootOp($operation) {
  * @param <String or Object> $article
  */
 function logootIntegrate($operations, $article) {
-    wfDebugLog('p2p',' - function logootIntegrate : '.$article);
+   global $wgCanonicalNamespaceNames;
+   $indexNS=0;
+   wfDebugLog('p2p',' - function logootIntegrate : '.$article);
 
     if(is_string($article)) {
-    //$db = wfGetDB( DB_SLAVE );
-
         $dbr = wfGetDB( DB_SLAVE );
+        if(strpos($article, ":")===false){
         $pageid = $dbr->selectField('page','page_id', array(
-            'page_title'=>$article));
+            'page_title'=>$article/*WithoutNS*/));
+        }else{//if there is a namespace
+        preg_match( "/^(.+?)_*:_*(.*)$/S", $article, $tmp );
+        $articleWithoutNS = $tmp[2];
+        $NS = $tmp[1];
+        if(in_array($NS, $wgCanonicalNamespaceNames)){
+            foreach ($wgCanonicalNamespaceNames as $key=>$value){
+                if($NS==$value) $indexNS=$key;
+            }
+        }
+        $pageid = $dbr->selectField('page','page_id', array(
+            'page_title'=>$articleWithoutNS, 'page_namespace'=>$indexNS));
+        }
         // get the page namespace
         $pageNameSpace = $dbr->selectField('page','page_namespace', array(
             'page_id'=>$pageid));

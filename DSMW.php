@@ -15,6 +15,7 @@ $wgDSMWIP = dirname( __FILE__ );
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
+$wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
 $wgExtensionMessagesFiles['DSMW'] = $wgDSMWIP . '/languages/DSMW_Messages.php';
 
 $wgHooks['UnknownAction'][] = 'onUnknownAction';
@@ -94,7 +95,7 @@ function conflict(&$editor, &$out) {
  * @return <boolean>
  */
 function onUnknownAction($action, $article) {
-    global $wgOut, $wgServerName, $wgScriptPath;
+    global $wgOut, $wgServerName, $wgScriptPath, $wgUser;
     $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
 
     //////////pull form page////////
@@ -187,20 +188,24 @@ window.open('".$specialAsk."?q='+query1+'&eq=yes','querywindow','menubar=no, sta
 
 
         $newtext = "
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+[[name::PushFeed:".$name."| ]]
+'''Semantic query:''' [[hasSemanticQuery::".$stringReq."| ]]<nowiki>".$request."</nowiki>
+
+'''Pages concerned:'''
+{{#ask: ".$request."}}
+[[deleted::false| ]]
+
+==Actions==
 {{#form:action=".$urlServer."?action=onpush|method=POST|
 {{#input:type=hidden|name=push|value=PushFeed:".$name."}}<br>
 {{#input:type=hidden|name=action|value=onpush}}<br>
 {{#input:type=submit|value=PUSH}}
 }}
-----
-[[Special:ArticleAdminPage]]
-----
-PushFeed:
-Name: [[name::PushFeed:".$name."]]
-hasSemanticQuery: [[hasSemanticQuery::".$stringReq."]]
-Pages concerned:
-{{#ask: ".$request."}}
-[[deleted::false| ]]
+The \"PUSH\" action publishes the (unpublished) modifications of the articles listed above.
+
 ";
 
         wfDebugLog('p2p','  -> push page contains : '.$newtext);
@@ -277,6 +282,7 @@ Pages concerned:
             $pages = getRequestedPages($request);//ce sont des pages et non des patches
             foreach ($pages as $page) {
                 wfDebugLog('p2p','  ->requested page '.$page);
+                $page = str_replace('"', '', $page);
                 $request1 = '[[Patch:+]][[onPage::'.$page.']]';
                 $tmpPatches = utils::orderPatchByPrevious($page);
                 if(!is_array($tmpPatches))
@@ -304,20 +310,37 @@ Pages concerned:
                 $articleName = substr($CSID, 0,$pos+1);
                 $CSID = "ChangeSet:".$articleName;
             }
-            $newtext = "ChangeSet:
-changeSetID: [[changeSetID::".$CSID."]]
-inPushFeed: [[inPushFeed::".$name."]]
-previousChangeSet: [[previousChangeSet::".$previousCSID."]]
+            $newtext = "
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+[[changeSetID::".$CSID."| ]]
+
+'''Date:''' ".date(DATE_RFC822)."
+
+'''User:''' ".$wgUser->getName()."
+
+This ChangeSet is in : [[inPushFeed::".$name."]]<br>
+==Published patches==
+
+{| class=\"wikitable\" border=\"1\" style=\"text-align:left; width:30%;\"
+|-
+!bgcolor=#c0e8f0 scope=col | Patch
+|-
 ";
             //wfDebugLog('p2p','  -> count unpublished patch '.count($unpublished));
             foreach ($unpublished as $patch) {
                 wfDebugLog('p2p','  -> unpublished patch '.$patch);
-                $newtext.=" hasPatch: [[hasPatch::".$patch."]]";
+                $newtext.="|[[hasPatch::".$patch."]]
+|-
+";
             }
-
             $newtext.="
-----
-[[Special:ArticleAdminPage]]";
+|}";
+$newtext.="
+==Previous ChangeSet==
+[[previousChangeSet::".$previousCSID."]]
+";
 
             $update = updatePushFeed($name, $CSID);
             if($update==true) {// update the "hasPushHead" value successful
@@ -345,20 +368,22 @@ previousChangeSet: [[previousChangeSet::".$previousCSID."]]
         $pullname = $_POST['pullname'];
 
         $newtext = "
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+
+[[name::PullFeed:".$pullname."| ]]
+'''URL of the DSMW PushServer:''' [[pushFeedServer::".$url."]]<br>
+'''PushFeed name:''' [[pushFeedName::PushFeed:".$pushname."]]
+[[deleted::false| ]]
+
+==Actions==
 {{#form:action=".$urlServer."?action=onpull|method=POST|
 {{#input:type=hidden|name=pull|value=PullFeed:".$pullname."}}<br>
 {{#input:type=hidden|name=action|value=onpull}}<br>
 {{#input:type=submit|value=PULL}}
 }}
-----
-[[Special:ArticleAdminPage]]
-----
-PullFeed:
-
-name: [[name::PullFeed:".$pullname."]]
-pushFeedServer: [[pushFeedServer::".$url."]]
-pushFeedName: [[pushFeedName::PushFeed:".$pushname."]]
-[[deleted::false| ]]
+The \"PULL\" action gets the modifications published in the PushFeed of the PushFeedServer above.
 ";
 
         $title = Title::newFromText($pullname, PULLFEED);
@@ -559,7 +584,9 @@ function attemptSave($editpage) {
         $tmp = serialize($listOp1);
         $patchid = sha1($tmp);
         $patch = new Patch($patchid, $listOp1, utils::getNewArticleRevId(), $editpage->mArticle->getId());
-        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
+        if ($editpage->mTitle->getNamespace()==0) $title = $editpage->mTitle->getText();
+        else $title = $editpage->mTitle->getNsText().':'.$editpage->mTitle->getText();
+        $patch->storePage($title);//stores the patch in a wikipage
 
         //integration: diffs between VO and V2 into V1
 
@@ -570,8 +597,10 @@ function attemptSave($editpage) {
         $modelAfterIntegrate = $logoot->getModel();
         $tmp = serialize($listOp);
         $patchid = sha1($tmp);
-        $patch = new Patch($patchid, $listOp, utils::getNewArticleRevId(), $editpage->mArticle->getId());
-        $patch->storePage($editpage->mTitle->getText());//stores the patch in a wikipage
+        $patch = new Patch($patchid, $listOp, utils::getNewArticleRevId(), $editpage->mArticle->getId());        
+        if ($editpage->mTitle->getNamespace()==0) $title = $editpage->mTitle->getText();
+        else $title = $editpage->mTitle->getNsText().':'.$editpage->mTitle->getText();
+        $patch->storePage($title);//stores the patch in a wikipage
 
     }
     $revId = utils::getNewArticleRevId();

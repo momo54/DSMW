@@ -23,7 +23,9 @@ class manager {
                 return new boModel();
             }
         } catch (Exception $e) {
-            throw new MWException( __METHOD__.' db access problems' );
+            throw new MWException( __METHOD__.' db access problems,
+if this page existed before the DSMW installation,
+maybe it has not been processed by DSMW' );
         }
 
     }

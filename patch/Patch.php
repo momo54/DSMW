@@ -92,7 +92,7 @@ class Patch {
 //    }
 
     public function storePage($pageName){
-
+        global $wgUser;
         //$pageName = $this->getPageTitleWithId($this->mPageId);
         $previous = utils::getLastPatchId($pageName);
         if($previous==false) {
@@ -112,8 +112,25 @@ class Patch {
 //                $ID = "Patch:".$articleName;
 //            }
 
-        $text = 'Patch: patchID: [[patchID::Patch:'.$ID.']]
- onPage: [[onPage::'.$pageName.']] ';
+        $text = '
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+[[patchID::Patch:'.$ID.'| ]]
+
+\'\'\'Date:\'\'\' '.date(DATE_RFC822).'
+
+\'\'\'User:\'\'\' '.$wgUser->getName().'
+
+This is a patch of the article: [[onPage::'.$pageName.']]<br>
+==Operations of the patch==
+
+{| class="wikitable" border="1" style="text-align:left; width:80%;"
+|-
+!bgcolor=#c0e8f0 scope=col | Type
+!bgcolor=#c0e8f0 scope=col | Content
+|-
+';
         $i=1;//op counter
         foreach ($this->mOperations as $operation){
             $lineContent = $operation->getLineContent();
@@ -125,24 +142,36 @@ class Patch {
             if($operation instanceof LogootIns) $type="Insert";
             else $type="Delete";
             $operationID = utils::generateID();
-            $text.=' hasOperation: [[hasOperation::'.$operationID.';'.$type.';'
-            .$operation->getLogootPosition()->toString().';'.$lineContent1/*.'|'
-            .$operationID.';'.$type.';'.$operation->getLogootPosition()->toString()
-            .';'.$lineContent*/.']] ';
+            $text.='|[[hasOperation::'.$operationID.';'.$type.';'
+            .$operation->getLogootPosition()->toString().';'.$lineContent1.'| ]]'.$type;
+
+            //displayed text
+            //if (strlen($lineContent)>150) $lineContent2 = $this->splitLine($lineContent);
+            $lineContent2 = $lineContent;
+            //$text.='<br>\'\'\'type:\'\'\' '.$type.'<br>\'\'\'Content: \'\'\''.$lineContent2;
+            $text.='
+| <nowiki>'.$lineContent2.'</nowiki>
+|-
+';
         }
+        $text.='|}';
         if (is_array($previous)){
-            $text.=' previous: [[previous::';
+            $text.='
+==Previous patch(es)==
+[[previous::';
             foreach ($previous as $prev){
                 $text.=$prev.';';
             }
             $text.=']]';
         }
         else{
-        $text.=' previous: [[previous::'.$previous.']]';
+        $text.='
+==Previous patch(es)==
+[[previous::'.$previous.']]';
         }
-        $text.="
-----
-[[Special:ArticleAdminPage]]";
+//        $text.="
+//----
+//[[Special:ArticleAdminPage|DSMW Admin functions]]";
         $title = Title::newFromText($ID, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary="");
@@ -150,7 +179,14 @@ class Patch {
 
     }
 
-
+private function splitLine($line){
+    $text = "";
+    $arr = str_split($line, 150);
+    foreach ($arr as $element){
+        $text.=$element.'<br>';
+    }
+    return $text;
+}
 //function getPreviousPatchId($pageName){
 //global $wgServerName, $wgScriptPath;
 //

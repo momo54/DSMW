@@ -109,7 +109,7 @@ if(test==true){
 
 <table'.$tableStyle.' >
   <a href="javascript:displayRemotePatch(true);">[Display]</a><a href="javascript:displayRemotePatch(false);">[Hide]</a> remote patches
-  <tr>';
+  <tr bgcolor=#c0e8f0>';
 if(isset ($_GET['display'])){$output .= '    <th colspan="5"'.$style.'>PULL:
   <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_pull_site_addition&action=addpullpage>[Add]</a>';
 }else{
@@ -195,8 +195,8 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
         $output .= '
 <FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPush">
-<table'.$tableStyle.' >
-  <tr>
+<table'.$tableStyle.'  >
+  <tr bgcolor=#c0e8f0>
     <th colspan="6"'.$style.'>PUSH:
   <a href='./*dirname($_SERVER['HTTP_REFERER'])*/$url.'?title=administration_push_site_addition&action=addpushpage>[Add]</a>';
         if ($pushFeeds!=false) {
@@ -266,14 +266,14 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 </table>
 </FORM>';
 
-        if (!$this->getArticle('Property:ChangeSetID')->exists()) {
-            $output .='
-<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/DSMW/bot/DSMWBot.php" name="scriptExec">
-<table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
-</td></table>
-<input type="hidden" name="server" value="'.$urlServer.'">
-</form>';
-        }
+//        if (!$this->getArticle('Property:ChangeSetID')->exists()) {
+//            $output .='
+//<FORM METHOD="POST" ACTION="'.$urlServer.'/extensions/DSMW/bot/DSMWBot.php" name="scriptExec">
+//<table'.$tableStyle.'><td><button type="submit"><b>[UPDATE PROPERTY TYPE]</b></button>
+//</td></table>
+//<input type="hidden" name="server" value="'.$urlServer.'">
+//</form>';
+//        }
 
         $wgOut->addHTML($output);
         return false;
@@ -300,7 +300,8 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
         //Verify that the action coming in is "admin"
         if($action == "admin") {
             wfDebugLog('p2p', 'Admin page');
-            $title = $article->mTitle->getText();
+            if($article->mTitle->getNamespace()==0) $title=$article->mTitle->getText();
+            else $title = $article->mTitle->getNsText().':'.$article->mTitle->getText();
             wfDebugLog('p2p', ' -> title : '.$title);
             $wgOut->setPagetitle('DSMW on '.$title);
 
@@ -404,14 +405,17 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
             //part push page
             $url = "http://".$wgServerName.$wgScriptPath."/index.php";
-//            $output .= '
-//<div><FORM METHOD="POST" ACTION='.$url.' name="formPush">
-//<table >
-//  <tr><td> <button type="submit">[Push page : "'.$title.'"]</button></td></tr>
-//<input type="hidden" name="action" value="onpush"/>
-//<input type="hidden" name="push" value="PushFeed:PushPage_'.$title.'"/>
-//<input type="hidden" name="request" value="[['.$title.']]"/>
-//<input type="hidden" name="page" value="'.$title.'"/></table></form></div>';
+            $output .= '
+<h2>Actions</h2>
+<div><FORM METHOD="POST" ACTION='.$url.' name="formPush">
+<table >
+  <tr><td> <button type="submit">[Push page : "'.$title.'"]</button></td></tr>
+<input type="hidden" name="action" value="onpush"/>
+<input type="hidden" name="push" value="PushFeed:PushPage_'.$title.'"/>
+<input type="hidden" name="request" value="[['.$title.']]"/>
+<input type="hidden" name="page" value="'.$title.'"/></table></form></div>
+This [Push page : "'.$title.'"] action will create a PushFeed and
+publish the modifications of the "'.$title.'" article';
 
 
             $wgOut->addHTML($output);
@@ -439,7 +443,9 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
         $db = &wfGetDB(DB_SLAVE);
 
         $patchCount = 0;
-        $patchList = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$skin->mTitle->getText().']]','?patchID');
+        if($skin->mTitle->getNamespace()==0) $title = $skin->mTitle->getText();
+        else $title = $skin->mTitle->getNsText().':'.$skin->mTitle->getText();
+        $patchList = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$title.']]','?patchID');
         $patchCount = count($patchList);
         if($skin->mTitle->mNamespace == PATCH
             || $skin->mTitle->mNamespace == PULLFEED

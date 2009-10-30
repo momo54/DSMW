@@ -96,7 +96,7 @@ class utils {
      * @param <array> $listPatch
      */
     static function createChangeSetPush($CSID,$inPushFeed,$previousCS,$listPatch) {
-        $newtest = 'ChangeSet:
+        $newtext = 'ChangeSet:
 changeSetID: [[changeSetID::'.$CSID.']]
 inPushFeed: [[inPushFeed::'.$inPushFeed.']]
 previousChangeSet: [[previousChangeSet::'.$previousCS.']]
@@ -122,17 +122,36 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
      * @param <array> $listPatch
      */
     static function createChangeSetPull($CSID,$inPullFeed,$previousCS,$listPatch) {
-        $newtext = 'ChangeSet:
-changeSetID: [[changeSetID::'.$CSID.']]
-inPullFeed: [[inPullFeed::'.$inPullFeed.']]
-previousChangeSet: [[previousChangeSet::'.$previousCS.']]
+        global $wgUser;
+        $newtext = '
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+[[changeSetID::'.$CSID.']]
+
+\'\'\'Date:\'\'\' '.date(DATE_RFC822).'
+
+\'\'\'User:\'\'\' '.$wgUser->getName().'
+
+This ChangeSet is in : [[inPullFeed::'.$inPullFeed.']]<br>
+==Pulled patches==
+
+{| class="wikitable" border="1" style="text-align:left; width:30%;"
+|-
+!bgcolor=#c0e8f0 scope=col | Patch
+|-
 ';
         foreach ($listPatch as $patch) {
-            $newtext .=" hasPatch: [[hasPatch::".$patch."]]";
+            $newtext .="|[[hasPatch::".$patch."]]
+|-
+";
         }
         $newtext.="
-----
-[[Special:ArticleAdminPage]]";
+|}";
+        $newtext.="
+==Previous ChangeSet==
+[[previousChangeSet::".$previousCS."]]
+";
         $title = Title::newFromText($CSID, CHANGESET);
         $article = new Article($title);
         $article->doEdit($newtext, $summary="");
@@ -148,24 +167,48 @@ previousChangeSet: [[previousChangeSet::'.$previousCS.']]
      * @param <array> $operations
      */
     static function createPatch($patchId, $onPage, $previousPatch, $operations) {
-        $text = 'Patch: patchID: [[patchID::'.$patchId.']]
- onPage: [[onPage::'.$onPage.']] ';
+        $text = '
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+[[patchID::'.$patchId.'| ]]
+
+\'\'\'Remote Patch\'\'\'
+
+\'\'\'Integration Date:\'\'\' '.date(DATE_RFC822).'
+
+This is a patch of the article: [[onPage::'.$onPage.']]
+==Operations of the patch==
+
+{| class="wikitable" border="1" style="text-align:left; width:80%;"
+|-
+!bgcolor=#c0e8f0 scope=col | Type
+!bgcolor=#c0e8f0 scope=col | Content
+|-
+';
         foreach ($operations as $op) {
-            $text .= 'hasOperation [[hasOperation::'.$op.']] ';
+            $opArr = explode(";", $op);
+            $text .= '|[[hasOperation::'.$op.'| ]]'.$opArr[1].'
+|<nowiki>'.utils::contentDecoding($opArr[3]).'</nowiki>
+|-
+';
         }
         if (is_array($previousPatch)) {
-            $text.=' previous: [[previous::';
+           $text.='|}';
+           $text.='
+==Previous patch(es)==
+[[previous::';
             foreach ($previousPatch as $prev) {
                 $text.=$prev.';';
             }
             $text.=']]';
         }
         else {
-            $text.=' previous: [[previous::'.$previousPatch.']]';
+            $text.='
+==Previous patch(es)==
+[[previous::'.$previousPatch.']]';
         }
-        $text.="
-----
-[[Special:ArticleAdminPage]]";
+        
         $title = Title::newFromText($patchId, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary="");

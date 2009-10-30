@@ -27,7 +27,7 @@ function getRequestedPages($request) {
             $res[$key] = str_replace(',', '', $page);
             $pos = strpos($page, ':');
             $count = 1;
-            if($pos==0) $res[$key] = str_replace(':', '', $page, $count);
+            if($pos==0) $res[$key] = trim($page,":");//str_replace(':', '', $page, $count);
         }
     }
 

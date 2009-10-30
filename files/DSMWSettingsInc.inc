@@ -31,11 +31,17 @@ $wgNamespacesWithSubpages[CHANGESET] = true;
 $wgGroupPermissions['*']['editchangeset'] = false;
 $wgGroupPermissions['sysop']['editchangeset'] = true;
 
+$wgGroupPermissions['*']['DSMWAdmin']       = true;//sysop
+require_once("$IP/extensions/DSMW/specialPage/DSMWAdmin.php" );
+
 //Simple forms extension
 include("$IP/extensions/DSMW/SimpleForms/SimpleForms.php");
 
 //semantic mediawiki extension
  $smwgNamespaceIndex = 120;
+
+//Database update
+updateDB();
 
  //define unique serverId
  global $serverId;
@@ -66,5 +72,42 @@ include("$IP/extensions/DSMW/SimpleForms/SimpleForms.php");
         $dbw->update( 'p2p_params', array(
             'server_id'        => $serverId,
             ), '*', __METHOD__ );
+    }
+
+    /**
+     *
+     * @global <type> $wgDBname
+     * @global <type> $wgDSMWIP
+     */
+    function setDBName(){
+        global $wgDBname, $wgDSMWIP;
+        $content = file_get_contents($wgDSMWIP.'/db/addedTables.sql');
+		if ( false === $content ) {
+			throw new MWException( "Could not open \"../db/addedTables.sql\".\n" );
+		}
+        $newContent = str_replace('`wikidb`', "`".$wgDBname."`", $content);
+
+        $fp = fopen( $wgDSMWIP.'/db/addedTables.sql', 'w+' );
+		if ( false === $fp ) {
+			throw new MWException( "Could not open \"../db/addedTables.sql\".\n" );
+		}
+        fwrite($fp, $newContent);
+
+	fclose( $fp );
+    }
+
+    /**
+     * Automatic database tables creation
+     * @global <String> $wgDSMWIP
+     */
+    function updateDB() {
+        global $wgDSMWIP;
+
+        $db   = &wfGetDB(DB_SLAVE);
+        if ($db->tableExists('model') === false && $db->tableExists('p2p_params') === false) {
+        //if the dsmw tables doesn't exist, there are created automatically
+            setDBName();
+            $db->sourceFile($wgDSMWIP.'/db/addedTables.sql' );
+        }
     }
 ?>
