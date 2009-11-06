@@ -1,0 +1,17 @@
+For more documentation, see http://www.dsmw.org
+
+== DSMW 0.3.2 ==
+
+* New installation process (INSTALL FILE point(3)), the database tables are 
+  created automatically. (issue fixed: 8778)
+* New Special page "DSMW Settings".
+* New feature "Article update" in "DSMW Settings" that updates the "Main Page"
+  and makes it editable (via DSMW algorithm) and so it can be published.
+  (issues fixed: 8824, 8782)
+* The feature "Update properties type" that was previously in the
+  "DSMW admin functions" page is now in the "DSMW Settings" special page.
+* Better formatting of the DSMW wikipages (Patch,Changeset, Pullfeed, Pushfeed)
+  (issues fixed: 8730, 8731)
+* Every page can be published except the pages in the DSMW namespaces (Patch,
+  Changeset, Pullfeed, Pushfeed), functionnal tests added (issue fixed: 8828)
+
