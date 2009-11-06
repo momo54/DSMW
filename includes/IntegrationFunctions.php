@@ -125,6 +125,9 @@ function logootIntegrate($operations, $article) {
 
     if(is_string($article)) {
         $dbr = wfGetDB( DB_SLAVE );
+        //if there is a space in the title, repalce by '_'
+        $article = str_replace(" ", "_", $article);
+
         if(strpos($article, ":")===false){
         $pageid = $dbr->selectField('page','page_id', array(
             'page_title'=>$article/*WithoutNS*/));

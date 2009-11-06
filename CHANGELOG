@@ -1,5 +1,8 @@
 For more documentation, see http://www.dsmw.org
 
+* Pages with "spaces" in the title can be published and integrated
+  (issue fixed: 8826)
+
 == DSMW 0.3.2 ==
 
 * New installation process (INSTALL FILE point(3)), the database tables are 
@@ -13,5 +16,5 @@ For more documentation, see http://www.dsmw.org
 * Better formatting of the DSMW wikipages (Patch,Changeset, Pullfeed, Pushfeed)
   (issues fixed: 8730, 8731)
 * Every page can be published except the pages in the DSMW namespaces (Patch,
-  Changeset, Pullfeed, Pushfeed), functionnal tests added (issue fixed: 8828)
+  Changeset, Pullfeed, Pushfeed), functional tests added (issue fixed: 8828)
 
