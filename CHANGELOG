@@ -1,6 +1,10 @@
 For more documentation, see http://www.dsmw.org
 
-* Pages with "spaces" in the title can be published and integrated
+* New feature "Articles update" in "DSMW Settings" that updates all the articles
+  existing before the installation of DSMW and makes them editable (via DSMW
+  algorithm) and so they can be published.
+  (issues fixed: 8917)
+* Pages with "spaces" in the title can be published and integrated (pulled)
   (issue fixed: 8826)
 
 == DSMW 0.3.2 ==

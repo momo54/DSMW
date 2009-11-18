@@ -509,6 +509,7 @@ Pages concerned:
 //);
         $published = array();
         $pushName = str_replace(' ', '_', $pushName);
+        $title = str_replace(' ', '_', $title);
         if(isset ($title)) {
             $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
                 $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);

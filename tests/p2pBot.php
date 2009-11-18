@@ -159,6 +159,29 @@ class p2pBot {
             return false;
         }
     }
+
+    function articlesUpdate() {
+        $post_vars['action'] = 'logootize';
+        $this->bot->maxredirs = 0;
+        //$url = $this->bot->wikiServer.PREFIX.'/index.php/Special:DSMWAdmin';
+        if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/index.php/Special:DSMWAdmin',$post_vars) ) {
+        // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
+            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+            if ('200'==$code) {
+                echo "articlesUpdate failed with error 200:(".$this->bot->results.")";
+                return false;
+            }
+            elseif ('302'==$code)
+                return true;
+            else {
+                echo "articlesUpdate failed error not 200:(".$this->bot->results.")";
+                return false;
+            }
+        }else {
+            echo "articlesUpdate submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
+            return false;
+        }
+    }
 }
 
 function callbackTestFct($content1,$content2) {

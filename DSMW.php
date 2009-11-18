@@ -52,6 +52,10 @@ $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgDSMWIP/api/ApiQueryChangeSet.php";
 $wgAutoloadClasses['ApiPatchPush'] = "$wgDSMWIP/api/ApiPatchPush.php";
 $wgAutoloadClasses['utils'] = "$wgDSMWIP/files/utils.php";
 
+///// Register Jobs
+$wgJobClasses['DSMWUpdateJob']                  = 'DSMWUpdateJob';
+$wgAutoloadClasses['DSMWUpdateJob']             = "$wgDSMWIP/jobs/DSMWUpdateJob.php";
+
 
 global $wgVersion;
 if(compareMWVersion($wgVersion)==-1) {

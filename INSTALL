@@ -28,9 +28,9 @@ The PHP extension GMP (GNU Multiple Precision) must be installed (or activated)
 (also available on Windows platforms since PHP5.1.0) 
 
 Important: If you want to run the DSMW tests, you must make a dump of your 
-database immediatly after having executed the script that adds the DSMW tables 
-in the database, see point (3) (before using DSMW). For more details, see the
-readme file in the tests directory [wikipath]/extensions/DSMW/tests.
+database immediatly after having installed DSMW but before using DSMW.
+For more details, see the readme file in the tests directory
+[wikipath]/extensions/DSMW/tests.
 
 
 == Installation ==
@@ -69,7 +69,7 @@ if (!defined('PASSWORD')){	define('PASSWORD','admin');}
     ACTIVATION (see point (2)) and BEFORE THE LINES THAT ACTIVATE SEMANTIC
     MEDIAWIKI:
 
-    $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/Logo.jpeg";
+    $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
     require_once "$IP/extensions/DSMW/files/DSMWSettingsInc.inc";
 
     and these line after THE LINES THAT ACTIVATE SEMANTIC MEDIAWIKI:

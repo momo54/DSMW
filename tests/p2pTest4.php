@@ -8,7 +8,8 @@ require_once '../patch/Patch.php';
 require_once '../files/utils.php';
 
 /**
- * Description of p2pTest4
+ * p2pTest4 tests the same features than p2pTest1 except that the pagename has
+ * a namespace added
  *
  * @author jean-philippe muller
  * @copyright INRIA-LORIA-ECOO project
