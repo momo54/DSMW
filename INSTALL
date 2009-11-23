@@ -24,8 +24,6 @@ from 20 to 50M --> ini_set( 'memory_limit', '50M' )).
 For more details, see those extensions'own
 installation requirements.
 
-The PHP extension GMP (GNU Multiple Precision) must be installed (or activated)
-(also available on Windows platforms since PHP5.1.0) 
 
 Important: If you want to run the DSMW tests, you must make a dump of your 
 database immediatly after having installed DSMW but before using DSMW.
