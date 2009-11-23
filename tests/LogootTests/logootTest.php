@@ -7,6 +7,7 @@ require_once '../../logootComponent/logoot.php';
 require_once '../../logootComponent/logootEngine.php';
 require_once '../../logootComponent/LogootIns.php';
 require_once '../../logootComponent/LogootDel.php';
+require_once '../../logootComponent/Math/BigInteger.php';
 require_once '../../logootModel/boModel.php';
 require_once '../../logootModel/dao.php';
 require_once '../../logootModel/manager.php';
@@ -39,7 +40,7 @@ class logootTest  extends PHPUnit_Framework_TestCase{
         $id2->setInt(INT_MAX);
         $id2->setSessionId("10");
         $this->assertEquals('-1', $id1->compareTo($id2));
-        $this->assertEquals('1', LogootId::IdMax()->compareTo(LogootId::IdMin()));
+        $this->assertEquals('1', LogootId::IdMax()->compareTo(LogootId::IdMin()));      $y="yop";
     }
 
     function testPositionCompareTo(){
@@ -254,7 +255,7 @@ class logootTest  extends PHPUnit_Framework_TestCase{
             $testpos1 = $listPos[$j+1];
             $this->assertEquals('-1', $testpos->compareTo($testpos1));
             $this->assertEquals('1', $testpos1->compareTo($testpos));
-        }       
+        }
    }
 }
 ?>

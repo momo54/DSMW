@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2009 INRIA-LORIA-Score project
+ * @copyright 2009 INRIA-LORIA-Score Team
  * @author jean-philippe muller
  */
 

@@ -7,6 +7,7 @@ require_once '../../logootComponent/logoot.php';
 require_once '../../logootComponent/logootEngine.php';
 require_once '../../logootComponent/LogootIns.php';
 require_once '../../logootComponent/LogootDel.php';
+require_once '../../logootComponent/Math/BigInteger.php';
 require_once '../../logootModel/boModel.php';
 require_once '../../logootModel/dao.php';
 require_once '../../logootModel/manager.php';

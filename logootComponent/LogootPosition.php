@@ -78,11 +78,12 @@ class LogootPosition {
 
     public function add1($pos, $value, $sid/*, $clock*/){
         if ($pos < $this->size()) {
-            $tmp = gmp_add($this->get($pos)->getInt(), $value);
+            $tmp1 = new Math_BigInteger($this->get($pos)->getInt());
+            $tmp = $tmp1->add($value);
             unset ($this->mPosition[$pos]);
-            $this->mPosition[$pos] = new LogootId(gmp_strval($tmp),$sid/*,$clock*/);
+            $this->mPosition[$pos] = new LogootId($tmp->toString(),$sid/*,$clock*/);
         } else {
-            $this->mPosition[] = new LogootId(gmp_strval($tmp),$sid/*,$clock*/);
+            $this->mPosition[] = new LogootId($tmp->toString(),$sid/*,$clock*/);
         }
     }
 

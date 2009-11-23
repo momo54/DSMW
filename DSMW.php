@@ -51,6 +51,7 @@ $wgAutoloadClasses['ApiQueryPatch'] = "$wgDSMWIP/api/ApiQueryPatch.php";
 $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgDSMWIP/api/ApiQueryChangeSet.php";
 $wgAutoloadClasses['ApiPatchPush'] = "$wgDSMWIP/api/ApiPatchPush.php";
 $wgAutoloadClasses['utils'] = "$wgDSMWIP/files/utils.php";
+$wgAutoloadClasses['Math_BigInteger'] = "$wgDSMWIP/logootComponent/Math/BigInteger.php";
 
 ///// Register Jobs
 $wgJobClasses['DSMWUpdateJob']                  = 'DSMWUpdateJob';

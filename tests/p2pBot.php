@@ -168,8 +168,8 @@ class p2pBot {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
-                echo "articlesUpdate failed with error 200:(".$this->bot->results.")";
-                return false;
+        
+                return true;
             }
             elseif ('302'==$code)
                 return true;
@@ -178,7 +178,52 @@ class p2pBot {
                 return false;
             }
         }else {
-            echo "articlesUpdate submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
+            echo "articlesUpdate submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php/Special:DSMWAdmin'.$post_vars.")";
+            return false;
+        }
+    }
+
+    function importXML($file) {
+        if (!$this->bot->wikiConnect())
+			die ("Unable to connect.");
+
+        if (!$this->bot->fetch( $this->bot->wikiServer . PREFIX . '/index.php?title=Special:Import' ) )
+			return false;
+
+       
+        $val = strpos($this->bot->results, 'name="editToken" type="hidden" value="');//starting value
+        $val2 = strlen('name="editToken" type="hidden" value="');
+        $val1 = strpos($this->bot->results, '"', $val+$val2);//ending value
+        $editToken = substr($this->bot->results, $val+$val2, $val1-($val+$val2));
+        $fp = fopen($file, 'r');
+        $xmlContent = fread($fp, filesize($file));
+        fclose($fp);
+	$post_vars['editToken'] = $editToken;
+        $post_vars['action'] = 'submit';
+        $post_vars['source'] = 'upload';
+        $post_file['xmlimport'] = $file;
+//        $post_vars['xmlimport']['name']= 'Wikipedia-20091119095555.xml';
+//        $post_vars['xmlimport']['tmp_name']= $file;
+//        $post_vars['xmlimport']['type']= 'text/xml';
+        
+        $this->bot->maxredirs = 0;
+        $this->bot->set_submit_multipart();
+        //$url = $this->bot->wikiServer.PREFIX.'/index.php/Special:DSMWAdmin';
+        if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/index.php?title=Special:Import&action=submit',$post_vars, $post_file) ) {
+        // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
+            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+            if ('200'==$code) {
+                echo "import failed with error 200:(".$this->bot->results.")";
+                return true;
+            }
+            elseif ('302'==$code)
+                return true;
+            else {
+               
+                return false;
+            }
+        }else {
+            echo "import submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php?title=Special:Import&action=submit'.$post_vars.")";
             return false;
         }
     }

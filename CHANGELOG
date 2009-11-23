@@ -1,5 +1,7 @@
 For more documentation, see http://www.dsmw.org
 
+* The GMP library is no longer necessary but is used if it is installed
+  (issue fixed: 8610)
 * New feature "Articles update" in "DSMW Settings" that updates all the articles
   existing before the installation of DSMW and makes them editable (via DSMW
   algorithm) and so they can be published.

@@ -46,12 +46,12 @@ class LogootId {
     public function compareTo($id){
         $logid = $id;
 
-        $val1 = $this->mInt;
-        $val2 = $logid->mInt;
+        $val1 = new Math_BigInteger($this->mInt);
+        $val2 = new Math_BigInteger($logid->mInt);
 
-        if(gmp_cmp(gmp_init($val1), gmp_init($val2))<0)
+        if(($val1->compare($val2))<0)
         return -1;
-        else if(gmp_cmp(gmp_init($val1), gmp_init($val2))>0)
+        else if(($val1->compare($val2))>0)
         return 1;
         else if(strcmp($this->mSessionId, $logid->mSessionId)<0)
         return -1;
@@ -61,16 +61,16 @@ class LogootId {
     }
 
     public function toString(){
-        return "(".gmp_strval($this->mInt).":".$this->mSessionId.")";
+        return "(".$this->mInt.":".$this->mSessionId.")";
     }
 
     public function __clone(){
         return new LogootId($this->mInt,$this->mSessionId);
     }
 
-    public function gmpToStr(){
-        return $this->setInt(gmp_strval($this->mInt));
-    }
+//    public function gmpToStr(){
+//        return $this->setInt(gmp_strval($this->mInt));
+//    }
 
    
 }

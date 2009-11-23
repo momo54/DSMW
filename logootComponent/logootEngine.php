@@ -51,7 +51,7 @@ class logootEngine implements logoot {
                     }
                     else {/*the value is found in the array. It should not be, because
          * the logootid has to be unique
-         */
+         */             
                         throw new MWException( __METHOD__.' Logoot algorithm error,
                                 position exists yet!' );
                     }
@@ -124,14 +124,14 @@ class logootEngine implements logoot {
                         if($firstRev==1) {
                             $posMin = new LogootPosition(array(LogootId::IdMin()));
                             $posMax = new LogootPosition(array(LogootId::IdMax()));
-                            $positions = $this->getLogootPosition($posMin, $posMax, gmp_init("1"), $sid=session_id());
+                            $positions = $this->getLogootPosition($posMin, $posMax, new Math_BigInteger("1"), $sid=session_id());
                             $position = $positions[0];
                             $firstRev = 0;
                         }
                         else {
                             $start = $this->getPrevPosition($lineNb);
                             $end = $this->getNextPosition($lineNb);
-                            $positions = $this->getLogootPosition($start, $end, gmp_init("1"), $sid=session_id());
+                            $positions = $this->getLogootPosition($start, $end, new Math_BigInteger("1"), $sid=session_id());
                             $position = $positions[0];
                         }
                         $LogootIns = new LogootIns($position, $lineins);
@@ -180,14 +180,14 @@ class logootEngine implements logoot {
                         if($firstRev==1) {
                             $posMin = new LogootPosition(array(LogootId::IdMin()));
                             $posMax = new LogootPosition(array(LogootId::IdMax()));
-                            $positions = $this->getLogootPosition($posMin, $posMax, gmp_init("1"), $sid=session_id());
+                            $positions = $this->getLogootPosition($posMin, $posMax, new Math_BigInteger("1"), $sid=session_id());
                             $position = $positions[0];
                             $firstRev = 0;
                         }
                         else {
                             $start = $this->getPrevPosition($lineNb4);
                             $end = $this->getNextPosition($lineNb4);
-                            $positions = $this->getLogootPosition($start, $end, gmp_init("1"), $sid=session_id());
+                            $positions = $this->getLogootPosition($start, $end, new Math_BigInteger("1"), $sid=session_id());
                             $position = $positions[0];
                         }
 
@@ -215,8 +215,7 @@ class logootEngine implements logoot {
      * @return <Object> a logootPosition between $start and $end
      */
     private function getLogootPosition($start, $end, $N, $sid) {
-    //$clock = 0;
-        $result = array();
+    $result = array();
         $Id_Max = LogootId::IdMax();
         $Id_Min = LogootId::IdMin();
         $i = 0;
@@ -224,20 +223,22 @@ class logootEngine implements logoot {
         $pos = array();
         $currentPosition = new LogootPosition($pos);//voir constructeur
 
-        $inf = gmp_init("0");
-        $sup = gmp_init("0");
+        $inf = new Math_BigInteger("0");
+        $sup = new Math_BigInteger("0");
 
         $isInf = false;
 
         while (true) {
-            $inf = gmp_init($start->get($i)->getInt());
+            $inf = new Math_BigInteger($start->get($i)->getInt());
 
             if($isInf==true)
-                $sup = gmp_init(INT_MAX);
+                $sup = new Math_BigInteger(INT_MAX);
             else
-                $sup = gmp_init($end->get($i)->getInt());
+                $sup = new Math_BigInteger($end->get($i)->getInt());
 
-            if (gmp_cmp(gmp_sub(gmp_sub($sup, $inf), gmp_init("1")), $N)>0) {
+            $tmpVal = $sup->subtract($inf);
+            $tmpVal1 = $tmpVal->subtract(new Math_BigInteger("1"));
+            if (($tmpVal1->compare($N))>0) {
             //				inf = start.get(i).getInteger();
             //				sup = end.get(i).getInteger();
                 break;
@@ -253,51 +254,58 @@ class logootEngine implements logoot {
             if ($i == $end->size())
                 $end->add($Id_Max);
 
-            if(gmp_cmp($inf, $sup)<0)$isInf=true;
+            if(($inf->compare($sup))<0)$isInf=true;
 
         }
 
-        $binf = gmp_add($inf, gmp_init("1"));
-        $bsup = gmp_sub($sup, gmp_init("1"));
-        $slot = gmp_sub($bsup, $binf);
-        $step = gmp_div_q($slot, $N);
+        $binf = $inf->add(new Math_BigInteger("1"));
+        $bsup = $sup->subtract(new Math_BigInteger("1")) ;
+        $slot = $bsup->subtract($binf) ;
+        $stepTmp = $slot->divide($N);
+        $step = $stepTmp[0];//quotient, [1] is the remainder
 
         $old = clone $currentPosition;
 
-        if (gmp_cmp($step, INT_MAX)>0) {
-            $lstep = INT_MAX;
+        if (($step->compare(new Math_BigInteger(INT_MAX)))>0) {
+            $lstep = new Math_BigInteger(INT_MAX);
 
             $r = clone $currentPosition;
 
-            $r->set($i, gmp_strval($this->random($inf, $sup)), $sid/*, $clock*/);
+            $tmpVal2 = $inf->random($inf, $sup);
+            $r->set($i, $tmpVal2->toString(), $sid/*, $clock*/);
 
             $result[]=$r;//result est une arraylist<Position>
             return $result;
         } else
             $lstep = $step;
 
-        if (gmp_cmp($lstep, gmp_init("0")) == 0) {
-            $lstep = gmp_init("1");
+        if (($lstep->compare(new Math_BigInteger("0"))) == 0) {
+            $lstep = new Math_BigInteger("1");
         }
 
         $p = clone $currentPosition;
 
-        $p->set($i, gmp_strval($inf), $sid/*, $clock*/);
-        for ($j = 0; $j < gmp_intval($N); $j++) {
+        $p->set($i, $inf->toString(), $sid/*, $clock*/);
+        $tmpVal3 = (int)$N->toString();
+        for ($j = 0; $j < $tmpVal3; $j++) {
             $r = clone $p;
-            if (!gmp_cmp($lstep, gmp_init("1")) == 0) {
+            if (!(($lstep->compare(new Math_BigInteger("1"))) == 0)) {
 
-                $add = $this->random(gmp_init($p->get($i)->getInt()),
-                    gmp_add(gmp_init($p->get($i)->getInt()), $lstep));
+            $tmpVal4 = new Math_BigInteger($p->get($i)->getInt());
+            $tmpVal5 = $tmpVal4->add($lstep);//max
+            $tmpVal6 = new Math_BigInteger($p->get($i)->getInt());//min
+            $add = $tmpVal6->random($tmpVal6, $tmpVal5);
 
-                $r->set($i, gmp_strval($add), $sid/*, $clock*/);
+                $r->set($i, $add->toString(), $sid/*, $clock*/);
             } else
-                $r->add1($i, gmp_init("1"), $sid/*, $clock*/);
+                $r->add1($i, new Math_BigInteger("1"), $sid/*, $clock*/);
 
 
             $result[]=clone $r;//voir
             $old = clone $r;
-            $p->set($i, gmp_strval(gmp_add($p->get($i)->getInt(), $lstep)), $sid/*,$clock*/);
+            $tmpVal7 = new Math_BigInteger($p->get($i)->getInt());
+            $tmpVal7 = $tmpVal7->add($lstep);
+            $p->set($i, $tmpVal7->toString(), $sid/*,$clock*/);
 
         }
         return $result;
@@ -584,11 +592,11 @@ class logootEngine implements logoot {
      * @param <gmp_ressource> $max
      * @return <gmp_ressource> random value
      */
-    private function random ($min,$max) {
-        $min = gmp_add($min, gmp_init("1"));
-        $rdm = gmp_add($min, gmp_mod(gmp_random(2), gmp_sub($max, $min)));
-        return $rdm;
-    }
+//    private function random ($min,$max) {
+//        $min = gmp_add($min, gmp_init("1"));
+//        $rdm = gmp_add($min, gmp_mod(gmp_random(2), gmp_sub($max, $min)));
+//        return $rdm;
+//    }
 
     /**
      * Size of the logootPosition array
