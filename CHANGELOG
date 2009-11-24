@@ -1,5 +1,14 @@
 For more documentation, see http://www.dsmw.org
 
+== DSMW 0.4.1?? ==
+
+* After performing the action "update properties type" in "DSMW Settings", the
+  "back" link leads now back to the "DSMW Settings". (issue fixed: 9026)
+* The script that creates automatically the DSMW database tables takes now in
+  consideration the database prefix. (issue fixed: 9024)
+
+== DSMW 0.4 ==
+
 * The GMP library is no longer necessary but is used if it is installed
   (issue fixed: 8610)
 * New feature "Articles update" in "DSMW Settings" that updates all the articles

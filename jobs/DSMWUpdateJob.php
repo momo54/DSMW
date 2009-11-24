@@ -24,7 +24,9 @@ class DSMWUpdateJob extends Job {
 //Getting all the revision ids of pages having been logootized
         $db = wfGetDB( DB_SLAVE );
 
-        $sql ="SELECT `rev_id` FROM `model`";
+        $model_table = $db->tableName( 'model' );
+
+        $sql ="SELECT `rev_id` FROM $model_table";
 
         $res = $db->query($sql);
         while ($row = $db->fetchObject($res)) {
@@ -38,7 +40,10 @@ class DSMWUpdateJob extends Job {
 //Getting all the revision ids without the pages in the DSMW namespaces and
 //Administration_pull_site_addition and Administration_pull_site_addition pages
 
-        $sql ="SELECT `revision`.`rev_id` FROM `revision`, `page` WHERE
+        $rev_table = $db->tableName( 'revision' );
+        $page_table = $db->tableName( 'page' );
+
+        $sql ="SELECT $rev_table.`rev_id` FROM $rev_table, $page_table WHERE
      `rev_page`=`page_id` and `page_namespace`!= 110 and `page_namespace`!= 200
         and `page_namespace`!= 210 and `page_namespace`!= 220
 and `page_title`!= \"Administration_pull_site_addition\"

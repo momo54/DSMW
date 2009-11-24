@@ -51,5 +51,5 @@ $args['type'] = "String;String;String;Text";
 $result = $myBot->wikiFilter($source, 'addType','',$args);
 
 echo "Property types are updated!";
-echo '<a href="'.$_POST['server'].'">back</a>'
+echo '<a href="'.$_POST['server'].'/index.php/Special:DSMWAdmin">back</a>'
 ?>
