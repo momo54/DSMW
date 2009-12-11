@@ -30,25 +30,54 @@ class ApiQueryPatch extends ApiQueryBase {
 
         $params = $this->extractRequestParams();
         wfDebugLog('p2p','ApiQueryPatch params '.$params['patchId']);
-        $request = $this->encodeRequest('[[patchID::'.$params['patchId'].']]');
         
-        wfDebugLog('p2p','  -> request : '.$request);
-        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FpatchID/-3FonPage/-3FhasOperation/-3Fprevious/headers=hide/format=csv/sep=!';
-        wfDebugLog('p2p','  -> url request : '.$url);
-        $data = file_get_contents($url);
 
+        $res = utils::getSemanticQuery('[[patchID::'.$params['patchId'].']]', '?patchID
+?onPage
+?hasOperation
+?previous');
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
+
+            $row = $res->getNext();
+            if ($row===false) break;
+            $patchId = $row[1];
+            $col = $patchId->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[1] = $wikiValue;
+            }
+            $onPage = $row[2];
+            $col = $onPage->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[2] = $wikiValue;
+            }
+            $hasOperation = $row[3];
+            $col = $hasOperation->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $op[] = $wikiValue;
+            }
+            $results[3]=$op;
+            $previous = $row[4];
+            $col = $previous->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[4] = $wikiValue;
+            }
+        }
         $result = $this->getResult();
-        $data = str_replace('"', '', $data);
+        //$data = str_replace('"', '', $data);
 
-        $data = explode('!',$data);
-        if($data[1]) {
-            substr($data[3],0,-1);
-            $op = explode(',',$data[3]);
-            $title = trim($data[2],":");
+        //$data = explode('!',$data);
+        $op = $results[3];
+        if($results[1]) {
+            $title = trim($results[2],":");
             $result->setIndexedTagName($op, 'operation');
-            $result->addValue(array('query',$this->getModuleName()),'id',$data[1]);
+            $result->addValue(array('query',$this->getModuleName()),'id',$results[1]);
             $result->addValue(array('query',$this->getModuleName()),'onPage',$title);
-            $result->addValue(array('query',$this->getModuleName()),'previous',substr($data[4],0,-1));
+            $result->addValue(array('query',$this->getModuleName()),'previous',$results[4]);
             $result->addValue('query', $this->getModuleName(), $op);
         }
     }

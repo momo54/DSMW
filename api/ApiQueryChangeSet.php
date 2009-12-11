@@ -31,23 +31,37 @@ class ApiQueryChangeSet extends ApiQueryBase {
         global $wgServerName, $wgScriptPath;
         wfDebugLog('p2p','ApiQueryChangeSet');
         $params = $this->extractRequestParams();
-        $request = $this->encodeRequest('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]');
-        wfDebugLog('p2p','  -> request : '.$request);
-        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FhasPatch/format=csv/sep=!';
-        wfDebugLog('p2p','  -> url request : '.$url);
-        $data = file_get_contents('http://'.$wgServerName.$wgScriptPath.'/index.php/Special:Ask/'.$request.'/-3FchangeSetID/-3FhasPatch/headers=hide/format=csv/sep=!');
-        $data = trim($data);
-        $result = $this->getResult();
-        $data = str_replace('"', '', $data);
 
-        $data = explode('!',$data);
-        $CSID = $data[1];
+       
+        $res = utils::getSemanticQuery('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]', '?changeSetID
+?hasPatch');
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
+
+            $row = $res->getNext();
+            if ($row===false) break;
+            $changesetId = $row[1];
+            $col = $changesetId->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[1] = $wikiValue;
+            }
+            $hasPatch = $row[2];
+            $col = $hasPatch->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $patches[] = $wikiValue;
+            }
+            $results[2]=$patches;
+        }
+
+        $result = $this->getResult();
+
+        $CSID = $results[1];
         wfDebugLog('p2p','  -> CSID : '.$CSID);
         if($CSID) {
-            $data = explode(',',$data[2]);
-            for ($i = 0 ; $i < count($data) ; $i++) {
-                wfDebugLog('p2p','  -> patch : '.$data[$i]);
-            }
+            $data = $results[2];
+
             $result->setIndexedTagName($data, 'patch');
             $result->addValue(array('query',$this->getModuleName()),'id',$CSID);
             $result->addValue('query', $this->getModuleName(), $data);

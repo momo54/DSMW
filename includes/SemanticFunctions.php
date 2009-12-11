@@ -14,24 +14,25 @@
  * @return <array>
  */
 function getRequestedPages($request) {
-    global $wgServerName, $wgScriptPath;
-    $req = utils::encodeRequest($request);
-    $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/format=csv/sep=,/limit=100";
-    $string = file_get_contents($url1);
-    $res = explode("\n", $string);
-    foreach ($res as $key=>$page) {
-        if($page=="") {
-            unset ($res[$key]);
-        }else {
-            $res[$key] = str_replace("\"", "", $page);
-            $res[$key] = str_replace(',', '', $page);
-            $pos = strpos($page, ':');
-            $count = 1;
-            if($pos==0) $res[$key] = trim($page,":");//str_replace(':', '', $page, $count);
-        }
-    }
+    
+        $results = array();
+        $res = utils::getSemanticQuery($request);
+        if($res===false) return false;
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
 
-    return $res;
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[0];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[] = $wikiValue;
+            }
+        }
+
+        return $results;
 }
 
 /**
@@ -43,20 +44,26 @@ function getRequestedPages($request) {
  * @return <String>
  */
 function getPushFeedRequest($pfName) {
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[['.$pfName.']]';//'[[PushFeed:'.$pfName.']]'
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FhasSemanticQuery/headers=hide/format=csv/sep=,/limit=100";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $res = explode(",", $string);
-    if (count($res)==2){
-    $res = utils::decodeRequest($res[1]);
-    }else{
-        $res = utils::decodeRequest($res[0]);
+
+    $results = array();
+    $res = utils::getSemanticQuery('[['.$pfName.']]', '?hasSemanticQuery');//PullFeed:PullBureau
+    if($res===false)return false;
+    $count = $res->getCount();
+    for($i=0; $i<$count; $i++) {
+
+        $row = $res->getNext();
+        if ($row===false) break;
+        $row = $row[0];
+
+        $col = $row->getContent();//SMWResultArray object
+        foreach($col as $object) {//SMWDataValue object
+            $wikiValue = $object->getWikiValue();
+            $results[] = $wikiValue;
+        }
     }
-    return $res;
+
+    $value = utils::decodeRequest($results[0]);
+    return $value;
 }
 
 /**
@@ -90,28 +97,25 @@ function getPushFeedRequest($pfName) {
  * @return <array> array of the published patches' name
  */
 function getPublishedPatches($pfname) {
-    global $wgServerName, $wgScriptPath;
-    wfDebugLog('p2p',' - getPublishedPatches params pfName '.$pfname);
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[ChangeSet:+]] [[inPushFeed::'.$pfname.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
-    wfDebugLog('p2p','  -> url : '.$url);
-    $string = file_get_contents($url);
-    if ($string=="") return array();//false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+    
+    $results = array();
+    $res = utils::getSemanticQuery('[[ChangeSet:+]] [[inPushFeed::'.$pfname.']]', '?hasPatch');//PullFeed:PullBureau
+    if($res===false) return false;
+    $count = $res->getCount();
+    for($i=0; $i<$count; $i++) {
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
-            unset($res[$key]);
+        $row = $res->getNext();
+        if ($row===false) break;
+        $row = $row[1];
+
+        $col = $row->getContent();//SMWResultArray object
+        foreach($col as $object) {//SMWDataValue object
+            $wikiValue = $object->getWikiValue();
+            $results[] = $wikiValue;
         }
-        wfDebugLog('p2p','  -> res : '.$resultLine);
     }
-    $res = array_unique($res);
-
-    return $res;//published patch tab
+    $results = array_unique($results);
+    return $results;
 }
 
 /**
@@ -166,24 +170,25 @@ function updatePushFeed($name, $CSID) {
  * @return <String or bool> false if no pullhead
  */
 function getHasPullHead($pfName) {//pullfeed name with ns
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[PullFeed:+]] [[name::'.$pfName.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FhasPullHead/headers=hide/order=desc/format=csv/limit=1";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+    
+    $results = array();
+    $res = utils::getSemanticQuery('[[PullFeed:+]] [[name::'.$pfName.']]', '?hasPullHead');
+    if ($res===false) return false;
+    $count = $res->getCount();
+    for($i=0; $i<$count; $i++) {
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'PullFeed:')!==false || $resultLine=="") {
-            unset($res[$key]);
+        $row = $res->getNext();
+        if ($row===false) break;
+        $row = $row[1];
+
+        $col = $row->getContent();//SMWResultArray object
+        foreach($col as $object) {//SMWDataValue object
+            $wikiValue = $object->getWikiValue();
+            $results[] = $wikiValue;
         }
     }
-    if (empty ($res)) return false;
-    else return $res[1];
+    if(empty ($results)) return false;
+    else return $results[0];
 }
 
 /**
@@ -196,24 +201,25 @@ function getHasPullHead($pfName) {//pullfeed name with ns
  * @return <String or bool> false if no pushhead
  */
 function getHasPushHead($pfName) {//pushfeed name with ns
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[PushFeed:+]] [[name::'.$pfName.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FhasPushHead/headers=hide/order=desc/format=csv/limit=1";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+    
+    $results = array();
+    $res = utils::getSemanticQuery('[[PushFeed:+]] [[name::'.$pfName.']]', '?hasPushHead');
+    if ($res===false) return false;
+    $count = $res->getCount();
+    for($i=0; $i<$count; $i++) {
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'PushFeed:')!==false || $resultLine=="") {
-            unset($res[$key]);
+        $row = $res->getNext();
+        if ($row===false) break;
+        $row = $row[1];
+
+        $col = $row->getContent();//SMWResultArray object
+        foreach($col as $object) {//SMWDataValue object
+            $wikiValue = $object->getWikiValue();
+            $results[] = $wikiValue;
         }
     }
-    if (empty ($res)) return false;
-    else return $res[1];
+    if(empty ($results)) return false;
+    else return $results[0];
 }
 
 /**
@@ -225,24 +231,25 @@ function getHasPushHead($pfName) {//pushfeed name with ns
  * @return <type> pushfeed name
  */
 function getPushName($name) {//pullfeed name with NS
-    global $wgServerName, $wgScriptPath;
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[PullFeed:+]] [[name::'.$name.']]';
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FpushFeedName/headers=hide/order=desc/format=csv/limit=1";
-    $string = file_get_contents($url);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+    
+    $results = array();
+    $res = utils::getSemanticQuery('[[PullFeed:+]] [[name::'.$name.']]', '?pushFeedName');
+    if ($res===false) return false;
+    $count = $res->getCount();
+    for($i=0; $i<$count; $i++) {
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'PullFeed:')!==false || $resultLine=="") {
-            unset($res[$key]);
+        $row = $res->getNext();
+        if ($row===false) break;
+        $row = $row[1];
+
+        $col = $row->getContent();//SMWResultArray object
+        foreach($col as $object) {//SMWDataValue object
+            $wikiValue = $object->getWikiValue();
+            $results[] = $wikiValue;
         }
     }
-    if (empty ($res)) return false;
-    else return $res[1];
+    if(empty ($results)) return false;
+    else return $results[0];
 }
 
 /**
@@ -254,29 +261,25 @@ function getPushName($name) {//pullfeed name with NS
  * @return <String> Pushfeed Url
  */
 function getPushURL($name) {//pullfeed name with NS
-    global $wgServerName, $wgScriptPath;
-    wfDebugLog('p2p',' - function getPushURL');
-    $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-    $req = '[[PullFeed:+]] [[name::'.$name.']]';
-    wfDebugLog('p2p','  -> request : '.$req);
-    $req = utils::encodeRequest($req);
-    $url = $url."/Special:Ask/".$req."/-3FpushFeedServer/headers=hide/order=desc/format=csv/limit=1";
-    wfDebugLog('p2p','  -> url request : '.$url);
-    $string = file_get_contents($url);
-    wfDebugLog('p2p','  -> csv result : '.$string);
-    if ($string=="") return false;
-    $string = str_replace("\n", ",", $string);
-    $string = str_replace("\"", "", $string);
-    $res = explode(",", $string);
+    
+    $results = array();
+    $res = utils::getSemanticQuery('[[PullFeed:+]] [[name::'.$name.']]', '?pushFeedServer');
+    if ($res===false) return false;
+    $count = $res->getCount();
+    for($i=0; $i<$count; $i++) {
 
-    foreach ($res as $key=>$resultLine) {
-        if(strpos($resultLine, 'PullFeed:')!==false || $resultLine=="") {
-            unset($res[$key]);
+        $row = $res->getNext();
+        if ($row===false) break;
+        $row = $row[1];
+
+        $col = $row->getContent();//SMWResultArray object
+        foreach($col as $object) {//SMWDataValue object
+            $wikiValue = $object->getWikiValue();
+            $results[] = $wikiValue;
         }
     }
-    wfDebugLog('p2p','  -> result '.$res[1].')');
-    if (empty ($res)) return false;
-    else return $res[1];
+    if(empty ($results)) return false;
+    else return $results[0];
 }
 /**
  *In a pullfeed page, the value of [[hasPullHead::]] has to be updated with the

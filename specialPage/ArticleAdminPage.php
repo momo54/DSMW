@@ -152,18 +152,27 @@ $output .='    <th >Local <br>Patches</th>
                 }
 
                 //count the number of local patch concerned by the current pullFeed
-                $pulledCS = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]','?hasPatch');
-
-                //if connection failed
+                
+                $results = array();
+                $pulledCS = utils::getSemanticQuery('[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]', '?hasPatch');
                 if($pulledCS===false) $countPulledPatch="-";
-                else{
-                $countPulledPatch = 0;
-                foreach ($pulledCS as $CS) {
-                    $res = explode('!', $CS);
-                    $res = explode(',',$res[1]);
-                    $countPulledPatch += count($res);
+                else {
+                    $count = $pulledCS->getCount();
+                    for($i=0; $i<$count; $i++) {
+
+                        $row = $pulledCS->getNext();
+                        if ($row===false) break;
+                        $row = $row[1];
+
+                        $col = $row->getContent();//SMWResultArray object
+                        foreach($col as $object) {//SMWDataValue object
+                            $wikiValue = $object->getWikiValue();
+                            $results[] = $wikiValue;
+                        }
+                    }
+                    $countPulledPatch = count($results);
                 }
-                }
+               
                
                     $output .= '
   <tr>
@@ -221,23 +230,57 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 $pushName = str_replace(' ', '_', $pushFeed);
                 //count the number of page concerned by the current pushFeed
                 $request = getPushFeedRequest($pushName);
-                $tabPage = utils::getSemanticRequest($urlServer,$request,'');
+
+
                 
+                $results1 = array();
+                $tabPage = utils::getSemanticQuery($request);
                 //if connection failed
                 if($tabPage===false){
                     $countConcernedPage="-";
                     $countPatchs="-";
                 }
                 else {
-                $countConcernedPage = count($tabPage);
+
+                $count = $tabPage->getCount();
+                    for($i=0; $i<$count; $i++) {
+
+                        $row = $tabPage->getNext();
+                        if ($row===false) break;
+                        $row = $row[0];
+
+                        $col = $row->getContent();//SMWResultArray object
+                        foreach($col as $object) {//SMWDataValue object
+                            $wikiValue = $object->getWikiValue();
+                            $results1[] = $wikiValue;
+                        }
+                    }
+                $countConcernedPage = count($results1);
 
                 //count the number of patchs from the page concerned
                 $countPatchs = 0;
-                foreach ($tabPage as $page) {
-                    $patchs = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$page.']]','?patchID');
-                    $countPatchs += count($patchs);
+                foreach ($results1 as $page) {
+                    $results = array();
+                    $patchs = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$page.']]','?patchID');
+
+                    $count = $patchs->getCount();
+                    for($i=0; $i<$count; $i++) {
+                        
+                        $row = $patchs->getNext();
+                        if ($row===false) break;
+                        $row = $row[0];
+                        
+                        $col = $row->getContent();//SMWResultArray object
+                        foreach($col as $object) {//SMWDataValue object
+                            $wikiValue = $object->getWikiValue();
+                            $results[] = $wikiValue;
+                        }
+                    }
+                    
+                    $countPatchs += count($results);
                 }
                 }
+
                 //count the number of patchs published by the current pushFeed
                 $published = utils::getPublishedPatchs($urlServer, $pushName);
 
@@ -245,7 +288,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 else $countPublished = count($published);
 
                 //count the number of patchs unpublished
-                if($tabPage===false || $published===false) $countUnpublished="-";
+                if($results1===false || $published===false) $countUnpublished="-";
                 else $countUnpublished = $countPatchs - $countPublished;
 
                 //$this->getAwarenessData($row["site_url"]);
@@ -327,8 +370,26 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 }
 
                 //count the number of delete and insert operations into the patch
-                $op = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.$patch.']]','?hasOperation');
-                $countOp = utils::countOperation($op);
+
+               
+                $results = array();
+                $op = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']]','?hasOperation');
+                $count = $op->getCount();
+                for($i=0; $i<$count; $i++) {
+
+                    $row = $op->getNext();
+                    if ($row===false) break;
+                    $row = $row[1];
+
+                    $col = $row->getContent();//SMWResultArray object
+                    foreach($col as $object) {//SMWDataValue object
+                        $wikiValue = $object->getWikiValue();
+                        $results[] = $wikiValue;
+                    }
+                }
+
+
+                $countOp = utils::countOperation($results);//old code passed $op parameter
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
                 $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
                 /*$titlePatch = Title::newFromText( $patch,PATCH );
@@ -337,14 +398,31 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
             $output .= '</table></div>';
 
             //list of push
-            $pushs = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPushFeed::+]]','?inPushFeed');
+
+            
+            $pushs = array();
+            $res = utils::getSemanticQuery('[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPushFeed::+]]', '?inPushFeed');
+            $count = $res->getCount();
+            for($i=0; $i<$count; $i++) {
+
+                $row = $res->getNext();
+                if ($row===false) break;
+                $row = $row[1];
+
+                $col = $row->getContent();//SMWResultArray object
+                foreach($col as $object) {//SMWDataValue object
+                    $wikiValue = $object->getWikiValue();
+                    $pushs[] = $wikiValue;
+                }
+            }
+
 
             if(!empty ($pushs)) {
 
                 $output .= '<br><div style="width:60%;height:40%;overflow:auto;"><table style="border-bottom: 2px solid #000;"><caption><b>List of pushs</b></caption>';
                 foreach ($pushs as $push) {
-                    $pushName = explode('!',$push);
-                    $pushName = $pushName[1];
+                    
+                      $pushName = $push;
 
                     $output .= '<tr><td align="right" width="50%"><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
 
@@ -365,14 +443,31 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
             }//end if empty $pushs
 
             //part list of pull
-            $pulls = utils::getSemanticRequest($urlServer,'[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPullFeed::+]]','?inPullFeed');
+
+            $pulls = array();
+            $res = utils::getSemanticQuery('[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPullFeed::+]]', '?inPullFeed');
+            $count = $res->getCount();
+            for($i=0; $i<$count; $i++) {
+
+                $row = $res->getNext();
+                if ($row===false) break;
+                $row = $row[1];
+
+                $col = $row->getContent();//SMWResultArray object
+                foreach($col as $object) {//SMWDataValue object
+                    $wikiValue = $object->getWikiValue();
+                    $pulls[] = $wikiValue;
+                }
+            }
+
 
             if(!empty ($pulls)) {
 
                 $output .= '<br><div style="width:60%;height:40%;overflow:auto;"><table style="border-bottom: 2px solid #000;"><caption><b>List of pull</b></caption>';
                 foreach ($pulls as $pull) {
-                    $pullName = explode('!',$pull);
-                    $pullName = $pullName[1];
+
+                     
+                    $pullName = $pull;                   
                     $pushServer = getPushURL($pullName);
                     $pushName = getPushName($pullName);
                     $output .= '<tr><td align="right" width="50%"><a href="'.$_SERVER['PHP_SELF'].'?title='.$pullName.'">'.$pullName.'</a> : </td>';
@@ -380,9 +475,23 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                     $pulledPatch = utils::getPulledPatches($pullName);
                     $patchs = array();
                     foreach ($pulledPatch as $patch) {
-                        $onPage = utils::getSemanticRequest($urlServer,'[[Patch:+]][[patchID::'.$patch.']]','?onPage');
-                        $onPage = explode('!',$onPage[0]);
-                        if($onPage[1]==$title){
+                        
+                        $onPage = array();
+                        $res = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']]','?onPage');
+                        $count = $res->getCount();
+                        for($i=0; $i<$count; $i++) {
+
+                            $row = $res->getNext();
+                            if ($row===false) break;
+                            $row = $row[1];
+
+                            $col = $row->getContent();//SMWResultArray object
+                            foreach($col as $object) {//SMWDataValue object
+                                $wikiValue = $object->getWikiValue();
+                                $onPage[] = $wikiValue;
+                            }
+                        }
+                        if($onPage[0]==$title){
                             $patchs[] = $patch;
                         }
                     }
@@ -445,7 +554,23 @@ publish the modifications of the "'.$title.'" article';
         $patchCount = 0;
         if($skin->mTitle->getNamespace()==0) $title = $skin->mTitle->getText();
         else $title = $skin->mTitle->getNsText().':'.$skin->mTitle->getText();
-        $patchList = utils::getSemanticRequest($urlServer,'[[Patch:+]][[onPage::'.$title.']]','?patchID');
+
+        $patchList = array();
+        $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']]', '?patchID');
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
+
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[1];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $patchList[] = $wikiValue;
+            }
+        }
+
         $patchCount = count($patchList);
         if($skin->mTitle->mNamespace == PATCH
             || $skin->mTitle->mNamespace == PULLFEED
@@ -518,28 +643,24 @@ publish the modifications of the "'.$title.'" article';
      * returns an array of page titles received via the request
      */
     function getRequestedPages($request) {
-        global $wgServerName, $wgScriptPath;
-        $req = utils::encodeRequest($request);
-        $url1 = 'http://'.$wgServerName.$wgScriptPath."/index.php/Special:Ask/".$req."/headers=hide/format=csv/sep=,/limit=100";
-        $string = file_get_contents($url1);
-        $res = explode("\n", $string);
-        foreach ($res as $key=>$page) {
-            if($page=="") {
-                unset ($res[$key]);
-            }else {
-            //$page = strtr($page, "\"", "\0");
-            //            $pos = strrpos($page, ":");//NS removing
-            //            if ($pos === false) {
-            //                // not found...
-            //            }else{
-            //                $page = substr($page, $pos+1);
-            //            }
-                $res[$key] = str_replace("\"", "", $page);
-            //$res[$key] = strtr($page, "\"", "");
+
+        $results = array();
+        $res = utils::getSemanticQuery($request);
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
+
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[0];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[] = $wikiValue;
             }
         }
 
-        return $res;
+        return $results;
     }
 
     function getArticle( $article_title ) {

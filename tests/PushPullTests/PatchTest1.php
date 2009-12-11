@@ -34,7 +34,7 @@ class PatchTest1 extends PHPUnit_Framework_TestCase {
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = 'http://localhost/wiki1';
         $this->p2pBot1 = new p2pBot($basicbot1);
-
+        $this->p2pBot1->updateProperies();
     }
    
 

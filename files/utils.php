@@ -241,49 +241,88 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      * @global <String> $wgScriptPath
      * @param <String> $pageName
      * @param <String> $url
-     * @return <array or String> the la patch id
+     * @return <array or String> the last patch id
      * or an array of the last patches id
      */
     static function getLastPatchId($pageName, $url='') {
-        global $wgServerName, $wgScriptPath;
+        
+        if($url!=''){//case of tests
         $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
         $req = utils::encodeRequest($req);
-        if($url=='')    $url = 'http://'.$wgServerName.$wgScriptPath;
         $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
-        $string = file_get_contents($url1);//patches list
-        $string = str_replace('"', '', $string);
-        $string = $string;
-        if ($string=="") return false;
-        $string = explode("\n", $string);
-        foreach ($string as $key=>$str1) {
-            if ($str1=="") unset ($string[$key]);
+        $results = file_get_contents($url1);//patches list
+        $results = str_replace('"', '', $results);
+        if ($results=="") return false;
+        $results = explode("\n", $results);
+        foreach ($results as $key=>$str1) {
+            if ($str1=="") unset ($results[$key]);
             $pos = strpos($str1, '!');
-            if($pos !== false) $string[$key] = /*'patch:'.*/substr($str1, $pos+1);
+            if($pos !== false) $results[$key] = /*'patch:'.*/substr($str1, $pos+1);
         //else $string[$key] = 'Patch:'.$str1;
         }
-/*$string is the list of the patches */
+        }else{
 
-        $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
-        $string1 = file_get_contents($url2);//previous list
-        $string1 = $string1;
-        //$string1 = str_replace("patch:", "", $string1);
-        if ($string1=="") return false;
-        $string1 = explode("\n", $string1);
-        foreach ($string1 as $key=>$str) {
-            $pos = strpos($str, '!');
-            if($pos !== false) $string1[$key] = substr($str, $pos+1);
-            //            $pos2 = strpos($string1[$key], 'patch:');
-            //            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
-            if ($string1[$key]=="") unset ($string1[$key]);
-            $pos1 = strpos($string1[$key], ';');
-            if($pos1 !== false) {
-                $res = explode(';', $string1[$key]);
-                $string1 = array_merge($string1, $res);
+        $results = array();
+        $res = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?patchID');
+        if($res===false)return false;
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
+
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[1];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[] = $wikiValue;
             }
         }
+        }
+
+/*$string is the list of the patches */
+        
+        if($url!=''){
+        $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
+        $results1 = file_get_contents($url2);//previous list
+        //$string1 = str_replace("patch:", "", $string1);
+        if ($results1=="") return false;
+        $results1 = explode("\n", $results1);
+        foreach ($results1 as $key=>$str) {
+            $pos = strpos($str, '!');
+            if($pos !== false) $results1[$key] = substr($str, $pos+1);
+            //            $pos2 = strpos($string1[$key], 'patch:');
+            //            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
+            if ($results1[$key]=="") unset ($results1[$key]);
+            $pos1 = strpos($results1[$key], ';');
+            if($pos1 !== false) {
+                $res = explode(';', $results1[$key]);
+                $results1 = array_merge($results1, $res);
+            }
+        }
+        }else{
+
+        $results1 = array();
+        $res1 = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?patchID');//PullFeed:PullBureau
+        if($res1===false)return false;
+        $count1 = $res1->getCount();
+        for($j=0; $j<$count1; $j++) {
+
+            $row1 = $res1->getNext();
+            if ($row1===false) break;
+            $row1 = $row1[1];
+
+            $col1 = $row1->getContent();//SMWResultArray object
+            foreach($col1 as $object1) {//SMWDataValue object
+                $wikiValue1 = $object1->getWikiValue();
+                $results1[] = $wikiValue1;
+            }
+        }
+        }
+
     /*$string1 is the list of the patches witch are previouses */
 
-        $result = array_diff($string, $string1);
+        $result = array_diff($results, $results1);
         if (count($result)>1) return $result;
         else return array_shift($result);
     }
@@ -425,25 +464,24 @@ Pages concerned:
      * @return <array> pulled patches
      */
     static function getPulledPatches($pfname) {
-        global $wgServerName, $wgScriptPath;
-        $url = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
-        $req = '[[ChangeSet:+]] [[inPullFeed::'.$pfname.']]';
-        $req = utils::encodeRequest($req);
-        $url = $url."/Special:Ask/".$req."/-3FhasPatch/headers=hide/format=csv/sep=,/limit=100";
-        $string = file_get_contents($url);
-        if ($string=="") return array();//false;
-        $string = str_replace("\n", ",", $string);
-        $string = str_replace("\"", "", $string);
-        $res = explode(",", $string);
+       
+        $results = array();
+        $res = utils::getSemanticQuery('[[ChangeSet:+]] [[inPullFeed::'.$pfname.']]', '?hasPatch');
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
 
-        foreach ($res as $key=>$resultLine) {
-            if(strpos($resultLine, 'ChangeSet:')!==false || $resultLine=="") {
-                unset($res[$key]);
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[1];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[] = $wikiValue;
             }
         }
-        $res = array_unique($res);
-
-        return $res;//published patch tab
+        $results = array_unique($results);
+        return $results;
     }
 
     /**
@@ -456,27 +494,42 @@ Pages concerned:
      * @return <array> patch list
      */
     static function orderPatchByPrevious($title,$previousPatch='none') {
-        global $wgServerName, $wgScriptPath;
-        $firstPatch = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]', '-3FpatchID');
+        
+        $firstPatch = array();
+        $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]', '?patchID');
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
 
-        /*while($firstPatch) {
-            $p = split(',',$firstPatch[0]);
-            $firstPatch[0] = $p[1];
-            $patchFound = $this->getRequestedPages('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]','?patchID');
-            foreach ($patchFound as $p) {
-                $firstPatch[] = $p;
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[1];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $firstPatch[] = $wikiValue;
             }
-
-            $newPatch = array_shift($firstPatch);
-            if(!$marque[$newPatch]) {
-                $marque[$newPatch] = 1;
-                $patchs[] = $newPatch;
-            }*/
+        }
+       
         $patchs = array();
         while($firstPatch) {
-            /*$p = split(',',$firstPatch[0]);
-            $firstPatch[0] = $p[1];*/
-            $patchFound = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]', '-3FpatchID');
+            
+            $patchFound = array();
+            $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]', '?patchID');
+            $count = $res->getCount();
+            for($i=0; $i<$count; $i++) {
+
+                $row = $res->getNext();
+                if ($row===false) break;
+                $row = $row[1];
+
+                $col = $row->getContent();//SMWResultArray object
+                foreach($col as $object) {//SMWDataValue object
+                    $wikiValue = $object->getWikiValue();
+                    $patchFound[] = $wikiValue;
+                }
+            }
+
             foreach ($patchFound as $p) {
                 $firstPatch[] = $p;
             }
@@ -486,27 +539,36 @@ Pages concerned:
     }
 
     static function getPageConcernedByPull($pfname) {
-        global $wgServerName, $wgScriptPath;
+
         $patchs = utils::getPulledPatches($pfname);
         $tabPage = array();
         foreach ($patchs as $patch) {
-            $onPage = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']]','?onPage');
-            if($onPage===false)return false;
-            if(!empty ($onPage)){
-                $onPage = explode('!', $onPage[0]);
-                $tabPage[$onPage[1]] = 0;
+            
+                        $onPage = array();
+            $res = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']]','?onPage');
+            if($res===false) return false;
+            $count = $res->getCount();
+            for($i=0; $i<$count; $i++) {
+
+                $row = $res->getNext();
+                if ($row===false) break;
+                $row = $row[1];
+
+                $col = $row->getContent();//SMWResultArray object
+                foreach($col as $object) {//SMWDataValue object
+                    $wikiValue = $object->getWikiValue();
+                    $onPage[] = $wikiValue;
+                }
+            }
+            if(!empty ($onPage)) {
+                $tabPage[$onPage[0]] = 0;
             }
         }
         return $tabPage;
     }
 
     static function getPublishedPatchs($server,$pushName,$title=null) {
-//        $ctx = stream_context_create(array(
-//    'http' => array(
-//        'timeout' => 1
-//        )
-//    )
-//);
+
         $published = array();
         $pushName = str_replace(' ', '_', $pushName);
         $title = str_replace(' ', '_', $title);
@@ -526,6 +588,38 @@ Pages concerned:
             $published[] = $p->firstChild->nodeValue;
         }
         return $published;
+    }
+
+    /**
+ *
+ * @param <String> $query (e.g. [[ChangeSet:+]][[inPullFeed::Pullfeed:xxxxx]])
+ * @param <String> $paramstring Printout parameters (e.g. ?hasPatch?changeSetID)
+ * @return <Object> SMWQueryResult object
+ */
+
+    static public function getSemanticQuery($query, $paramstring='') {
+        $printouts = array();
+        $rawparams = array();
+        $params = array('format'=>' ', 'sort'=>' ', 'offset'=>0);
+        $rawparams[] = $query;
+        if ($paramstring != '') {
+            $ps = explode("\n", $paramstring);
+            foreach ($ps as $param) {
+                $param = trim($param);
+                if ( ($param != '') && ($param{0} != '?') ) {
+                    $param = '?' . $param;
+                }
+                $rawparams[] = $param;
+            }
+        }
+
+        SMWQueryProcessor::processFunctionParams($rawparams, $query,$params,$printouts);
+
+        $queryobj = SMWQueryProcessor::createQuery($query, $params, SMWQueryProcessor::SPECIAL_PAGE , '', $printouts);
+        $res = smwfGetStore()->getQueryResult($queryobj);
+
+        if(!($res instanceof SMWQueryResult))return false;
+        return $res;
     }
 
 }

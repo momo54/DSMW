@@ -1,7 +1,7 @@
 For more documentation, see http://www.dsmw.org
 
-== DSMW 0.4.1?? ==
-
+== DSMW 0.5 ==
+* Internal features modification in order to speed up the reactivity of DSMW.
 * After performing the action "update properties type" in "DSMW Settings", the
   "back" link leads now back to the "DSMW Settings". (issue fixed: 9026)
 * The script that creates automatically the DSMW database tables takes now in

@@ -40,7 +40,23 @@ class ApiPatchPush extends ApiQueryBase {
         //filtered on published patch on page title
         if(isset ($params['pageName'])) {
             foreach ($publishedInPush as $patch) {
-                if(count(utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath,'[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$params['pageName'].']]',''))) {
+               
+                $patches = array();
+                $res = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$params['pageName'].']]');
+                $count = $res->getCount();
+                for($i=0; $i<$count; $i++) {
+
+                    $row = $res->getNext();
+                    if ($row===false) break;
+                    $row = $row[0];
+
+                    $col = $row->getContent();//SMWResultArray object
+                    foreach($col as $object) {//SMWDataValue object
+                        $wikiValue = $object->getWikiValue();
+                        $patches[] = $wikiValue;
+                    }
+                }
+                if(count($patches)) {
                     $published[] = $patch;
                 }
             }

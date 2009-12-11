@@ -159,7 +159,7 @@ The country is a parliamentary democracy with a president as head of state and a
 changeSetID: [[changeSetID::localhost/wiki12]]
 inPushFeed: [[inPushFeed::PushFeed:PushCity11]]
 previousChangeSet: [[previousChangeSet::none]]
- hasPatch: [[hasPatch::"Patch:Berlin1"]] hasPatch: [[hasPatch::"Patch:Paris0"]]';
+ hasPatch: [[hasPatch::Patch:Berlin1]] hasPatch: [[hasPatch::Patch:Paris0]]';
         $this->p2pBot1->createPage($pageName, $content);
 
         $pageName = 'PushFeed:PushCity11';
@@ -203,7 +203,7 @@ Pages concerned:
 changeSetID: [[changeSetID::localhost/wiki13]]
 inPushFeed: [[inPushFeed::PushFeed:PushCity]]
 previousChangeSet: [[previousChangeSet::ChangeSet:localhost/wiki12]]
- hasPatch: [[hasPatch::"Patch:Berlin2"]]';
+ hasPatch: [[hasPatch::Patch:Berlin2]]';
         $this->p2pBot1->createPage($pageName, $content);
 
         //apiQueryChangeSet call
