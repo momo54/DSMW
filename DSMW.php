@@ -127,7 +127,7 @@ function onUnknownAction($action, $article) {
         $newtext = "Add a new site:
 
 {{#form:action=".$urlServer."?action=pullpage|method=POST|
-PushServer Url: {{#input:type=button|value=Url test|onClick=
+PushFeed Url: {{#input:type=button|value=Url test|onClick=
 var url = document.getElementsByName('url')[0].value;
 if(url.indexOf('PushFeed')==-1){
 alert('No valid PushFeed syntax, see example.');
@@ -175,7 +175,7 @@ if(xhr_object.readyState == 4) {
 
 	   xhr_object.send(null);
 }
-}}<br>        {{#input:type=text|name=url|size=50}} <b>e.g. http://server/path/index?title=PushFeed:PushName</b><br>
+}}<br>        {{#input:type=text|name=url|size=50}} <b>e.g. http://server/path/index.php?title=PushFeed:PushName</b><br>
 PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
 {{#input:type=submit|value=ADD}}
 }}";
