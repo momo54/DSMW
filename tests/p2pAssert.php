@@ -6,7 +6,7 @@ function assertPageExist($server,$pageName) {
     $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
     $rev =  unserialize($rev);
     PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0,
-        'Page '.$pageName.' unexist on '.$server);
+        'Page '.$pageName.' does not exist on '.$server);
 }
 
 function assertContentEquals($server1,$server2,$pageName) {

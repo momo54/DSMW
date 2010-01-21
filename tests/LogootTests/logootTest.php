@@ -257,5 +257,24 @@ class logootTest  extends PHPUnit_Framework_TestCase{
             $this->assertEquals('1', $testpos1->compareTo($testpos));
         }
    }
+
+   function testManyInsDel(){
+        $model = manager::loadModel(0);
+        $logoot = new logootEngine($model);
+        $oldContent = "";
+
+        for ($i=0; $i<500; $i++){//500 inserts / 499 deletion
+        //insert X
+        $newContent = $i;
+        $listOp1 = $logoot->generate($oldContent, $newContent);
+        if($i==0) $this->assertEquals(1, count($listOp1)); //ins first line
+        else $this->assertEquals(2, count($listOp1));
+
+        $oldContent = $newContent;
+        }
+        $modelAssert = $logoot->getModel();
+
+        $this->assertEquals(1, count($modelAssert->getPositionlist()));
+   }
 }
 ?>

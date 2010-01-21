@@ -7,7 +7,8 @@ include_once 'p2pAssert.php';
  /*
  * Description of p2pTest5
  *
- * @author mullejea
+ * @author jean-philippe muller
+ * @copyright INRIA-LORIA-SCORE Team
  */
 class p2pTest5 extends PHPUnit_Framework_TestCase {
 

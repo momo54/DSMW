@@ -11,6 +11,7 @@
  * @param <String> $changeSetId with NS
  */
 function integrate($changeSetId,$patchIdList,$relatedPushServer) {
+global $wgScriptExtension;
 // $patchIdList = getPatchIdList($changeSetId);
 //  $lastPatch = utils::getLastPatchId($pageName);
     wfDebugLog('p2p',' - function integrate : '.$changeSetId);
@@ -18,9 +19,9 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
             wfDebugLog('p2p','      -> patch unexist');
-            $url = $relatedPushServer.'/api.php?action=query&meta=patch&papatchId='./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+            $url = strtolower($relatedPushServer)."/api{$wgScriptExtension}?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
-            $patch = file_get_contents($url);
+            $patch = utils::file_get_contents_curl($url);
             if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
@@ -191,6 +192,7 @@ function logootIntegrate($operations, $article) {
     $revId = utils::getNewArticleRevId();
     manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
     $status = $article->doEdit($modelAfterIntegrate->getText(), $summary="");
+    //sleep(4);
     if(is_bool($status)) return $status;
     else return $status->isGood();
 }

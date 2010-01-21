@@ -8,6 +8,7 @@ require_once 'p2pTest2.php';
 require_once 'p2pTest3.php';
 require_once 'p2pTest4.php';
 require_once 'p2pTest5.php';
+require_once 'p2pTest6.php';
 
 
 
@@ -30,6 +31,7 @@ class AllTests {
         $suite->addTestSuite('p2pTest3');
         $suite->addTestSuite('p2pTest4');
         $suite->addTestSuite('p2pTest5');
+        $suite->addTestSuite('p2pTest6');
         return $suite;
     }
 }

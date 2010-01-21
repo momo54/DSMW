@@ -38,9 +38,9 @@ class ArticleAdminPage extends SpecialPage {
      * @return <bool>
      */
     function execute() {
-        global $wgOut, $wgServerName, $wgScriptPath;/*, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;*/
+        global $wgOut, $wgServerName, $wgScriptPath, $wgScriptExtension;/*, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;*/
 
-        $url = 'http://'.$wgServerName.$wgScriptPath."/index.php";
+        $url = 'http://'.$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
         $urlServer = 'http://'.$wgServerName.$wgScriptPath;
         //$wgOut->addHeadItem('script', ArticleAdminPage::javascript());
 
@@ -173,11 +173,11 @@ $output .='    <th >Local <br>Patches</th>
                     $countPulledPatch = count($results);
                 }
                
-               
+               $pullFeedLink = str_replace(' ', '_', $pullFeed);
                     $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="pull[]" value="'.$pullFeed.'"  /></td>
-    <td ><a href='.$url.'?title='.$pullFeed.'>'.$pullFeed.'</a></td>
+    <td ><a href='.$url.'?title='.$pullFeedLink.'>'.$pullFeed.'</a></td>
     <td align="center" title="Number of locally concerned pages">['.$pageConcerned.']</td>';
                if(isset ($_GET['display'])){ $output .= '
     <td align="center" title="Published patches">['. $countRemotePatch.']</td>';}
@@ -291,11 +291,12 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 if($results1===false || $published===false) $countUnpublished="-";
                 else $countUnpublished = $countPatchs - $countPublished;
 
-                //$this->getAwarenessData($row["site_url"]);
+                $pushFeedLink = str_replace(' ', '_', $pushFeed);
+
                 $output .= '
   <tr>
     <td align="center"><input type="checkbox" id="'.$i.'" name="push[]" value="'.$pushFeed.'" /></td>
-    <td ><a href='.$url.'?title='.$pushFeed.'>'.$pushFeed.'</a></td>
+    <td ><a href='.$url.'?title='.$pushFeedLink.'>'.$pushFeed.'</a></td>
     <td align="center" title="Number of concerned pages">['.$countConcernedPage.']</td>
     <td align="center" title="Sum of all the patches">['.$countPatchs.']</td>
     <td align="center" title="Published patches">['.$countPublished.']</td>
@@ -335,7 +336,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
      * @return <bool>
      */
     function onUnknownAction($action, $article) {
-        global $wgOut, $wgCachePages, $wgServerName, $wgScriptPath;
+        global $wgOut, $wgCachePages, $wgServerName, $wgScriptPath, $wgScriptExtension;
 
         $urlServer = 'http://'.$wgServerName.$wgScriptPath;
 
@@ -350,7 +351,9 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
             //part list of patch
             $patchs = utils::orderPatchByPrevious($title);
+$wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
+==Features==');
             $output = '<div style="width:60%;height:40%;overflow:auto;">
 <table style="border-bottom: 2px solid #000;">
 <caption><b>List of patchs</b></caption>';
@@ -513,7 +516,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
             }//end if empty $pulls
 
             //part push page
-            $url = "http://".$wgServerName.$wgScriptPath."/index.php";
+            $url = "http://".$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
             $output .= '
 <h2>Actions</h2>
 <div><FORM METHOD="POST" ACTION='.$url.' name="formPush">

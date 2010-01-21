@@ -66,10 +66,6 @@ class logootEngine implements logoot {
                     $this->deleteLine($result);
 
                 }
-                else {
-                    throw new MWException( __METHOD__.' Logoot algorithm error,
-                            did not find the line to delete' );
-                }
 
             }
         }//end foreach

@@ -131,5 +131,35 @@ class logootTest1 extends PHPUnit_Framework_TestCase {
 
     }
 
+    function testConcDelOpIntegration(){
+
+
+        $oldtext = "";
+        $conctext = "line1\nline2\nline3\nline4";
+        $model = manager::loadModel(0);
+        $logoot = new logootEngine($model);
+        $listOp = $logoot->generate($oldtext, $conctext);
+        //$model has 4 lines created by 4 ins operations
+
+        $tmpMod = $logoot->getModel();
+        $this->assertEquals(4, count($tmpMod->getPositionlist()));
+        $this->assertEquals(4, count($tmpMod->getLinelist()));
+
+        $oldtext = "line1\nline2\nline3\nline4";
+        $actualtext = "line1\nline2\nline4";
+
+        $listOp1 = $logoot->generate($oldtext, $actualtext);
+
+        $tmpMod = $logoot->getModel();
+        $this->assertEquals(3, count($tmpMod->getPositionlist()));
+        $this->assertEquals(3, count($tmpMod->getLinelist()));
+
+
+        $modelAssert = $logoot->integrate($listOp1);
+        $this->assertEquals(3, count($modelAssert->getPositionlist()));
+        $this->assertEquals(3, count($modelAssert->getLinelist()));
+ 
+    }
+
 }
 ?>

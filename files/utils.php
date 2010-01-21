@@ -13,11 +13,13 @@ class utils {
  * Locally unique
  */
     static function generateID() {
-        global $serverId;//$wgServerName, $wgScriptPath;
+        //global $serverId;
+        $serverId = DSMWSiteId::getInstance();
+        
         $pc = new persistentClock();
         $pc->load();
         $pc->incrementClock();
-        $id = /*$wgServerName.$wgScriptPath*/$serverId.$pc->getValue();
+        $id = /*$wgServerName.$wgScriptPath*/$serverId->getSiteId().$pc->getValue();
         $pc->store();
         unset ($pc);
         return $id;
@@ -76,9 +78,9 @@ class utils {
      * @return <bool>
      */
     static function pageExist($pageName) {
-        global $wgServerName, $wgScriptPath;
+        global $wgServerName, $wgScriptPath, $wgScriptExtension;
         $url = 'http://'.$wgServerName.$wgScriptPath;
-        $rev = file_get_contents($url.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
+        $rev = utils::file_get_contents_curl(strtolower($url)."/api{$wgScriptExtension}?action=query&prop=info&titles=".$pageName.'&format=php');
         wfDebugLog('p2p','  -> result page exist : '.$rev);
         $rev =  unserialize($rev);
         wfDebugLog('p2p','  -> count : '.count($rev['query']['pages'][-1]));
@@ -250,7 +252,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
         $req = utils::encodeRequest($req);
         $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
-        $results = file_get_contents($url1);//patches list
+        $results = utils::file_get_contents_curl($url1);//patches list
         $results = str_replace('"', '', $results);
         if ($results=="") return false;
         $results = explode("\n", $results);
@@ -284,7 +286,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         
         if($url!=''){
         $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
-        $results1 = file_get_contents($url2);//previous list
+        $results1 = utils::file_get_contents_curl($url2);//previous list
         //$string1 = str_replace("patch:", "", $string1);
         if ($results1=="") return false;
         $results1 = explode("\n", $results1);
@@ -303,7 +305,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         }else{
 
         $results1 = array();
-        $res1 = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?patchID');//PullFeed:PullBureau
+        $res1 = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?previous');//PullFeed:PullBureau
         if($res1===false)return false;
         $count1 = $res1->getCount();
         for($j=0; $j<$count1; $j++) {
@@ -346,7 +348,8 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      * @return <int or bool> false if no occurence
      */
     static function isRemote($patchId) {
-        return strpos(strtolower($patchId), strtolower(getServerId()));
+        $serverId = DSMWSiteId::getInstance();
+        return strpos(strtolower($patchId), strtolower($serverId->getSiteId()));
     }
 
     /**
@@ -386,7 +389,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         $param = utils::encodeRequest($param);
         $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100';
         wfDebugLog('p2p','  -> request url : '.$url);
-        $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100'/*, 0, $ctx*/);
+        $php = utils::file_get_contents_curl($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100'/*, 0, $ctx*/);
         if($php == "") {
             return array();
         }
@@ -413,8 +416,8 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      * @return <bool> true if creation successful, false if not
      */
     static function createPushFeed($name, $request) {
-        global $wgServerName, $wgScriptPath;
-        $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+        global $wgServerName, $wgScriptPath, $wgScriptExtension;
+        $urlServer = 'http://'.$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
         $stringReq = utils::encodeRequest($request);//avoid "semantic injection"
         $newtext = "
 {{#form:action=".$urlServer."?action=onpush|method=POST|
@@ -568,15 +571,15 @@ Pages concerned:
     }
 
     static function getPublishedPatchs($server,$pushName,$title=null) {
-
+        global $wgScriptExtension;
         $published = array();
         $pushName = str_replace(' ', '_', $pushName);
         $title = str_replace(' ', '_', $title);
         if(isset ($title)) {
-            $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
+            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api{$wgScriptExtension}?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
         }else {
-            $patchXML = file_get_contents($server.'/api.php?action=query&meta=patchPushed&pppushName='.
+            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api{$wgScriptExtension}?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&format=xml'/*,0, $ctx*/);
         }
         if($patchXML===false)return false;
@@ -616,11 +619,43 @@ Pages concerned:
         SMWQueryProcessor::processFunctionParams($rawparams, $query,$params,$printouts);
 
         $queryobj = SMWQueryProcessor::createQuery($query, $params, SMWQueryProcessor::SPECIAL_PAGE , '', $printouts);
+        $queryobj->setLimit(5000);
         $res = smwfGetStore()->getQueryResult($queryobj);
 
         if(!($res instanceof SMWQueryResult))return false;
         return $res;
     }
+
+    static function parsePushURL($url) {
+        $res = array();
+        $pos = strpos($url, 'PushFeed:');
+        if ($pos===false) return false;
+        $pushName = substr($url, $pos+strlen('PushFeed:'));
+
+        $tmpUrl = substr($url, 0, $pos);
+        $pos1=strpos($tmpUrl, '/index.php');
+        if($pos1!=false) $pushUrl = substr($tmpUrl,0,$pos1);
+        else $pushUrl = $tmpUrl;
+
+        $pushUrl = rtrim($pushUrl, "/");
+
+        $res[0] = $pushName;
+        $res[1] = $pushUrl;
+        return $res;
+    }
+
+    static function file_get_contents_curl($url) {
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+    curl_setopt($ch, CURLOPT_URL, $url);
+
+    $data = curl_exec($ch);
+    curl_close($ch);
+
+    return $data;
+}
 
 }
 ?>

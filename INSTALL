@@ -18,9 +18,7 @@ provided).
 DSMW has been developped on MW 1.14.0. DSMW-0.3.1 and DSMW-0.3.2 has been tested
 with version MW-1.13.2, MW-1.14.0, MW-1.15.0 and MW-1.15.1.
 The DSMW extension requires an install of Semantic MediaWiki 1.4.2 or 1.4.3
-(cf: http://semantic-mediawiki.org/wiki/Semantic_MediaWiki)
-(in the LocalSettings.php file, set the memory limit
-from 20 to 50M --> ini_set( 'memory_limit', '50M' )).
+(cf: http://semantic-mediawiki.org/wiki/Semantic_MediaWiki).
 For more details, see those extensions'own
 installation requirements.
 
@@ -45,64 +43,21 @@ For more details, see the readme file in the tests directory
     ACTIVATE SEMANTIC MEDIAWIKI(cf. requirements):
 
   require_once "$IP/extensions/DSMW/DSMW.php";
-  $wgGroupPermissions['*']['ArticleAdminPage']       = true;
-  require_once("$IP/extensions/DSMW/specialPage/ArticleAdminPage.php" );
-
-
-'''Remark:'''  The admin user of the wiki must be "WikiSysop" and
-the password "admin", if it isn't so, you have to modify those credentials
-in the "BasicBot.php" file.
-"[wikipath]/extensions/DSMW/bot/BasicBot.php" (line 79-80)
-These two lines:
-if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
-if (!defined('PASSWORD')){	define('PASSWORD','admin');}
-
-(3) The "addedTables.sql" file must be writeable by the server
-    ([wikipath]/extensions/DSMW/db/addedTables.sql)
-
-(4) The "cache" directory should exist and be writeable by the server
-    ([wikipath]/extensions/DSMW/bot/cache)
-
-(5) Edit the LocalSettings.php and add these lines AFTER THE DSMW EXTENSION
-    ACTIVATION (see point (2)) and BEFORE THE LINES THAT ACTIVATE SEMANTIC
-    MEDIAWIKI:
-
-    $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
-    require_once "$IP/extensions/DSMW/files/DSMWSettingsInc.inc";
-
-    and these line after THE LINES THAT ACTIVATE SEMANTIC MEDIAWIKI:
-
-    global $smwgNamespacesWithSemanticLinks;
-    $smwgNamespacesWithSemanticLinks = $smwgNamespacesWithSemanticLinks + array(
-		PATCH => true,
-		PUSHFEED => true,
-                PULLFEED => true,
-                CHANGESET => true
-                );
-
+  $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
+  
 
 == Example: LocalSettings.php ==
 
 The end of this file should look like this:
 
-
+//DSMW
 require_once "$IP/extensions/DSMW/DSMW.php"
-$wgGroupPermissions['*']['ArticleAdminPage']       = true;//sysop
-require_once("$IP/extensions/DSMW/specialPage/ArticleAdminPage.php" );
+$wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
 
-$wgLogo = "{$wgScriptPath}/extensions/DSMW/files/Logo.jpeg";
-
-require_once "$IP/extensions/DSMW/files/DSMWSettingsInc.inc";
-
+//SMW
 include_once("$IP/extensions/SemanticMediaWiki/includes/SMW_Settings.php");
 enableSemantics($_SERVER['SERVER_NAME']);
-global $smwgNamespacesWithSemanticLinks;
-$smwgNamespacesWithSemanticLinks = $smwgNamespacesWithSemanticLinks + array(
-		PATCH => true,
-		PUSHFEED => true,
-        PULLFEED => true,
-        CHANGESET => true
-	);
+
 
 
 == Contact ==

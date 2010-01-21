@@ -1,5 +1,20 @@
 For more documentation, see http://www.dsmw.org
 
+== DSMW 0.6 ==
+* Number of selected pages in the proceedings of the "Push" has been set to 5000
+  (issue fixed: 9302)
+* There is now a link to the "DSMW Admin functions" special page in the DSMW tab
+  page. (issue fixed: 9308)
+* BasicBot.php file is normalized. (^M removed) (issue fixed: 9299)
+* Issue fixed: 9311
+* The installation procedure has been simplified. See INSTALL file.
+  (issue fixed: 9300)
+* (issue fixed: 9310)
+* The way PullFeed are created has been improved (issue fixed: 9340)
+* The directive "allow_url_fopen" in the php.ini file does no longer restrict
+  the use of DSMW, the "file_get_contents" function has been removed (except in
+  the tests). (issue fixed: 9462)
+
 == DSMW 0.5 ==
 * Internal features modification in order to speed up the reactivity of DSMW.
 * After performing the action "update properties type" in "DSMW Settings", the

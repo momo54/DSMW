@@ -123,7 +123,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         //create push on wiki1
         $pushName = 'PushCity10';
         $pushRequest = '[[Category:city1]]';
-        
+
         $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
             'Failed to create push : '.$pushName.' ('.$this->p2pBot1->bot->results.')');
 

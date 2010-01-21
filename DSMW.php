@@ -14,7 +14,7 @@ $wgDSMWIP = dirname( __FILE__ );
 
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
-define('DSMW_VERSION', '0.5');
+define('DSMW_VERSION', '0.6');
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
 $wgExtensionMessagesFiles['DSMW'] = $wgDSMWIP . '/languages/DSMW_Messages.php';
@@ -53,10 +53,17 @@ $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgDSMWIP/api/ApiQueryChangeSet.php";
 $wgAutoloadClasses['ApiPatchPush'] = "$wgDSMWIP/api/ApiPatchPush.php";
 $wgAutoloadClasses['utils'] = "$wgDSMWIP/files/utils.php";
 $wgAutoloadClasses['Math_BigInteger'] = "$wgDSMWIP/logootComponent/Math/BigInteger.php";
+$wgAutoloadClasses['DSMWDBHelpers'] = "$wgDSMWIP/db/DSMWDBHelpers.php";
 
 ///// Register Jobs
 $wgJobClasses['DSMWUpdateJob']                  = 'DSMWUpdateJob';
 $wgAutoloadClasses['DSMWUpdateJob']             = "$wgDSMWIP/jobs/DSMWUpdateJob.php";
+$wgJobClasses['DSMWPropertyTypeJob']            = 'DSMWPropertyTypeJob';
+$wgAutoloadClasses['DSMWPropertyTypeJob']       = "$wgDSMWIP/jobs/DSMWPropertyTypeJob.php";
+
+$wgAutoloadClasses['DSMWSiteId']                = "$wgDSMWIP/includes/DSMWSiteId.php";
+
+$wgExtensionFunctions[] = 'dsmwgSetupFunction';
 
 ///// credits (see "Special:Version") /////
 	$wgExtensionCredits['parserhook'][]= array(
@@ -111,7 +118,7 @@ function conflict(&$editor, &$out) {
  * @return <boolean>
  */
 function onUnknownAction($action, $article) {
-    global $wgOut, $wgServerName, $wgScriptPath, $wgUser;
+    global $wgOut, $wgServerName, $wgScriptPath, $wgUser, $wgScriptExtension;
     $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
 
     //////////pull form page////////
@@ -122,12 +129,26 @@ function onUnknownAction($action, $article) {
 {{#form:action=".$urlServer."?action=pullpage|method=POST|
 PushServer Url: {{#input:type=button|value=Url test|onClick=
 var url = document.getElementsByName('url')[0].value;
-var v = new RegExp();
-    v.compile('^[A-Za-z]+://[A-Za-z0-9-_]+\\.[A-Za-z0-9-_%&\?\/.=]+$');
-if(!v.test(url)){
-alert ('You must supply a valid URL.');
-        document.getElementsByName('url')[0].focus();}
-else{
+if(url.indexOf('PushFeed')==-1){
+alert('No valid PushFeed syntax, see example.');
+}else{
+var urlTmp = url.substring(0,url.indexOf('PushFeed'));
+//alert(urlTmp);
+
+var pos1 = urlTmp.indexOf('index.php');
+//alert(pos1);
+var pushUrl='';
+if(pos1!=-1){
+pushUrl = urlTmp.substring(0,pos1);
+//alert('if');
+}else{
+pushUrl = urlTmp;
+//alert('else');
+}
+//alert(pushUrl);
+
+
+//alert(pushUrl+'api.php?action=query&meta=patch&papatchId=1&format=xml');
 var xhr_object = null;
 
 	   if(window.XMLHttpRequest) // Firefox
@@ -139,22 +160,22 @@ var xhr_object = null;
 	      return;
 	   }
 
-	  try{ xhr_object.open('GET', url+'/api.php?action=query&meta=patch&papatchId=1&format=xml', true);}
+	  try{ xhr_object.open('GET', pushUrl+'api{$wgScriptExtension}?action=query&meta=patch&papatchId=1&format=xml', true);}
           catch(e){
                     alert('There is no DSMW Server responding at this URL');
                   }
            xhr_object.onreadystatechange = function() {
 
 if(xhr_object.readyState == 4) {
-            if(xhr_object.status==200)
+            if(xhr_object.statusText=='OK')
                 alert('URL valid, there is a DSMW Server responding');
+                else alert('There is no DSMW Server responding at this URL');
 		  }
 	   }
 
 	   xhr_object.send(null);
 }
-}}<br>        {{#input:type=text|name=url}} <b>e.g. http://server/path</b><br>
-PushFeed Name:<br>        {{#input:type=text|name=pushname}}<br>
+}}<br>        {{#input:type=text|name=url|size=50}} <b>e.g. http://server/path/index?title=PushFeed:PushName</b><br>
 PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
 {{#input:type=submit|value=ADD}}
 }}";
@@ -376,11 +397,18 @@ $newtext.="
 
     //////////PullFeed page////////
     elseif(isset ($_GET['action']) && $_GET['action']=='pullpage') {
-        wfDebugLog('p2p','Create pull '.$_POST['pullname'].' with pushName '.$_POST['pushname'].' on '.$_POST['url']);
-        $url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
-        if(utils::isValidURL($url)==false)
-            throw new MWException( __METHOD__.': '.$url.' seems not to be an url' );//throws an exception if $url is invalid
-        $pushname = $_POST['pushname'];//with ns
+       //wfDebugLog('p2p','Create pull '.$_POST['pullname'].' with pushName '.$_POST['pushname'].' on '.$_POST['url']);
+        //$url = rtrim($_POST['url'], "/"); //removes the final "/" if there is one
+        $urlTmp = $_POST['url'];
+        if(utils::isValidURL($urlTmp)==false)
+            throw new MWException( __METHOD__.': '.$urlTmp.' seems not to be an url' );//throws an exception if $url is invalid
+
+        $res = utils::parsePushURL($urlTmp);
+        if($res===false || empty ($res)) throw new MWException( __METHOD__.': URL format problem' );
+        $pushname = $res[0];
+        $url = $res[1];
+
+        //$pushname = $_POST['pushname'];
         $pullname = $_POST['pullname'];
 
         $newtext = "
@@ -456,9 +484,9 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 
             //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-            $url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+            $url = $relatedPushServer."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-            $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (ChangeSet API)' );
             $dom = new DOMDocument();
             $dom->loadXML($cs);
@@ -490,7 +518,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
                 $previousCSID = $CSID;
                 wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-                $cs = file_get_contents($relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
                 $dom = new DOMDocument();
                 $dom->loadXML($cs);
 
@@ -592,7 +620,9 @@ function attemptSave($editpage) {
     }
 
     if($conctext!=$text) {//if last revision is not V0, there is editing conflict
-
+        wfDebugLog('testlog',' -> CONCURRENCE: ');
+        wfDebugLog('testlog',' -> +'.$conctext.'+('.$rev_id.') ts '.$lastRevision->getTimestamp());
+        wfDebugLog('testlog',' -> +'.$text.'+('.$rev_id1.') ts '.$editpage->edittime.' '.$rev->getTimestamp());
         $model1 = manager::loadModel($rev_id1);
         $logoot1 = new logootEngine($model1);
         $listOp1 = $logoot1->generate($text, $actualtext);
@@ -626,3 +656,11 @@ function attemptSave($editpage) {
     $editpage->textbox1 = $modelAfterIntegrate->getText();
     return true;
 }
+
+function dsmwgSetupFunction(){
+    global $smwgNamespacesWithSemanticLinks;
+$smwgNamespacesWithSemanticLinks = $smwgNamespacesWithSemanticLinks + array(
+    PATCH => true,PUSHFEED => true,PULLFEED => true,CHANGESET => true);
+}
+
+require_once "$IP/extensions/DSMW/includes/DSMWSettingsInc.inc";

@@ -75,13 +75,13 @@ class p2pTest4 extends PHPUnit_Framework_TestCase {
         //create pull on wiki2
         $pullName = 'PullCity';
         $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
-            'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
+            'failed to create pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
 
         //pull
         $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
             'failed to pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
 
-        // assert page paris exist
+        // assert page Lambach exist
         assertPageExist($this->p2pBot1->bot->wikiServer, $pageName);
 
         //assert that there is the same changeSet on the 2 wikis
