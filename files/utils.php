@@ -666,7 +666,7 @@ Pages concerned:
     $data = curl_exec($ch);
     curl_close($ch);
     }else{// if curl is not loaded
-        if(ini_get('allow_url_fopen')===true){
+        if(ini_get('allow_url_fopen')==='1'){
         $data = file_get_contents($url);
         }else{// curl not loaded and allow_url_fopen=>Off
             throw new MWException( __METHOD__.': DSMW needs either curl extension
