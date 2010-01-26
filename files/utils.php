@@ -626,6 +626,12 @@ Pages concerned:
         return $res;
     }
 
+/**
+ * 
+ *
+ * @param <String> $url
+ * @return <Array> array(0=>pushName, 1=>pushUrl)
+ */
     static function parsePushURL($url) {
         $res = array();
         $pos = strpos($url, 'PushFeed:');
@@ -644,7 +650,13 @@ Pages concerned:
         return $res;
     }
 
+/**
+ * file_get_Contents
+ * @param <String> $url
+ * @return <String>
+ */
     static function file_get_contents_curl($url) {
+    if(extension_loaded('curl')){
     $ch = curl_init();
 
     curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -653,7 +665,14 @@ Pages concerned:
 
     $data = curl_exec($ch);
     curl_close($ch);
-
+    }else{// if curl is not loaded
+        if(ini_get('allow_url_fopen')===true){
+        $data = file_get_contents($url);
+        }else{// curl not loaded and allow_url_fopen=>Off
+            throw new MWException( __METHOD__.': DSMW needs either curl extension
+to be loaded else "allow_url_fopen" set to "On"' );
+        }
+    }
     return $data;
 }
 

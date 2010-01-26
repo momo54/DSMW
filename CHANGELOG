@@ -1,5 +1,9 @@
 For more documentation, see http://www.dsmw.org
 
+== DSMW 0.6.1 ==
+* Added a test on the "allow_url_fopen" directive and on the load of "curl"
+  extension to define whether or not DSMW can run on the server.
+
 == DSMW 0.6 ==
 * Number of selected pages in the proceedings of the "Push" has been set to 5000
   (issue fixed: 9302)
