@@ -247,11 +247,11 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      * or an array of the last patches id
      */
     static function getLastPatchId($pageName, $url='') {
-        
+        global $wgScriptExtension;
         if($url!=''){//case of tests
         $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
         $req = utils::encodeRequest($req);
-        $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
+        $url1 = $url."/index{$wgScriptExtension}/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
         $results = utils::file_get_contents_curl($url1);//patches list
         $results = str_replace('"', '', $results);
         if ($results=="") return false;
@@ -285,7 +285,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
 /*$string is the list of the patches */
         
         if($url!=''){
-        $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
+        $url2 = $url."/index{$wgScriptExtension}/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
         $results1 = utils::file_get_contents_curl($url2);//previous list
         //$string1 = str_replace("patch:", "", $string1);
         if ($results1=="") return false;
@@ -384,12 +384,13 @@ This is a patch of the article: [[onPage::'.$onPage.']]
 //        )
 //    )
 //);
+        global $wgScriptExtension;
         wfDebugLog('p2p','- function getSemanticRequest');
         $request = utils::encodeRequest($request);
         $param = utils::encodeRequest($param);
-        $url = $server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100';
+        $url = $server."/index{$wgScriptExtension}/Special:Ask/".$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100';
         wfDebugLog('p2p','  -> request url : '.$url);
-        $php = utils::file_get_contents_curl($server.'/index.php/Special:Ask/'.$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100'/*, 0, $ctx*/);
+        $php = utils::file_get_contents_curl($server."/index{$wgScriptExtension}/Special:Ask/".$request.'/'.$param.'/headers=hide/format=csv/sep='.$sep.'/limit=100'/*, 0, $ctx*/);
         if($php == "") {
             return array();
         }

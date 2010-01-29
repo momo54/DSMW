@@ -119,7 +119,7 @@ function conflict(&$editor, &$out) {
  */
 function onUnknownAction($action, $article) {
     global $wgOut, $wgServerName, $wgScriptPath, $wgUser, $wgScriptExtension;
-    $urlServer = 'http://'.$wgServerName.$wgScriptPath.'/index.php';
+    $urlServer = 'http://'.$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
 
     //////////pull form page////////
     if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
