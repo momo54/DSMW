@@ -27,7 +27,7 @@ class DSMWDBHelpers {
         DSMWDBHelpers::reportProgress("Setting up table $table ...\n");
         if ($db->tableExists($table) === false) {
             //creation
-            if($table=="`model`"){
+            if($table=="`{$wgDBprefix}model`"){
                 $sql = 'CREATE TABLE '."`$wgDBname`.".$table.' (
 `rev_id` INT( 10 ) NOT NULL ,
 `session_id` VARCHAR( 50 ) NOT NULL ,
@@ -36,7 +36,7 @@ class DSMWDBHelpers {
 PRIMARY KEY ( `rev_id` , `session_id` )
 ) ENGINE = InnoDB CHARACTER SET binary;';
                 $db->query( $sql, $fname );
-            }elseif($table=="`p2p_params`"){
+            }elseif($table=="`{$wgDBprefix}p2p_params`"){
                 $sql = 'CREATE TABLE '."`$wgDBname`.".$table.' (
 `value` BIGINT( 18 ) NOT NULL DEFAULT \'0\',
  `server_id` VARCHAR( 40 ) NOT NULL DEFAULT \'0\'

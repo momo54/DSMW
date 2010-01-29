@@ -287,7 +287,8 @@ The \"PUSH\" action publishes the (unpublished) modifications of the articles li
         //            $wgOut->addHTML($outtext);
         //            return false;
        /* }else*/if($name1=="") {
-            $outtext='<p><b>No pushfeed selected!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
+            $returntitle = Title::makeTitle(NS_SPECIAL, 'ArticleAdminPage');
+            $outtext='<p><b>No pushfeed selected!</b></p> <a href="' . htmlspecialchars($returntitle->getFullURL()) . '">back</a>';
             $wgOut->addHTML($outtext);
             return false;
         }
@@ -453,7 +454,8 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
             $wgOut->addHTML($outtext);
             return false;
         }else*/if($name1=="") {
-            $outtext='<p><b>No pullfeed selected!</b></p> <a href="'.$_SERVER['HTTP_REFERER'].'?back=true">back</a>';
+            $returntitle = Title::makeTitle(NS_SPECIAL, 'ArticleAdminPage');
+            $outtext='<p><b>No pullfeed selected!</b></p> <a href="' . htmlspecialchars($returntitle->getFullURL()) . '">back</a>';
             $wgOut->addHTML($outtext);
             return false;
         }

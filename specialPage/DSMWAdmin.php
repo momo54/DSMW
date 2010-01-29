@@ -69,21 +69,21 @@ class DSMWAdmin extends SpecialPage {
                 $title = Title::makeTitle(NS_SPECIAL, 'DSMWAdmin');
                 $newjob = new DSMWUpdateJob($title);
                 $newjob->insert();
-                $wgOut->addHTML('<p>Articles update process started.</p>');
+                $wgOut->addHTML('<p><font color="red"><b>Articles update process started.</b></font></p>');
             } else {
-                $wgOut->addHTML('<p>Articles update process is already running.</p>');
+                $wgOut->addHTML('<p><font color="red"><b>Articles update process is already running.</b></font></p>');
             }
 
         }
 
         elseif($action=='addProperties'){
-            if ($propertiesjob === NULL) { // careful, there might be race conditions here
+            if ($propertiesjob === NULL) { 
                 $title1 = Title::makeTitle(NS_SPECIAL, 'DSMWAdmin');
                 $newjob1 = new DSMWPropertyTypeJob($title1);
                 $newjob1->insert();
-                $wgOut->addHTML('<p>Properties type update process started.</p>');
+                $wgOut->addHTML('<p><font color="red"><b>Properties type update process started.</b></font></p>');
             } else {
-                $wgOut->addHTML('<p>Properties type update process is already running.</p>');
+                $wgOut->addHTML('<p><font color="red"><b>Properties type update process is already running.</b></font></p>');
             }
         }
         elseif ( $action=='updatetables' ) {

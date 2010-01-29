@@ -1,5 +1,9 @@
 For more documentation, see http://www.dsmw.org
 
+== DSMW x.x ==
+* The "back" link leads to the "DSMW Admin functions" page (issue fixed: 9501)
+* Table (with prefix) creation problem fixed (issue fixed: 9522)
+
 == DSMW 0.6.1 ==
 * Added a test on the "allow_url_fopen" directive and on the load of "curl"
   extension to define whether or not DSMW can run on the server.
