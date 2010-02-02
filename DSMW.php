@@ -118,13 +118,14 @@ function conflict(&$editor, &$out) {
  * @return <boolean>
  */
 function onUnknownAction($action, $article) {
-    global $wgOut, $wgServerName, $wgScriptPath, $wgUser, $wgScriptExtension;
+    global $wgOut, $wgServerName, $wgScriptPath, $wgUser, $wgScriptExtension, $wgDSMWIP;
     $urlServer = 'http://'.$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
 
     //////////pull form page////////
     if(isset ($_GET['action']) && $_GET['action']=='addpullpage') {
         wfDebugLog('p2p','addPullPage ');
         $newtext = "Add a new site:
+<div id='dsmw' style=\"color:green;\"></div>
 
 {{#form:action=".$urlServer."?action=pullpage|method=POST|
 PushFeed Url: {{#input:type=button|value=Url test|onClick=
@@ -162,14 +163,23 @@ var xhr_object = null;
 
 	  try{ xhr_object.open('GET', pushUrl+'api{$wgScriptExtension}?action=query&meta=patch&papatchId=1&format=xml', true);}
           catch(e){
-                    alert('There is no DSMW Server responding at this URL');
+                    //alert('There is no DSMW Server responding at this URL');
+                    document.getElementById('dsmw').innerHTML = 'There is no DSMW Server responding at this URL!';
+                    document.getElementById('dsmw').style.color = 'red';
                   }
            xhr_object.onreadystatechange = function() {
 
 if(xhr_object.readyState == 4) {
-            if(xhr_object.statusText=='OK')
-                alert('URL valid, there is a DSMW Server responding');
-                else alert('There is no DSMW Server responding at this URL');
+            if(xhr_object.statusText=='OK'){
+                //alert('URL valid, there is a DSMW Server responding');
+                document.getElementById('dsmw').innerHTML = 'URL valid, there is a DSMW Server responding!';
+                document.getElementById('dsmw').style.color = 'green';
+
+}
+                else{ //alert('There is no DSMW Server responding at this URL');
+                document.getElementById('dsmw').innerHTML = 'There is no DSMW Server responding at this URL!';
+                document.getElementById('dsmw').style.color = 'red';
+}
 		  }
 	   }
 

@@ -251,7 +251,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         if($url!=''){//case of tests
         $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
         $req = utils::encodeRequest($req);
-        $url1 = $url."/index{$wgScriptExtension}/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
+        $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
         $results = utils::file_get_contents_curl($url1);//patches list
         $results = str_replace('"', '', $results);
         if ($results=="") return false;
@@ -285,7 +285,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
 /*$string is the list of the patches */
         
         if($url!=''){
-        $url2 = $url."/index{$wgScriptExtension}/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
+        $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
         $results1 = utils::file_get_contents_curl($url2);//previous list
         //$string1 = str_replace("patch:", "", $string1);
         if ($results1=="") return false;
