@@ -11,7 +11,7 @@
  * @param <String> $changeSetId with NS
  */
 function integrate($changeSetId,$patchIdList,$relatedPushServer) {
-global $wgScriptExtension;
+//global $wgScriptExtension;
 // $patchIdList = getPatchIdList($changeSetId);
 //  $lastPatch = utils::getLastPatchId($pageName);
     wfDebugLog('p2p',' - function integrate : '.$changeSetId);
@@ -19,9 +19,20 @@ global $wgScriptExtension;
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
             wfDebugLog('p2p','      -> patch unexist');
-            $url = strtolower($relatedPushServer)."/api{$wgScriptExtension}?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+            $url = strtolower($relatedPushServer)."/api.php?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = utils::file_get_contents_curl($url);
+            
+            /*test if it is a xml file. If not, the server is not reachable via the url
+             * Then we try to reach it with the .php5 extension
+             */
+            if(strpos($patch, "<?xml version=\"1.0\"?>")===false){
+                $url = strtolower($relatedPushServer)."/api.php5?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+                wfDebugLog('p2p','      -> getPatch request url '.$url);
+                $patch = utils::file_get_contents_curl($url);
+            }
+            if(strpos($patch, "<?xml version=\"1.0\"?>")===false) $patch=false;
+
             if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
@@ -80,6 +91,7 @@ global $wgScriptExtension;
  */
 function operationToLogootOp($operation) {
     wfDebugLog('p2p',' - function operationToLogootOp : '.$operation);
+    $arr = array();
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
@@ -92,8 +104,9 @@ function operationToLogootOp($operation) {
     foreach ($res1 as $id) {
         $id1 = explode(':', $id);
         $idArrray = new LogootId($id1[0], $id1[1]);
+        $arr[] = $idArrray;
     }
-    $logootPos = new LogootPosition(array($idArrray));
+    $logootPos = new LogootPosition($arr);
 
     //    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
     //        $res[3] = utils::decodeRequest($res[3]);
@@ -177,10 +190,12 @@ function logootIntegrate($operations, $article) {
 
     foreach ($operations as $operation) {
         wfDebugLog('p2p',' - operation : '.$operation);
+        wfDebugLog('testlog',' - operation : '.$operation);
         $operation = operationToLogootOp($operation);
 
         if ($operation!=false && is_object($operation)) {
             $listOp[]=$operation;
+                    wfDebugLog('testlog',' -> Operation: '.$operation->getLogootPosition()->toString());
         //$blobInfo->integrateBlob($operation);
     }//end if
     //    else {

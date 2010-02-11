@@ -161,7 +161,7 @@ var xhr_object = null;
 	      return;
 	   }
 
-	  try{ xhr_object.open('GET', pushUrl+'api{$wgScriptExtension}?action=query&meta=patch&papatchId=1&format=xml', true);}
+	  try{ xhr_object.open('GET', pushUrl+'api.php?action=query&meta=patch&papatchId=1&format=xml', true);}
           catch(e){
                     //alert('There is no DSMW Server responding at this URL');
                     document.getElementById('dsmw').innerHTML = 'There is no DSMW Server responding at this URL!';
@@ -205,7 +205,7 @@ PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
     /////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
     elseif(isset ($_GET['action']) && $_GET['action']=='addpushpage') {
         wfDebugLog('p2p','addPushPage');
-        $specialAsk = $urlServer.'/Special:Ask';
+        $specialAsk = $urlServer.'?title=Special:Ask';
         $newtext = "Add a new pushfeed:
 
 {{#form:action=".$urlServer."?action=pushpage|method=POST|
@@ -213,7 +213,7 @@ PushFeed Name:   <br>    {{#input:type=text|name=name}}<br>
 Request: {{#input:type=button|value=Test your query|title=click here to test your query results|onClick=
 var query = document.getElementsByName('keyword')[0].value;
 var query1 = encodeURI(query);
-window.open('".$specialAsk."?q='+query1+'&eq=yes','querywindow','menubar=no, status=no, scrollbars=yes, menubar=no, width=700, height=400');}}
+window.open('".$specialAsk."&q='+query1+'&eq=yes','querywindow','menubar=no, status=no, scrollbars=yes, menubar=no, width=700, height=400');}}
   <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}} <b>e.g. [[Category:city]][[locatedIn::France]]</b><br>
 {{#input:type=submit|value=ADD}}
 }}";
@@ -496,9 +496,19 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 
             //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-            $url = $relatedPushServer."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
+            //$url = $relatedPushServer."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-            $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+
+            /*test if it is a xml file. If not, the server is not reachable via the url
+             * Then we try to reach it with the .php5 extension
+             */
+            if(strpos($cs, "<?xml version=\"1.0\"?>")===false){
+                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php5?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            }
+            if(strpos($cs, "<?xml version=\"1.0\"?>")===false) $cs=false;
+
+
             if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (ChangeSet API)' );
             $dom = new DOMDocument();
             $dom->loadXML($cs);
@@ -530,7 +540,17 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
                 $previousCSID = $CSID;
                 wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+
+                /*test if it is a xml file. If not, the server is not reachable via the url
+             * Then we try to reach it with the .php5 extension
+             */
+            if(strpos($cs, "<?xml version=\"1.0\"?>")===false){
+                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php5?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            }
+            if(strpos($cs, "<?xml version=\"1.0\"?>")===false) $cs=false;
+
+
                 $dom = new DOMDocument();
                 $dom->loadXML($cs);
 

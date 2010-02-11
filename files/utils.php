@@ -78,14 +78,34 @@ class utils {
      * @return <bool>
      */
     static function pageExist($pageName) {
-        global $wgServerName, $wgScriptPath, $wgScriptExtension;
-        $url = 'http://'.$wgServerName.$wgScriptPath;
-        $rev = utils::file_get_contents_curl(strtolower($url)."/api{$wgScriptExtension}?action=query&prop=info&titles=".$pageName.'&format=php');
-        wfDebugLog('p2p','  -> result page exist : '.$rev);
-        $rev =  unserialize($rev);
-        wfDebugLog('p2p','  -> count : '.count($rev['query']['pages'][-1]));
-        return count($rev['query']['pages'][-1])==0;
-    //PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
+//        global $wgServerName, $wgScriptPath, $wgScriptExtension;
+//        $url = 'http://'.$wgServerName.$wgScriptPath;
+//        $rev = utils::file_get_contents_curl(strtolower($url)."/api{$wgScriptExtension}?action=query&prop=info&titles=".$pageName.'&format=php');
+//        wfDebugLog('p2p','  -> result page exist : '.$rev);
+//        $rev =  unserialize($rev);
+//
+////        /*If false, the server is not reachable via the url
+////             * Then we try to reach it with the .php5 extension
+////             */
+////            if($rev===false){
+////                $rev = utils::file_get_contents_curl(strtolower($url)."/api.php5?action=query&prop=info&titles=".$pageName.'&format=php');
+////                wfDebugLog('p2p','  -> result page exist : '.$rev);
+////                $rev =  unserialize($rev);
+////            }
+//
+//        wfDebugLog('p2p','  -> count : '.count($rev['query']['pages'][-1]));
+//        return count($rev['query']['pages'][-1])==0;
+//    //PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
+//
+
+    //split NS and name
+    preg_match( "/^(.+?)_*:_*(.*)$/S", $pageName, $m );
+    $nameWithoutNS = $m[2];
+    $title = Title::newFromText($nameWithoutNS, PATCH);
+    $article = new Article($title);
+    if($article->exists()) return true;
+    else return false;
+
     }
 
 
@@ -247,7 +267,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      * or an array of the last patches id
      */
     static function getLastPatchId($pageName, $url='') {
-        global $wgScriptExtension;
+        //global $wgScriptExtension;
         if($url!=''){//case of tests
         $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
         $req = utils::encodeRequest($req);
@@ -572,16 +592,32 @@ Pages concerned:
     }
 
     static function getPublishedPatchs($server,$pushName,$title=null) {
-        global $wgScriptExtension;
+        //global $wgScriptExtension;
         $published = array();
         $pushName = str_replace(' ', '_', $pushName);
         $title = str_replace(' ', '_', $title);
         if(isset ($title)) {
-            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api{$wgScriptExtension}?action=query&meta=patchPushed&pppushName=".
+            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
+            /*test if it is a xml file. If not, the server is not reachable via the url
+             * Then we try to reach it with the .php5 extension
+             */
+            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false){
+                $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
+                $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
+            }
+            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
         }else {
-            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api{$wgScriptExtension}?action=query&meta=patchPushed&pppushName=".
+            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&format=xml'/*,0, $ctx*/);
+            /*test if it is a xml file. If not, the server is not reachable via the url
+             * Then we try to reach it with the .php5 extension
+             */
+            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false){
+                $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
+                $pushName.'&format=xml'/*,0, $ctx*/);
+            }
+            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
         }
         if($patchXML===false)return false;
         $dom = new DOMDocument();
