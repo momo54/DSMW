@@ -61,7 +61,8 @@ class DSMWPropertyTypeJob extends Job {
         if(!$title->exists()){
         $article = new Article($title);
         $editpage = new EditPage($article);
-        $editpage->textbox1 = '[[has type::String;String;String;Text]]';
+        $editpage->textbox1 = '[[has type::Record]]
+[[has fields::String;String;String;Text]]';
         $editpage->attemptSave();
         }
         

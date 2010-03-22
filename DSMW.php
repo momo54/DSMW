@@ -101,9 +101,22 @@ function conflict(&$editor, &$out) {
 }
 
 //function performAction($output, $article, $title, $user, $request, $wiki) {
-//     $dbr = wfGetDB( DB_SLAVE );
-//    $lastRevision = Revision::loadFromTitle($dbr, $title);
-//    $rawtext = $lastRevision->getRawText();
+////     $dbr = wfGetDB( DB_SLAVE );
+////    $lastRevision = Revision::loadFromTitle($dbr, $title);
+////    $rawtext = $lastRevision->getRawText();
+//
+//    //$page = "The_angel's_game";
+//
+//
+////    $page="Home";
+////    $arrayres = utils::getDependencies($page, true, true, true, true);
+////    $test;
+//
+//        global $wgRequest;
+//	$form = new UploadForm( $wgRequest );
+//        $form->mDesiredDestName = 'Lego1.png';
+//	$form->execute();
+//
 //    return true;
 //}
 
@@ -213,7 +226,7 @@ PushFeed Name:   <br>    {{#input:type=text|name=name}}<br>
 Request: {{#input:type=button|value=Test your query|title=click here to test your query results|onClick=
 var query = document.getElementsByName('keyword')[0].value;
 var query1 = encodeURI(query);
-window.open('".$specialAsk."&q='+query1+'&eq=yes','querywindow','menubar=no, status=no, scrollbars=yes, menubar=no, width=700, height=400');}}
+window.open('".$specialAsk."&q='+query1+'&eq=yes&p%5Bformat%5D=broadtable','querywindow','menubar=no, status=no, scrollbars=yes, menubar=no, width=1000, height=900');}}
   <br>{{#input:type=textarea|cols=30 | style=width:auto |rows=2|name=keyword}} <b>e.g. [[Category:city]][[locatedIn::France]]</b><br>
 {{#input:type=submit|value=ADD}}
 }}";
@@ -497,7 +510,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
             //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             //$url = $relatedPushServer."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-            wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            wfDebugLog('testlog','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
 
             /*test if it is a xml file. If not, the server is not reachable via the url
@@ -510,6 +523,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 
             if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (ChangeSet API)' );
+            $cs = trim($cs);
             $dom = new DOMDocument();
             $dom->loadXML($cs);
 
@@ -550,6 +564,8 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
             }
             if(strpos($cs, "<?xml version=\"1.0\"?>")===false) $cs=false;
 
+                if($cs===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (ChangeSet API)' );
+                $cs = trim($cs);
 
                 $dom = new DOMDocument();
                 $dom->loadXML($cs);
@@ -652,9 +668,9 @@ function attemptSave($editpage) {
     }
 
     if($conctext!=$text) {//if last revision is not V0, there is editing conflict
-        wfDebugLog('testlog',' -> CONCURRENCE: ');
-        wfDebugLog('testlog',' -> +'.$conctext.'+('.$rev_id.') ts '.$lastRevision->getTimestamp());
-        wfDebugLog('testlog',' -> +'.$text.'+('.$rev_id1.') ts '.$editpage->edittime.' '.$rev->getTimestamp());
+//        wfDebugLog('testlog',' -> CONCURRENCE: ');
+//        wfDebugLog('testlog',' -> +'.$conctext.'+('.$rev_id.') ts '.$lastRevision->getTimestamp());
+//        wfDebugLog('testlog',' -> +'.$text.'+('.$rev_id1.') ts '.$editpage->edittime.' '.$rev->getTimestamp());
         $model1 = manager::loadModel($rev_id1);
         $logoot1 = new logootEngine($model1);
         $listOp1 = $logoot1->generate($text, $actualtext);
