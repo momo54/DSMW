@@ -1,6 +1,10 @@
 For more documentation, see http://www.dsmw.org
 
-== DSMW x.x ==
+== DSMW 0.7 ==
+* This version take in account new features of SMW 1.5 and in this case the
+  multi-valued properties (http://semantic-mediawiki.org/wiki/Help:Installation_1.5.0#N-ary_.28multivalued.29_properties)
+  So if you are using DSMW 0.7 with SMW versions < SMW 1.5, read the section
+  "== Since SMW 1.5 ==" in the INSTALL file.
 * The "back" link leads to the "DSMW Admin functions" page (issue fixed: 9501)
 * Table (with prefix) creation problem fixed (issue fixed: 9522)
 * "Test URL" modified (issue fixed: 9529)
