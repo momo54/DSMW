@@ -226,6 +226,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
             $text.=']]';
         }
         else {
+            $text.='|}';
             $text.='
 ==Previous patch(es)==
 [[previous::'.$previousPatch.']]';
@@ -620,6 +621,7 @@ Pages concerned:
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
         }
         if($patchXML===false)return false;
+        $patchXML = trim($patchXML);
         $dom = new DOMDocument();
         $dom->loadXML($patchXML);
         $patchPublished = $dom->getElementsByTagName('patch');
@@ -713,5 +715,168 @@ to be loaded else "allow_url_fopen" set to "On"' );
     return $data;
 }
 
+
+    /**
+     * Used to get properties (and/or) categories (and/or) templates (and/or)
+     * linked with the given page(s)
+     *
+     * @param <String or array> $pages pagename
+     * @param <bool> $properties True if you want to get the properties pages
+     * @param <bool> $categories True if you want to get the categories pages
+     * @param <bool> $templates True if you want to get the templates pages
+     * @param <bool> $pagelinks True if you want to get the link pages
+     * @return <array> $result An array of pages (cat, prop, templ or articles)
+     */
+    static function getDependencies($pages, $properties=true, $categories=false,
+        $templates=false, $pagelinks=false){
+        $result = array();
+        if(is_string($pages)){
+         $pages = array($pages);
+        }
+        elseif(!is_string($pages) && !is_array($pages))
+        throw new MWException( __METHOD__.': $pages parameter is neither an
+ array nor a string' );
+
+
+        foreach ($pages as $page){
+            if($properties){
+                // get the properties
+                $title = Title::newFromText($page);
+                $dbkey = $title->getDBkey();
+                $namespace = $title->getNamespace();
+                $value = SMWWikiPageValue::makePage($dbkey, $namespace);
+                $data = smwfGetStore()->getSemanticData($value, false);// data instance of SMWSemanticData
+                $props = $data->getProperties();
+                foreach ($props as $property){
+
+                    if ($property->isUserDefined()) { // user defined property
+                        $property->setCaption(preg_replace('/[ ]/u','&nbsp;',$property->getWikiValue(),2));
+
+                        if ($property->getWikiPageValue()!=null){
+                            $obj=$property->getWikiPageValue();
+                            $text=$obj->getPrefixedText();
+                            $result[]=$text;
+                        }
+                    }
+                }
+            }
+            if($categories){
+                // get the categories
+                $tables = array ();
+                $where = array ();
+                $fields = array (
+            'cl_from',
+            'cl_to'
+                );
+                $options = array ();
+                $join_conds = array ();
+
+                $tables[] = 'categorylinks';
+                $db = wfGetDB( DB_SLAVE );
+                $pageid = $db->selectField('page','page_id', array(
+            'page_title'=>$page/*WithoutNS*/));
+                $where['cl_from']=$pageid;
+
+                $options['USE INDEX'] = array('categorylinks' => 'cl_from');
+                $options['ORDER BY'] = 'cl_to';
+
+                $res = $db->select($tables, $fields, $where, __METHOD__, $options, $join_conds);
+
+
+
+                while ($row = $db->fetchObject($res)) {
+                    $title = Title :: makeTitle(NS_CATEGORY, $row->cl_to);
+                    $pageName = $title->getPrefixedDBkey();
+                    $result[]= $pageName;
+                }
+
+
+                $db->freeResult($res);
+            }//end if categories
+            if($templates){
+                // get the templates
+                $tables = array ('templatelinks');
+                $where = array ();
+                $options = array ();
+                $join_conds = array ();
+                $prefix = 'tl';
+
+                $fields = array (
+                        $prefix . '_from AS pl_from',
+                        $prefix . '_namespace AS pl_namespace',
+                        $prefix . '_title AS pl_title'
+                    );
+
+                $db = wfGetDB( DB_SLAVE );
+                $pageid = $db->selectField('page','page_id', array(
+            'page_title'=>$page/*WithoutNS*/));
+                $where[$prefix . '_from']=$pageid;
+                //$this->addWhereFld($this->prefix . '_namespace', $params['namespace']);
+
+
+                $options['ORDER BY'] = "{$prefix}_title";
+                $options['USE INDEX'] = "{$prefix}_from";
+                //$options['LIMIT'] = $params['limit'] + 1;
+
+
+                $res = $db->select($tables, $fields, $where, __METHOD__, $options, $join_conds);
+
+
+
+                while ($row = $db->fetchObject($res)) {
+                    $title = Title :: makeTitle($row->pl_namespace, $row->pl_title);
+                    $pageName = $title->getPrefixedDBkey();
+                    $result[]= $pageName;
+                }
+
+
+                $db->freeResult($res);
+            }//end if templates
+
+            if($pagelinks){
+                // get the templates
+                $tables = array ('pagelinks');
+                $where = array ();
+                $options = array ();
+                $join_conds = array ();
+                $prefix = 'pl';
+
+                $fields = array (
+                        $prefix . '_from AS pl_from',
+                        $prefix . '_namespace AS pl_namespace',
+                        $prefix . '_title AS pl_title'
+                    );
+
+                $db = wfGetDB( DB_SLAVE );
+                $pageid = $db->selectField('page','page_id', array(
+            'page_title'=>$page/*WithoutNS*/));
+                $where[$prefix . '_from']=$pageid;
+                //$this->addWhereFld($this->prefix . '_namespace', $params['namespace']);
+
+
+                $options['ORDER BY'] = "{$prefix}_title";
+                $options['USE INDEX'] = "{$prefix}_from";
+                //$options['LIMIT'] = $params['limit'] + 1;
+
+
+                $res = $db->select($tables, $fields, $where, __METHOD__, $options, $join_conds);
+
+
+
+                while ($row = $db->fetchObject($res)) {
+                    $title = Title :: makeTitle($row->pl_namespace, $row->pl_title);
+                    $pageName = $title->getPrefixedDBkey();
+                    $result[]= $pageName;
+                }
+
+
+                $db->freeResult($res);
+            }//end if $pagelinks
+        }//end foreach
+
+
+
+        return $result;
+    }
 }
 ?>
