@@ -44,14 +44,30 @@ For more details, see the readme file in the tests directory
 
   require_once "$IP/extensions/DSMW/DSMW.php";
   $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
-  
+
+
+== Since SMW 1.5 ==
+
+DSMW is now configured to be used with SMW 1.5, so if you are using DSMW 0.7
+with SMW versions < SMW 1.5, you must modify the article "Property:HasOperation".
+This article has this content:
+
+[[has type::Record]]
+[[has fields::String;String;String;Text]]
+
+replace it with this:
+
+[[has type::String;String;String;Text]]
+
+'''Remark:'''  This must be done before using the 'Articles update' feature.
+See www.dsmw.org 
 
 == Example: LocalSettings.php ==
 
 The end of this file should look like this:
 
 //DSMW
-require_once "$IP/extensions/DSMW/DSMW.php"
+require_once "$IP/extensions/DSMW/DSMW.php";
 $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
 
 //SMW

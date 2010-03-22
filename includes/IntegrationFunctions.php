@@ -22,7 +22,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             $url = strtolower($relatedPushServer)."/api.php?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = utils::file_get_contents_curl($url);
-            
+
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
              */
@@ -34,6 +34,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             if(strpos($patch, "<?xml version=\"1.0\"?>")===false) $patch=false;
 
             if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
+            $patch = trim($patch);
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
             $dom->loadXML($patch);
