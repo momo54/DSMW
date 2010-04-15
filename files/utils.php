@@ -188,12 +188,14 @@ This ChangeSet is in : [[inPullFeed::'.$inPullFeed.']]<br>
      * @param <String> $previousPatch
      * @param <array> $operations
      */
-    static function createPatch($patchId, $onPage, $previousPatch, $operations) {
+    static function createPatch($patchId, $onPage, $previousPatch, $operations, $siteID) {
         $text = '
 [[Special:ArticleAdminPage|DSMW Admin functions]]
 
 ==Features==
 [[patchID::'.$patchId.'| ]]
+
+\'\'\'SiteID:\'\'\' [[siteID::'.$siteID.']]
 
 \'\'\'Remote Patch\'\'\'
 
@@ -364,7 +366,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
     }
 
     /**
-     *
+     * tests if the patch is remote
      * @param <String> $patchId
      * @return <int or bool> false if no occurence
      */
@@ -375,7 +377,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
 
     /**
      *
-     * @param <type> $stringOpInPatch
+     * @param <string> $OpInPatch
      * @return <type> array of nb insert and delete operation
      */
     static function countOperation($opInPatch) {
@@ -563,6 +565,11 @@ Pages concerned:
         return $patchs;
     }
 
+/**
+ * Used to get the list of article titles concerned by the given pullfeed
+ * @param <string> $pfname pullfeed name
+ * @return <array> array of page titles
+ */
     static function getPageConcernedByPull($pfname) {
 
         $patchs = utils::getPulledPatches($pfname);
@@ -592,6 +599,14 @@ Pages concerned:
         return $tabPage;
     }
 
+/**
+ * Used to get the published patches of a given server and a given pushfeed
+ * (and optionnaly a page title)
+ * @param <string> $server url of the server
+ * @param <string> $pushName pushfeed name
+ * @param <string> $title article title
+ * @return <array> array of patchIDs
+ */
     static function getPublishedPatchs($server,$pushName,$title=null) {
         //global $wgScriptExtension;
         $published = array();

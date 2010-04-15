@@ -54,6 +54,9 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
                 if ($p->hasAttribute("previous")) {
                     $previousPatch = $p->getAttribute('previous');
                 }
+                if ($p->hasAttribute("siteID")) {
+                    $siteID = $p->getAttribute('siteID');
+                }
             }
 
             $operations = null;
@@ -73,7 +76,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             //            }
             if(logootIntegrate($operations, $onPage)===true)
             {
-             utils::createPatch($patchId, $onPage, $lastPatch, $operations);
+             utils::createPatch($patchId, $onPage, $lastPatch, $operations, $siteID);
             }
             else{
                 throw new MWException( __METHOD__.': article not saved!');

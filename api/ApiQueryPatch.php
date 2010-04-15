@@ -35,7 +35,8 @@ class ApiQueryPatch extends ApiQueryBase {
         $res = utils::getSemanticQuery('[[patchID::'.$params['patchId'].']]', '?patchID
 ?onPage
 ?hasOperation
-?previous');
+?previous
+?siteID');
         $count = $res->getCount();
         for($i=0; $i<$count; $i++) {
 
@@ -66,6 +67,12 @@ class ApiQueryPatch extends ApiQueryBase {
                 $wikiValue = $object->getWikiValue();
                 $results[4] = $wikiValue;
             }
+            $siteID = $row[5];
+            $col = $siteID->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $results[5] = $wikiValue;
+            }
         }
         $result = $this->getResult();
         //$data = str_replace('"', '', $data);
@@ -78,6 +85,7 @@ class ApiQueryPatch extends ApiQueryBase {
             $result->addValue(array('query',$this->getModuleName()),'id',$results[1]);
             $result->addValue(array('query',$this->getModuleName()),'onPage',$title);
             $result->addValue(array('query',$this->getModuleName()),'previous',$results[4]);
+            $result->addValue(array('query',$this->getModuleName()),'siteID',$results[5]);
             $result->addValue('query', $this->getModuleName(), $op);
         }
     }

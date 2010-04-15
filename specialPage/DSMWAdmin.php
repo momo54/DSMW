@@ -17,7 +17,7 @@ class DSMWAdmin extends SpecialPage {
         global $wgHooks, $wgSpecialPages, $wgWatchingMessages;
         # Add all our needed hooks
         $wgHooks["SkinTemplateTabs"][] = $this;
-        SpecialPage::SpecialPage('DSMWAdmin'/*, "block"*/);// avec block => pasges speciales restreintes
+        SpecialPage::SpecialPage('DSMWAdmin'/*, "block"*/);// avec block => pages speciales restreintes
         wfLoadExtensionMessages('DSMW');
     }
 
@@ -27,7 +27,7 @@ class DSMWAdmin extends SpecialPage {
 
 
     /**
-     * Executed the user opens the DSMW administration special page
+     * Executed when the user opens the DSMW administration special page
      * Calculates the PushFeed list and the pullfeed list (and everything that
      * is displayed on the psecial page
      *
@@ -39,8 +39,7 @@ class DSMWAdmin extends SpecialPage {
     function execute() {
         global $wgOut, $wgRequest, $wgServerName, $wgScriptPath, $wgDSMWIP, $wgServerName, $wgScriptPath;/*, $wgSitename, $wgCachePages, $wgUser, $wgTitle, $wgDenyAccessMessage, $wgAllowAnonUsers, $wgRequest, $wgMessageCache, $wgWatchingMessages, $wgDBtype, $namespace_titles;*/
         $urlServer = 'http://'.$wgServerName.$wgScriptPath;
-        //        $url = 'http://'.$wgServerName.$wgScriptPath."/index.php";
-        //        $urlServer = 'http://'.$wgServerName.$wgScriptPath;
+       
 
             /**** Get status of refresh job, if any ****/
         $dbr =& wfGetDB( DB_SLAVE );
@@ -146,7 +145,7 @@ function wfSetupDSMWAdmin() {
     global $wgUser;
     SpecialPage::addPage( new DSMWAdmin() );
     if ($wgUser->isAllowed("DSMWAdmin")) {
-        global $wgArticleAdminPage;
+        global $wgDSMWAdmin;
         $wgDSMWAdmin = new DSMWAdmin();
     }
 }

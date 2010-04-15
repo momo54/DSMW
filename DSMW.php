@@ -14,9 +14,10 @@ $wgDSMWIP = dirname( __FILE__ );
 
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
-define('DSMW_VERSION', '0.6');
+define('DSMW_VERSION', '0.7');
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
+$wgSpecialPageGroups['DSMWGeneralExhibits'] = 'dsmw_group';
 $wgExtensionMessagesFiles['DSMW'] = $wgDSMWIP . '/languages/DSMW_Messages.php';
 
 $wgHooks['UnknownAction'][] = 'onUnknownAction';
@@ -62,6 +63,7 @@ $wgJobClasses['DSMWPropertyTypeJob']            = 'DSMWPropertyTypeJob';
 $wgAutoloadClasses['DSMWPropertyTypeJob']       = "$wgDSMWIP/jobs/DSMWPropertyTypeJob.php";
 
 $wgAutoloadClasses['DSMWSiteId']                = "$wgDSMWIP/includes/DSMWSiteId.php";
+$wgAutoloadClasses['DSMWExhibits']                = "$wgDSMWIP/includes/DSMWExhibits.php";
 
 $wgExtensionFunctions[] = 'dsmwgSetupFunction';
 
@@ -215,7 +217,7 @@ PullFeed Name:   <br>    {{#input:type=text|name=pullname}}<br>
     }
 
 
-    /////////push form page////////ChangeSet Url:<br>        {{#input:type=text|name=url}}<br>
+    /////////push form page////////
     elseif(isset ($_GET['action']) && $_GET['action']=='addpushpage') {
         wfDebugLog('p2p','addPushPage');
         $specialAsk = $urlServer.'?title=Special:Ask';
@@ -709,6 +711,14 @@ function dsmwgSetupFunction(){
     global $smwgNamespacesWithSemanticLinks;
 $smwgNamespacesWithSemanticLinks = $smwgNamespacesWithSemanticLinks + array(
     PATCH => true,PUSHFEED => true,PULLFEED => true,CHANGESET => true);
+
+if(defined('SRF_VERSION')){
+
+    global $wgDSMWExhibits;
+    if (!is_object($wgDSMWExhibits)) $wgDSMWExhibits = new DSMWExhibits();
+    
+}
+
 }
 
 require_once "$IP/extensions/DSMW/includes/DSMWSettingsInc.inc";

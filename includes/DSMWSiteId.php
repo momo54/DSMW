@@ -5,7 +5,7 @@
  */
 
 /**
- * Description of DSMWServerId
+ * Singleton used to manage the siteID 
  *
  * @author mullejea
  */
@@ -29,6 +29,12 @@ class DSMWSiteId {
     public function getSiteId(){
         return strtoupper($this->_SiteId);
     }
+
+    /**
+     * Gets the siteID form the DB and if it is equal to "0", it is genrated
+     * and stored
+     * @return <string> siteID
+     */
     private function getId() {
         $serverId = $this->loadServerId();
         if ($serverId===false) {
@@ -41,12 +47,20 @@ class DSMWSiteId {
         return strtoupper($serverId);
     }
 
+/**
+ * loads the siteId from the DB
+ * @return <string> siteId
+ */
     private function loadServerId(){
         $db = wfGetDB( DB_SLAVE );
         $res = $db->selectField('p2p_params','server_id');
         return $res;
     }
 
+/**
+ * stores the siteId to the DB
+ * @param <type> $ServerId
+ */
     private function store($ServerId){
         $dbw = wfGetDB( DB_MASTER );
         $dbw->update( 'p2p_params', array(

@@ -5,7 +5,7 @@
  */
 
 /**
- * Description of DSMWPropertyType
+ * Job that assigns a type to some properties used in the DSMW ontology
  *
  */
 class DSMWPropertyTypeJob extends Job {
@@ -34,6 +34,14 @@ class DSMWPropertyTypeJob extends Job {
         }
 
         $title = Title::newFromText('patchID', SMW_NS_PROPERTY);
+        if(!$title->exists()){
+        $article = new Article($title);
+        $editpage = new EditPage($article);
+        $editpage->textbox1 = '[[has type::String]]';
+        $editpage->attemptSave();
+        }
+
+        $title = Title::newFromText('siteID', SMW_NS_PROPERTY);
         if(!$title->exists()){
         $article = new Article($title);
         $editpage = new EditPage($article);

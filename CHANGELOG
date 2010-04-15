@@ -1,9 +1,17 @@
 For more documentation, see http://www.dsmw.org
 
+== DSMW 0.x ==
+* SiteID semantic annotation has been added in the patches
+* A tab has been added to each article page. This tab allows to open a page
+  which contains data about DSMW formalized using Semantic Results format
+  extension (The tab doesn't appear if SRF isn't installed).
+* A special page has been added which shows general data about DSMW. (also needs
+  SRF extension to accessible).
+
 == DSMW 0.7 ==
 * This version take in account new features of SMW 1.5 and in this case the
   multi-valued properties (http://semantic-mediawiki.org/wiki/Help:Installation_1.5.0#N-ary_.28multivalued.29_properties)
-  So if you are using DSMW 0.7 with SMW versions < SMW 1.5, read the section
+  So if you are using DSMW 0.7 with SMW versions < SMW 1.5.0, read the section
   "== Since SMW 1.5 ==" in the INSTALL file.
 * The "back" link leads to the "DSMW Admin functions" page (issue fixed: 9501)
 * Table (with prefix) creation problem fixed (issue fixed: 9522)

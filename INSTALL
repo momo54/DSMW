@@ -1,4 +1,4 @@
-[[Distributed Semantic MediaWiki 0.3.2]]
+[[Distributed Semantic MediaWiki 0.7]]
 
 Contents:
 * Disclaimer
@@ -46,7 +46,7 @@ For more details, see the readme file in the tests directory
   $wgLogo = "{$wgScriptPath}/extensions/DSMW/files/LogoDSMW.png";
 
 
-== Since SMW 1.5 ==
+== Since SMW 1.5.0 ==
 
 DSMW is now configured to be used with SMW 1.5, so if you are using DSMW 0.7
 with SMW versions < SMW 1.5, you must modify the article "Property:HasOperation".
