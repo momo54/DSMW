@@ -227,6 +227,57 @@ class p2pBot {
             return false;
         }
     }
+    
+    function uploadFile($file,$fname,$reUpload){
+         if (!$this->bot->wikiConnect())
+			die ("Unable to connect.");
+
+        if (!$this->bot->fetch( $this->bot->wikiServer . PREFIX . '/index.php?title=Special:Upload' ) )
+			return false;
+        //re uploade file 
+        $formvars['wpForReUpload'] = $reUpload;
+        //ignore warning
+        $formvars['wpIgnoreWarning'] = '1';
+        $formvars['wpDestFile'] = $fname;
+        $formvars['wpUpload'] ="Upload file";
+        $formfiles['wpUploadFile'] = $file;
+        
+        $this->bot->maxredirs = 0;
+        $this->bot->set_submit_multipart();
+        if ($this->bot->submit($this->bot->wikiServer.PREFIX.'/index.php?title=Special:Upload',$formvars, $formfiles) ) {
+        // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
+            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+            if ('200'==$code) {
+                echo "import failed with error 200:(".$this->bot->results.")";
+                return true;
+            }
+            elseif ('302'==$code)
+                return true;
+            else {
+
+                return false;
+            }
+        }else {
+            echo "import submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php?title=Special:Upload&action=submit'.$formvars.")";
+            return false;
+        }
+    }
+
+    //require_once '../../../includes/filerepo/FileRepo.php';
+    // temporaire : je n'ai pas réussi a instancier FileRepo
+    function getHashPathForLevel( $name, $levels ) {
+        if ( $levels == 0 ) {
+            return '';
+        } else {
+            $hash = md5( $name );
+            $path = '';
+            for ( $i = 1; $i <= $levels; $i++ ) {
+                $path .= substr( $hash, 0, $i ) . '/';
+            }
+            return $path;
+        }
+    }
+
 }
 
 function callbackTestFct($content1,$content2) {

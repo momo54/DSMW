@@ -32,6 +32,7 @@ class AllTests {
         $suite->addTestSuite('p2pTest4');
         $suite->addTestSuite('p2pTest5');
         $suite->addTestSuite('p2pTest6');
+        $suite->addTestSuite('p2pAttachmentTest1');
         return $suite;
     }
 }
