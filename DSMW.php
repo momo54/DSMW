@@ -513,13 +513,13 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
             //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             //$url = $relatedPushServer."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             wfDebugLog('testlog','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-            $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+            $cs = utils::file_get_contents_curl(utils::lcfirst($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
 
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
              */
             if(strpos($cs, "<?xml version=\"1.0\"?>")===false){
-                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php5?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+                $cs = utils::file_get_contents_curl(utils::lcfirst($relatedPushServer)."/api.php5?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             }
             if(strpos($cs, "<?xml version=\"1.0\"?>")===false) $cs=false;
 
@@ -556,13 +556,13 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
                 $previousCSID = $CSID;
                 wfDebugLog('p2p','      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
-                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+                $cs = utils::file_get_contents_curl(utils::lcfirst($relatedPushServer)."/api.php?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
 
                 /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
              */
             if(strpos($cs, "<?xml version=\"1.0\"?>")===false){
-                $cs = utils::file_get_contents_curl(strtolower($relatedPushServer)."/api.php5?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
+                $cs = utils::file_get_contents_curl(utils::lcfirst($relatedPushServer)."/api.php5?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             }
             if(strpos($cs, "<?xml version=\"1.0\"?>")===false) $cs=false;
 
@@ -646,6 +646,10 @@ function attemptSave($editpage) {
     if(is_null($lastRevision)) {
         $conctext = "";
         $rev_id = 0;
+    }
+    elseif(($ns==NS_FILE || $ns==NS_IMAGE || $ns==NS_MEDIA) && $lastRevision->getRawText()==""){
+       $rev_id = 0;
+       $conctext = $lastRevision->getText();
     }
     else {
         $conctext= $lastRevision->getText();//V1 conc

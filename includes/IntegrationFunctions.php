@@ -19,7 +19,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
             wfDebugLog('p2p','      -> patch unexist');
-            $url = strtolower($relatedPushServer)."/api.php?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+            $url = utils::lcfirst($relatedPushServer)."/api.php?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = utils::file_get_contents_curl($url);
 
@@ -27,7 +27,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
              * Then we try to reach it with the .php5 extension
              */
             if(strpos($patch, "<?xml version=\"1.0\"?>")===false){
-                $url = strtolower($relatedPushServer)."/api.php5?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+                $url = utils::lcfirst($relatedPushServer)."/api.php5?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
                 wfDebugLog('p2p','      -> getPatch request url '.$url);
                 $patch = utils::file_get_contents_curl($url);
             }

@@ -613,24 +613,24 @@ Pages concerned:
         $pushName = str_replace(' ', '_', $pushName);
         $title = str_replace(' ', '_', $title);
         if(isset ($title)) {
-            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php?action=query&meta=patchPushed&pppushName=".
+            $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
              */
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false){
-                $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
+                $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
             }
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
         }else {
-            $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php?action=query&meta=patchPushed&pppushName=".
+            $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&format=xml'/*,0, $ctx*/);
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
              */
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false){
-                $patchXML = utils::file_get_contents_curl(strtolower($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
+                $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
                 $pushName.'&format=xml'/*,0, $ctx*/);
             }
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
@@ -892,6 +892,11 @@ to be loaded else "allow_url_fopen" set to "On"' );
 
 
         return $result;
+    }
+
+    static function lcfirst($string){
+        $string{0} = strtolower($string{0});
+        return $string;
     }
 }
 ?>
