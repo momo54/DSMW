@@ -8,93 +8,121 @@
  * @author muller jean-philippe
  */
 class Patch {
-    private $mId;
+
     private $mPatchId;
     private $mOperations = array();
-    private $mRevId;
-    private $mActive;
-    private $mPageId;
+    private $mPrevPatch;
+    private $mCausal;
+    private $mSiteId;
+    private $mSiteUrl;
+    private $mRemote;
+    private $mAttachment;
+    private $mMime;
+    private $mSize;
+    private $mUrl;
+    private $mDate;
+    private $mID;
 
-    public function __construct($patchid, $operations, $revid/*, $active*/, $pageId) {
-        $this->mPatchId = $patchid;
-        $this->mOperations = $operations;
-        $this->mRevId = $revid;
-        $this->mPageId = $pageId;
-        //$this->active = $active;
-    }
-
-    public function getPatchid() {
-        return $this->mPatchId;
-    }
-
-    public function setPatchid($mPatchId) {
-        $this->mPatchId = $mPatchId;
-    }
-    public function getActive() {
-        return $this->mActive;
-    }
-
-    public function setActive($active) {
-        $this->mActive = $active;
-    }
-
-    public function getOperations() {
-        return $this->mOperations;
-    }
-
-    public function setOperations($operations) {
-        $this->mOperations = $operations;
-    }
-
-    public function getRevid() {
-        return $this->mRevId;
-    }
-
-    public function setRevid($mRevId) {
-        $this->mRevId = $mRevId;
-    }
-
-    public function getPageid() {
-        return $this->mPageId;
-    }
-
-    public function setPageid($PageId) {
-        $this->mPageId = $PageId;
-    }
-
-    public function getId() {
-        return $this->mId;
-    }
-
-    public function setId($Id) {
-        $this->mId = $Id;
-    }
-
-
-    public function storePage($pageName){
-        global $wgUser;
-        $previous = utils::getLastPatchId($pageName);
-        if($previous==false) {
-            $previous = "none";
+    /**
+     *
+     * @param <bool> $remote
+     * @param <bool> $attachment
+     * @param <array> $operations
+     * @param <string> $siteUrl
+     * @param <array> $causalLink
+     * @param <string> $patchid
+     * @param <string> $previousPatch
+     * @param <string> $siteID
+     * @param <string> $Mime
+     * @param <string> $Size
+     * @param <string> $Url
+     * @param <string> $Date
+     */
+    public function __construct($remote, $attachment, $operations, $siteUrl = '', $causalLink = '', $patchid = '', $previousPatch = '', $siteID = '', $Mime = '', $Size = '', $Url = '', $Date = '') {
+        global $wgServer;
+        $this->mRemote = $remote;
+        $this->mID = utils::generateID();
+        if ($remote == true) {
+            $this->mPatchId = $patchid;
+            $this->mSiteId = $siteID;
+            $this->mID = $patchid;
+        } else {
+            $this->mPatchId = "Patch:".$this->mID;
+            $this->mSiteId = DSMWSiteId::getInstance()->getSiteId();
         }
-        $ID = utils::generateID();
+        $this->mOperations = $operations;
+        $this->mPrevPatch = $previousPatch;
+        $this->mSiteUrl = $siteUrl;
+        $this->mCausal = $causalLink;
 
-$serverID = DSMWSiteId::getInstance();
+        $this->mAttachment = $attachment;
+        if ($attachment == true) {
+            $this->mMime = $Mime;
+            $this->mSize = $Size;
+            if ($remote) {
+                $this->mDate = $Date;
+                $this->mUrl = $Url;
+            }
+            else {
+                $this->mDate = date(DATE_RFC822);
+                $this->mPatchId = "Patch:ATT".$this->mID;
+                $this->mUrl = $wgServer.$Url;
+                $this->mID= "Patch:ATT".$this->mID;
+            }
+        }
+    }
 
+    public function storePage($pageName) {
+        global $wgUser;
         $text = '
 [[Special:ArticleAdminPage|DSMW Admin functions]]
 
 ==Features==
-[[patchID::Patch:'.$ID.'| ]]
+[[patchID::' . $this->mPatchId . '| ]]
 
-\'\'\'SiteID:\'\'\' [[siteID::'.$serverID->getSiteId().']]
+\'\'\'SiteID:\'\'\' [[siteID::' . $this->mSiteId . ']]
+    
+\'\'\'SiteUrl:\'\'\' [[siteUrl::' . $this->mSiteUrl . ']]
 
-\'\'\'Date:\'\'\' '.date(DATE_RFC822).'
+';
 
-\'\'\'User:\'\'\' '.$wgUser->getName().'
+        if ($this->mRemote) {
+            $text .= '\'\'\'Remote Patch\'\'\'
+                
+';
+        } else {
+            $this->mPrevPatch = utils::getLastPatchId($pageName);
+            if ($this->mPrevPatch == false) {
+                $this->mPrevPatch = "none";
+            }
+            $this->mCausal = utils::searchCausalLink($pageName);
+            if ($this->mCausal == false) {
+                $this->mCausal = "none";
+            }
+        }
 
-This is a patch of the article: [[onPage::'.$pageName.']]<br>
-==Operations of the patch==
+
+        $text .= '\'\'\'Date:\'\'\' ' . date(DATE_RFC822) . '
+
+';
+        if ($this->mAttachment) {
+            $text .= '\'\'\'Date of upload of the Attachment:\'\'\' [[DateAtt::' . $this->mDate . ']]
+
+\'\'\'Mime:\'\'\' [[Mime::' . $this->mMime . ']]
+
+\'\'\'Size:\'\'\' [[Size::' . $this->mSize . ']]
+
+\'\'\'Url:\'\'\' [[Url::' . $this->mUrl . ']]
+
+';
+        }
+        $text .= '\'\'\'User:\'\'\' ' . $wgUser->getName() . '
+
+This is a patch of the article: [[onPage::' . $pageName . ']] <br>
+
+';
+        if ($this->mAttachment == false) {
+            $text .= '==Operations of the patch==
 
 {| class="wikitable" border="1" style="text-align:left; width:80%;"
 |-
@@ -102,53 +130,85 @@ This is a patch of the article: [[onPage::'.$pageName.']]<br>
 !bgcolor=#c0e8f0 scope=col | Content
 |-
 ';
-        $i=1;//op counter
-        foreach ($this->mOperations as $operation){
-            $lineContent = $operation->getLineContent();
-            $lineContent1 = utils::contentEncoding($lineContent);//base64 encoding
-            $type="";
-            if($operation instanceof LogootIns) $type="Insert";
-            else $type="Delete";
-            $operationID = utils::generateID();
-            $text.='|[[hasOperation::'.$operationID.';'.$type.';'
-            .$operation->getLogootPosition()->toString().';'.$lineContent1.'| ]]'.$type;
-
-            //displayed text
-            $lineContent2 = $lineContent;
-            $text.='
-| <nowiki>'.$lineContent2.'</nowiki>
+            if ($this->mRemote == true) {
+                foreach ($this->mOperations as $op) {
+                    $opArr = explode(";", $op);
+                    $text .= '|[[hasOperation::' . $op . '| ]]' . $opArr[1] . '
+|<nowiki>' . utils::contentDecoding($opArr[3]) . '</nowiki>
 |-
 ';
+                }
+            } else {
+                $i = 1; //op counter
+                foreach ($this->mOperations as $operation) {
+                    $lineContent = $operation->getLineContent();
+                    $lineContent1 = utils::contentEncoding($lineContent); //base64 encoding
+                    $type = "";
+                    if ($operation instanceof LogootIns)
+                        $type = "Insert";
+                    else
+                        $type="Delete";
+                    $operationID = utils::generateID();
+                    $text.='|[[hasOperation::' . $operationID . ';' . $type . ';'
+                            . $operation->getLogootPosition()->toString() . ';' . $lineContent1 . '| ]]' . $type;
+
+                    //displayed text
+                    $lineContent2 = $lineContent;
+                    $text.='
+|<nowiki>' . $lineContent2 . '</nowiki>
+|-
+';
+                }
+            }
+
+            $text.='|}';
         }
-        $text.='|}';
-        if (is_array($previous)){
+        if (is_array($this->mPrevPatch)) {
             $text.='
+
 ==Previous patch(es)==
 [[previous::';
-            foreach ($previous as $prev){
-                $text.=$prev.';';
+            foreach ($this->mPrevPatch as $prev) {
+                $text.=$prev . ';';
             }
             $text.=']]';
-        }
-        else{
-        $text.='
+        } else {
+            $text.='
+                
 ==Previous patch(es)==
-[[previous::'.$previous.']]';
+[[previous::' . $this->mPrevPatch . ']]';
         }
-        $title = Title::newFromText($ID, PATCH);
+        
+        if (is_array($this->mCausal)) {
+            $text.='
+
+==Causal Link(s)==
+';
+            foreach ($this->mCausal as $caus) {
+                $text.='[[causal::'.$caus . ']]
+
+';
+            }
+        } else {
+            $text.='
+
+==Causal Link==
+[[causal::' . $this->mCausal . ']]';
+        }
+        
+        $title = Title::newFromText($this->mID, PATCH);
         $article = new Article($title);
-        $article->doEdit($text, $summary="");
-
+        $article->doEdit($text, $summary = "");
     }
 
-private function splitLine($line){
-    $text = "";
-    $arr = str_split($line, 150);
-    foreach ($arr as $element){
-        $text.=$element.'<br>';
+    private function splitLine($line) {
+        $text = "";
+        $arr = str_split($line, 150);
+        foreach ($arr as $element) {
+            $text.=$element . '<br>';
+        }
+        return $text;
     }
-    return $text;
-}
 
 }
 ?>

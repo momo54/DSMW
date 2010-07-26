@@ -17,6 +17,8 @@ class DSMWUpdateJob extends Job {
     }
 
     function run() {
+        global $wgServerName,$wgScriptPath;
+        $urlServer = 'http://'.$wgServerName;
         wfProfileIn('DSMWUpdateJob::run()');
         $revids = array();
         $revids1 = array();
@@ -45,7 +47,7 @@ class DSMWUpdateJob extends Job {
 
         $sql ="SELECT $rev_table.`rev_id` FROM $rev_table, $page_table WHERE
      `rev_page`=`page_id` and `page_namespace`!= 110 and `page_namespace`!= 200
-        and `page_namespace`!= 210 and `page_namespace`!= 220
+        and `page_namespace`!= 210 and `page_namespace`!= 220 
 and `page_title`!= \"Administration_pull_site_addition\"
 and `page_title` != \"Administration_push_site_addition\"";
         $res1 = $db->query($sql);
@@ -67,7 +69,7 @@ and `page_title` != \"Administration_push_site_addition\"";
         }
 
         $page_ids = array_unique($page_ids);
-
+        sort($page_ids);
 //Now we can logootize:
         if(count($page_ids)!=0) {
             foreach($page_ids as $pageid) {
@@ -83,7 +85,7 @@ and `page_title` != \"Administration_push_site_addition\"";
                 $modelAfterIntegrate = $logoot->getModel();
                 $tmp = serialize($listOp);
                 $patchid = sha1($tmp);
-                $patch = new Patch($patchid, $listOp, $lastRev->getId(), $pageid);
+                $patch = new Patch(false, false, $listOp, $urlServer);
                 $patch->storePage($lastRev->getTitle()->getText());
                 manager::storeModel($lastRev->getId(), $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
             }

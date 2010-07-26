@@ -1,6 +1,6 @@
 <?php
 
-define( 'MEDIAWIKI', true );
+if (!defined('MEDIAWIKI')){define( 'MEDIAWIKI', true );}
 if( defined( 'MW_INSTALL_PATH' ) ) {
     $IP = MW_INSTALL_PATH;
 } else {
@@ -8,6 +8,8 @@ if( defined( 'MW_INSTALL_PATH' ) ) {
 }
 
 require_once '../../files/utils.php';
+require_once '../../../../includes/GlobalFunctions.php';
+require_once '../../includes/IntegrationFunctions.php';
 require_once '../p2pBot.php';
 require_once '../BasicBot.php';
 require_once '../../logootComponent/LogootId.php';
@@ -15,10 +17,11 @@ require_once '../../logootComponent/LogootPosition.php';
 require_once '../../logootComponent/LogootIns.php';
 require_once '../../logootComponent/LogootDel.php';
 include_once '../p2pAssert.php';
-require_once '../../DSMW.php';
+//require_once '../../DSMW.php';
+require_once '../settings.php';
 //require_once '../../patch/Patch.php';
 
-$wgAutoloadClasses['LogootId'] = "$wgDSMWIP/logootEngine/LogootId.php";
+//$wgAutoloadClasses['LogootId'] = "$wgDSMWIP/logootEngine/LogootId.php";
 
 
 /**
@@ -30,6 +33,9 @@ class extensionTest extends PHPUnit_Framework_TestCase {
     var $p2pBot1;
     var $p2pBot2;
     var $p2pBot3;
+    var $wiki1 = WIKI1;
+    var $wiki2 = WIKI2;
+    var $wiki3 = WIKI3;
     var $tmpServerName;
     var $tmpScriptPath;
 
@@ -40,18 +46,18 @@ class extensionTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
+        exec('../initWikiTest.sh');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
-        $basicbot1->wikiServer = 'http://localhost/wiki1';
+        $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
 
         $basicbot2 = new BasicBot();
-        $basicbot2->wikiServer = 'http://localhost/wiki2';
+        $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
 
         $basicbot3 = new BasicBot();
-        $basicbot3->wikiServer = 'http://localhost/wiki3';
+        $basicbot3->wikiServer = $this->wiki3;
         $this->p2pBot3 = new p2pBot($basicbot3);
     }
 

@@ -8,14 +8,14 @@
  */
 class utils {
 
-/**
- * generates IDs ==> SiteURL.SiteName.localclock   (ChangeSetID,patchID,OperationID)
- * Locally unique
- */
+    /**
+     * generates IDs ==> SiteURL.SiteName.localclock   (ChangeSetID,patchID,OperationID)
+     * Locally unique
+     */
     static function generateID() {
         //global $serverId;
         $serverId = DSMWSiteId::getInstance();
-        
+
         $pc = new persistentClock();
         $pc->load();
         $pc->incrementClock();
@@ -32,8 +32,8 @@ class utils {
      */
     static function encodeRequest($request) {
         $req = str_replace(
-            array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'),
-            array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'), $request);
+                array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'),
+                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'), $request);
         return $req;
     }
 
@@ -44,8 +44,8 @@ class utils {
      */
     static function decodeRequest($req) {
         $request = str_replace(
-            array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
-            array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'), $req);
+                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
+                array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'), $req);
         return $request;
     }
 
@@ -98,13 +98,13 @@ class utils {
 //    //PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0);
 //
 
-    //split NS and name
-    preg_match( "/^(.+?)_*:_*(.*)$/S", $pageName, $m );
-    $nameWithoutNS = $m[2];
-    $title = Title::newFromText($nameWithoutNS, PATCH);
-    $article = new Article($title);
-    if($article->exists()) return true;
-    else return false;
+        //split NS and name
+        preg_match( "/^(.+?)_*:_*(.*)$/S", $pageName, $m );
+        $nameWithoutNS = $m[2];
+        $title = Title::newFromText($nameWithoutNS, PATCH);
+        $article = new Article($title);
+        if($article->exists()) return true;
+        else return false;
 
     }
 
@@ -218,8 +218,8 @@ This is a patch of the article: [[onPage::'.$onPage.']]
 ';
         }
         if (is_array($previousPatch)) {
-           $text.='|}';
-           $text.='
+            $text.='|}';
+            $text.='
 ==Previous patch(es)==
 [[previous::';
             foreach ($previousPatch as $prev) {
@@ -233,7 +233,7 @@ This is a patch of the article: [[onPage::'.$onPage.']]
 ==Previous patch(es)==
 [[previous::'.$previousPatch.']]';
         }
-        
+
         $title = Title::newFromText($patchId, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary="");
@@ -271,26 +271,144 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      */
     static function getLastPatchId($pageName, $url='') {
         //global $wgScriptExtension;
-        if($url!=''){//case of tests
-        $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
-        $req = utils::encodeRequest($req);
-        $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
-        $results = utils::file_get_contents_curl($url1);//patches list
-        $results = str_replace('"', '', $results);
-        if ($results=="") return false;
-        $results = explode("\n", $results);
-        foreach ($results as $key=>$str1) {
-            if ($str1=="") unset ($results[$key]);
-            $pos = strpos($str1, '!');
-            if($pos !== false) $results[$key] = /*'patch:'.*/substr($str1, $pos+1);
-        //else $string[$key] = 'Patch:'.$str1;
-        }
-        }else{
+        if($url!='') {//case of tests
+            $req = '[[Patch:+]] [[onPage::'.$pageName.']]';
+            $req = utils::encodeRequest($req);
+            $url1 = $url."/index.php/Special:Ask/".$req."/-3FpatchID/headers=hide/sep=!/format=csv/limit=100";
+            $results = utils::file_get_contents_curl($url1);//patches list
+            $results = str_replace('"', '', $results);
+            if ($results=="") return false;
+            $results = explode("\n", $results);
+            foreach ($results as $key=>$str1) {
+                if ($str1=="") unset ($results[$key]);
+                $pos = strpos($str1, '!');
+                if($pos !== false) $results[$key] = /*'patch:'.*/substr($str1, $pos+1);
+                //else $string[$key] = 'Patch:'.$str1;
+            }
+        }else {
 
+            $results = array();
+            $res = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?patchID');
+            if($res===false)return false;
+            $count = $res->getCount();
+            for($i=0; $i<$count; $i++) {
+
+                $row = $res->getNext();
+                if ($row===false) break;
+                $row = $row[1];
+
+                $col = $row->getContent();//SMWResultArray object
+                foreach($col as $object) {//SMWDataValue object
+                    $wikiValue = $object->getWikiValue();
+                    $results[] = $wikiValue;
+                }
+            }
+        }
+
+        /*$string is the list of the patches */
+
+        if($url!='') {
+            $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
+            $results1 = utils::file_get_contents_curl($url2);//previous list
+            //$string1 = str_replace("patch:", "", $string1);
+            if ($results1=="") return false;
+            $results1 = explode("\n", $results1);
+            foreach ($results1 as $key=>$str) {
+                $pos = strpos($str, '!');
+                if($pos !== false) $results1[$key] = substr($str, $pos+1);
+                //            $pos2 = strpos($string1[$key], 'patch:');
+                //            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
+                if ($results1[$key]=="") unset ($results1[$key]);
+                $pos1 = strpos($results1[$key], ';');
+                if($pos1 !== false) {
+                    $res = explode(';', $results1[$key]);
+                    $results1 = array_merge($results1, $res);
+                }
+            }
+        }else {
+
+            $results1 = array();
+            $res1 = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?previous');//PullFeed:PullBureau
+            if($res1===false)return false;
+            $count1 = $res1->getCount();
+            for($j=0; $j<$count1; $j++) {
+
+                $row1 = $res1->getNext();
+                if ($row1===false) break;
+                $row1 = $row1[1];
+
+                $col1 = $row1->getContent();//SMWResultArray object
+                foreach($col1 as $object1) {//SMWDataValue object
+                    $wikiValue1 = $object1->getWikiValue();
+                    $results1[] = $wikiValue1;
+                }
+            }
+        }
+
+        /*$string1 is the list of the patches witch are previouses */
+
+        $result = array_diff($results, $results1);
+        if (count($result)>1) return $result;
+        else return array_shift($result);
+    }
+
+    /**
+     * Return the causal link of a patch
+     *
+     * @param <String> $pageName
+     * @return <array or String> the causal link
+     */
+    static function searchCausalLink($pageName) {
+        $ID = DSMWSiteId::getInstance();
+        $ID = $ID->getSiteId();
         $results = array();
-        $res = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?patchID');
-        if($res===false)return false;
+        $resID = array();
+        $lastPatch = utils::getLastPatchId($pageName);
+        if ($lastPatch === null)
+            return false;
+        $res = true;
+        while ($res) {
+            $res1 = utils::getSemanticQuery('[[' . $lastPatch . ']]', '?previous
+?siteID');
+
+            $row1 = $res1->getNext();
+
+            $col2 = $row1[1]->getContent(); //SMWResultArray object
+            foreach ($col2 as $object2) {//SMWDataValue object
+                $wikiValue2 = $object2->getWikiValue();
+                $siteID = $wikiValue2;
+            }
+
+            if (!in_array($siteID, $resID)) {
+                $results[] = $lastPatch;
+                $resID[] = $siteID;
+            }
+
+            $col1 = $row1[0]->getContent(); //SMWResultArray object
+            foreach ($col1 as $object1) {//SMWDataValue object
+                $wikiValue1 = $object1->getWikiValue();
+                $lastPatch = $wikiValue1;
+            }
+            if ($siteID == $ID || $lastPatch == 'None' )
+                if (count($results) == 1) {
+                    return $results[0];
+                } else {
+                    return $results;
+                }
+        }
+    }
+
+    /**
+     * Used to get the id of the last time stamp of Attachment patch(es) for a given article
+     *
+     * @param <String> $pageName
+     * @return the time stamp
+     */
+    static function getLastAttPatchTimestamp($pageName) {
+        $res = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?DateAtt');
+        if($res===false)return null;
         $count = $res->getCount();
+        $results = null;
         for($i=0; $i<$count; $i++) {
 
             $row = $res->getNext();
@@ -300,56 +418,15 @@ This is a patch of the article: [[onPage::'.$onPage.']]
             $col = $row->getContent();//SMWResultArray object
             foreach($col as $object) {//SMWDataValue object
                 $wikiValue = $object->getWikiValue();
-                $results[] = $wikiValue;
+                if($results == null){
+                    $results = $wikiValue;
+                }
+                elseif ($wikiValue>$results){
+                    $results = $wikiValue;
+                }
             }
         }
-        }
-
-/*$string is the list of the patches */
-        
-        if($url!=''){
-        $url2 = $url."/index.php/Special:Ask/".$req."/-3Fprevious/headers=hide/sep=!/format=csv/limit=100";
-        $results1 = utils::file_get_contents_curl($url2);//previous list
-        //$string1 = str_replace("patch:", "", $string1);
-        if ($results1=="") return false;
-        $results1 = explode("\n", $results1);
-        foreach ($results1 as $key=>$str) {
-            $pos = strpos($str, '!');
-            if($pos !== false) $results1[$key] = substr($str, $pos+1);
-            //            $pos2 = strpos($string1[$key], 'patch:');
-            //            if($pos2 !== false) $string1[$key] = substr($string1[$key], $pos2+strlen('patch:'));
-            if ($results1[$key]=="") unset ($results1[$key]);
-            $pos1 = strpos($results1[$key], ';');
-            if($pos1 !== false) {
-                $res = explode(';', $results1[$key]);
-                $results1 = array_merge($results1, $res);
-            }
-        }
-        }else{
-
-        $results1 = array();
-        $res1 = utils::getSemanticQuery('[[Patch:+]] [[onPage::'.$pageName.']]', '?previous');//PullFeed:PullBureau
-        if($res1===false)return false;
-        $count1 = $res1->getCount();
-        for($j=0; $j<$count1; $j++) {
-
-            $row1 = $res1->getNext();
-            if ($row1===false) break;
-            $row1 = $row1[1];
-
-            $col1 = $row1->getContent();//SMWResultArray object
-            foreach($col1 as $object1) {//SMWDataValue object
-                $wikiValue1 = $object1->getWikiValue();
-                $results1[] = $wikiValue1;
-            }
-        }
-        }
-
-    /*$string1 is the list of the patches witch are previouses */
-
-        $result = array_diff($results, $results1);
-        if (count($result)>1) return $result;
-        else return array_shift($result);
+        return $results;
     }
 
     /**
@@ -491,7 +568,7 @@ Pages concerned:
      * @return <array> pulled patches
      */
     static function getPulledPatches($pfname) {
-       
+
         $results = array();
         $res = utils::getSemanticQuery('[[ChangeSet:+]] [[inPullFeed::'.$pfname.']]', '?hasPatch');
         $count = $res->getCount();
@@ -521,7 +598,7 @@ Pages concerned:
      * @return <array> patch list
      */
     static function orderPatchByPrevious($title,$previousPatch='none') {
-        
+
         $firstPatch = array();
         $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']][[previous::'.$previousPatch.']]', '?patchID');
         $count = $res->getCount();
@@ -537,10 +614,10 @@ Pages concerned:
                 $firstPatch[] = $wikiValue;
             }
         }
-       
+
         $patchs = array();
         while($firstPatch) {
-            
+
             $patchFound = array();
             $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']][[previous::'.$firstPatch[0].']]', '?patchID');
             $count = $res->getCount();
@@ -565,18 +642,18 @@ Pages concerned:
         return $patchs;
     }
 
-/**
- * Used to get the list of article titles concerned by the given pullfeed
- * @param <string> $pfname pullfeed name
- * @return <array> array of page titles
- */
+    /**
+     * Used to get the list of article titles concerned by the given pullfeed
+     * @param <string> $pfname pullfeed name
+     * @return <array> array of page titles
+     */
     static function getPageConcernedByPull($pfname) {
 
         $patchs = utils::getPulledPatches($pfname);
         $tabPage = array();
         foreach ($patchs as $patch) {
-            
-                        $onPage = array();
+
+            $onPage = array();
             $res = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']]','?onPage');
             if($res===false) return false;
             $count = $res->getCount();
@@ -599,14 +676,14 @@ Pages concerned:
         return $tabPage;
     }
 
-/**
- * Used to get the published patches of a given server and a given pushfeed
- * (and optionnaly a page title)
- * @param <string> $server url of the server
- * @param <string> $pushName pushfeed name
- * @param <string> $title article title
- * @return <array> array of patchIDs
- */
+    /**
+     * Used to get the published patches of a given server and a given pushfeed
+     * (and optionnaly a page title)
+     * @param <string> $server url of the server
+     * @param <string> $pushName pushfeed name
+     * @param <string> $title article title
+     * @return <array> array of patchIDs
+     */
     static function getPublishedPatchs($server,$pushName,$title=null) {
         //global $wgScriptExtension;
         $published = array();
@@ -614,24 +691,24 @@ Pages concerned:
         $title = str_replace(' ', '_', $title);
         if(isset ($title)) {
             $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php?action=query&meta=patchPushed&pppushName=".
-                $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
+                    $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
-             */
-            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false){
+            */
+            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) {
                 $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
-                $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
+                        $pushName.'&pppageName='.$title.'&format=xml'/*,0, $ctx*/);
             }
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
         }else {
             $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php?action=query&meta=patchPushed&pppushName=".
-                $pushName.'&format=xml'/*,0, $ctx*/);
+                    $pushName.'&format=xml'/*,0, $ctx*/);
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
-             */
-            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false){
+            */
+            if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) {
                 $patchXML = utils::file_get_contents_curl(utils::lcfirst($server)."/api.php5?action=query&meta=patchPushed&pppushName=".
-                $pushName.'&format=xml'/*,0, $ctx*/);
+                        $pushName.'&format=xml'/*,0, $ctx*/);
             }
             if(strpos($patchXML, "<?xml version=\"1.0\"?>")===false) $patchXML=false;
         }
@@ -648,11 +725,11 @@ Pages concerned:
     }
 
     /**
- *
- * @param <String> $query (e.g. [[ChangeSet:+]][[inPullFeed::Pullfeed:xxxxx]])
- * @param <String> $paramstring Printout parameters (e.g. ?hasPatch?changeSetID)
- * @return <Object> SMWQueryResult object
- */
+     *
+     * @param <String> $query (e.g. [[ChangeSet:+]][[inPullFeed::Pullfeed:xxxxx]])
+     * @param <String> $paramstring Printout parameters (e.g. ?hasPatch?changeSetID)
+     * @return <Object> SMWQueryResult object
+     */
 
     static public function getSemanticQuery($query, $paramstring='') {
         $printouts = array();
@@ -680,12 +757,12 @@ Pages concerned:
         return $res;
     }
 
-/**
- * 
- *
- * @param <String> $url
- * @return <Array> array(0=>pushName, 1=>pushUrl)
- */
+    /**
+     *
+     *
+     * @param <String> $url
+     * @return <Array> array(0=>pushName, 1=>pushUrl)
+     */
     static function parsePushURL($url) {
         $res = array();
         $pos = strpos($url, 'PushFeed:');
@@ -704,31 +781,31 @@ Pages concerned:
         return $res;
     }
 
-/**
- * file_get_Contents
- * @param <String> $url
- * @return <String>
- */
+    /**
+     * file_get_Contents
+     * @param <String> $url
+     * @return <String>
+     */
     static function file_get_contents_curl($url) {
-    if(extension_loaded('curl')){
-    $ch = curl_init();
+        if(extension_loaded('curl')) {
+            $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
-    curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); //Set curl to return the data instead of printing it to the browser.
+            curl_setopt($ch, CURLOPT_URL, $url);
 
-    $data = curl_exec($ch);
-    curl_close($ch);
-    }else{// if curl is not loaded
-        if(ini_get('allow_url_fopen')==='1'){
-        $data = file_get_contents($url);
-        }else{// curl not loaded and allow_url_fopen=>Off
-            throw new MWException( __METHOD__.': DSMW needs either curl extension
+            $data = curl_exec($ch);
+            curl_close($ch);
+        }else {// if curl is not loaded
+            if(ini_get('allow_url_fopen')==='1') {
+                $data = file_get_contents($url);
+            }else {// curl not loaded and allow_url_fopen=>Off
+                throw new MWException( __METHOD__.': DSMW needs either curl extension
 to be loaded else "allow_url_fopen" set to "On"' );
+            }
         }
+        return $data;
     }
-    return $data;
-}
 
 
     /**
@@ -743,18 +820,18 @@ to be loaded else "allow_url_fopen" set to "On"' );
      * @return <array> $result An array of pages (cat, prop, templ or articles)
      */
     static function getDependencies($pages, $properties=true, $categories=false,
-        $templates=false, $pagelinks=false){
+            $templates=false, $pagelinks=false) {
         $result = array();
-        if(is_string($pages)){
-         $pages = array($pages);
+        if(is_string($pages)) {
+            $pages = array($pages);
         }
         elseif(!is_string($pages) && !is_array($pages))
-        throw new MWException( __METHOD__.': $pages parameter is neither an
+            throw new MWException( __METHOD__.': $pages parameter is neither an
  array nor a string' );
 
 
-        foreach ($pages as $page){
-            if($properties){
+        foreach ($pages as $page) {
+            if($properties) {
                 // get the properties
                 $title = Title::newFromText($page);
                 $dbkey = $title->getDBkey();
@@ -762,12 +839,12 @@ to be loaded else "allow_url_fopen" set to "On"' );
                 $value = SMWWikiPageValue::makePage($dbkey, $namespace);
                 $data = smwfGetStore()->getSemanticData($value, false);// data instance of SMWSemanticData
                 $props = $data->getProperties();
-                foreach ($props as $property){
+                foreach ($props as $property) {
 
                     if ($property->isUserDefined()) { // user defined property
                         $property->setCaption(preg_replace('/[ ]/u','&nbsp;',$property->getWikiValue(),2));
 
-                        if ($property->getWikiPageValue()!=null){
+                        if ($property->getWikiPageValue()!=null) {
                             $obj=$property->getWikiPageValue();
                             $text=$obj->getPrefixedText();
                             $result[]=$text;
@@ -775,13 +852,13 @@ to be loaded else "allow_url_fopen" set to "On"' );
                     }
                 }
             }
-            if($categories){
+            if($categories) {
                 // get the categories
                 $tables = array ();
                 $where = array ();
                 $fields = array (
-            'cl_from',
-            'cl_to'
+                        'cl_from',
+                        'cl_to'
                 );
                 $options = array ();
                 $join_conds = array ();
@@ -789,7 +866,7 @@ to be loaded else "allow_url_fopen" set to "On"' );
                 $tables[] = 'categorylinks';
                 $db = wfGetDB( DB_SLAVE );
                 $pageid = $db->selectField('page','page_id', array(
-            'page_title'=>$page/*WithoutNS*/));
+                        'page_title'=>$page/*WithoutNS*/));
                 $where['cl_from']=$pageid;
 
                 $options['USE INDEX'] = array('categorylinks' => 'cl_from');
@@ -808,7 +885,7 @@ to be loaded else "allow_url_fopen" set to "On"' );
 
                 $db->freeResult($res);
             }//end if categories
-            if($templates){
+            if($templates) {
                 // get the templates
                 $tables = array ('templatelinks');
                 $where = array ();
@@ -820,11 +897,11 @@ to be loaded else "allow_url_fopen" set to "On"' );
                         $prefix . '_from AS pl_from',
                         $prefix . '_namespace AS pl_namespace',
                         $prefix . '_title AS pl_title'
-                    );
+                );
 
                 $db = wfGetDB( DB_SLAVE );
                 $pageid = $db->selectField('page','page_id', array(
-            'page_title'=>$page/*WithoutNS*/));
+                        'page_title'=>$page/*WithoutNS*/));
                 $where[$prefix . '_from']=$pageid;
                 //$this->addWhereFld($this->prefix . '_namespace', $params['namespace']);
 
@@ -848,7 +925,7 @@ to be loaded else "allow_url_fopen" set to "On"' );
                 $db->freeResult($res);
             }//end if templates
 
-            if($pagelinks){
+            if($pagelinks) {
                 // get the templates
                 $tables = array ('pagelinks');
                 $where = array ();
@@ -860,11 +937,11 @@ to be loaded else "allow_url_fopen" set to "On"' );
                         $prefix . '_from AS pl_from',
                         $prefix . '_namespace AS pl_namespace',
                         $prefix . '_title AS pl_title'
-                    );
+                );
 
                 $db = wfGetDB( DB_SLAVE );
                 $pageid = $db->selectField('page','page_id', array(
-            'page_title'=>$page/*WithoutNS*/));
+                        'page_title'=>$page/*WithoutNS*/));
                 $where[$prefix . '_from']=$pageid;
                 //$this->addWhereFld($this->prefix . '_namespace', $params['namespace']);
 
@@ -894,9 +971,18 @@ to be loaded else "allow_url_fopen" set to "On"' );
         return $result;
     }
 
-    static function lcfirst($string){
+    static function lcfirst($string) {
         $string{0} = strtolower($string{0});
         return $string;
     }
+
+    static function writeAndFlush($msg) {
+        echo $msg.'
+
+';
+        ob_end_flush();
+        flush();
+    }
+
 }
 ?>

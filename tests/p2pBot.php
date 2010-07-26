@@ -62,26 +62,32 @@ class p2pBot {
     function push($name) {
         $post_vars['action'] = 'onpush';
         if(is_array($name)) {
-            $post_vars['push'] = $name;
+            $post_vars['name'] = $name;
         }else {
-            $post_vars['push[]'] = $name;
+            $post_vars['name[]'] = $name;
         }
         $this->bot->maxredirs = 0;
         if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php',$post_vars) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
-                echo 'push failed with error 200 : ('.$this->bot->results.')';
-                return false;
+                if(strpos($this->bot->results, "<html") > 0 ){
+                    echo "push failed with error 200:(".$this->bot->results.")\n";
+                    return false;
+                }
+                else{ // Push return some information with Ajax
+                    echo $this->bot->results."\n";
+                    return true;
+                }
             }
             elseif ('302'==$code)
                 return true;
             else {
-                echo 'push failed error not 200 : ('.$this->bot->results.')';
+                echo "push failed error not 200:(".$this->bot->results.")";
                 return false;
             }
         }else {
-            echo 'push submit failed ('.$this->bot->wikiServer . PREFIX . '/index.php '.$post_vars.')';
+            echo "push submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
             return false;
         }
     }
@@ -113,9 +119,9 @@ class p2pBot {
 
     function pull($pullName) {
         if(is_array($pullName)) {
-            $post_vars['pull'] = $pullName;
+            $post_vars['name'] = $pullName;
         }else {
-            $post_vars['pull[]'] = $pullName;
+            $post_vars['name[]'] = $pullName;
         }
         $post_vars['action'] = 'onpull';
         $this->bot->maxredirs = 0;
@@ -124,8 +130,14 @@ class p2pBot {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
-                echo "pull failed with error 200:(".$this->bot->results.")";
-                return false;
+                if(strpos($this->bot->results, "<html") > 0 ){
+                    echo "pull failed with error 200:(".$this->bot->results.")\n";
+                    return false;
+                }
+                else{ // Pull return some information with Ajax
+                    echo $this->bot->results."\n";
+                    return true;
+                }
             }
             elseif ('302'==$code)
                 return true;
@@ -263,19 +275,19 @@ class p2pBot {
         }
     }
 
-    //require_once '../../../includes/filerepo/FileRepo.php';
-    // temporaire : je n'ai pas réussi a instancier FileRepo
-    function getHashPathForLevel( $name, $levels ) {
-        if ( $levels == 0 ) {
-            return '';
-        } else {
-            $hash = md5( $name );
-            $path = '';
-            for ( $i = 1; $i <= $levels; $i++ ) {
-                $path .= substr( $hash, 0, $i ) . '/';
-            }
-            return $path;
-        }
+    function getFileFeatures($file,$size){        
+        $url = $this->bot->wikiServer.PREFIX.'/api.php?action=query&titles=File:'.$file.'&prop=imageinfo&iilimit=50&iiend=20071231235959&iiprop=timestamp|user|url|size&format=php';
+        $image = file_get_contents($url);
+        $image = unserialize($image);
+        $array = array_shift($image);
+        $array = array_shift($array);
+        $array = array_shift($array);
+        if ($array['imageinfo'][0]['size'] == '')
+            return false;
+        elseif ($array['imageinfo'][0]['size'] == $size)
+            return true;
+        else
+            return false;
     }
 
 }

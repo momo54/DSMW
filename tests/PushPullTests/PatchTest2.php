@@ -5,6 +5,7 @@ require_once('../../files/utils.php');
 require_once('../../clockEngine/persistentClock.php');
 require_once '../p2pBot.php';
 require_once '../BasicBot.php';
+require_once '../settings.php';
 
 /**
  * Description of Test_2
@@ -17,8 +18,8 @@ require_once '../BasicBot.php';
 
 class PatchTest2 extends PHPUnit_Framework_TestCase {
 
-
     var $p2pBot1;
+    var $wiki1 = WIKI1;    
 
 
     /**
@@ -28,11 +29,10 @@ class PatchTest2 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('../initWikiTest.sh  ../createDBTest.sql ../dump.sql');
-        //wfDebugLog('p2p','start p2p Test');
+        exec('../initWikiTest.sh');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
-        $basicbot1->wikiServer = 'http://localhost/wiki1';
+        $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
 
     }

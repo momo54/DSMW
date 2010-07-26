@@ -1,11 +1,12 @@
 <?php
-require_once 'PHPUnit/Framework/Assert.php';
+//require_once 'PHPUnit/Framework/Assert.php';
 //require_once '../files/utils.php';
 
 function assertPageExist($server,$pageName) {
     $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
     $rev =  unserialize($rev);
-    PHPUnit_Framework_Assert::assertFalse(count($rev['query']['pages'][-1])>0,
+    $count = count(end($rev['query']['pages']));
+    PHPUnit_Framework_Assert::assertTrue($count>3,
         'Page '.$pageName.' does not exist on '.$server);
 }
 

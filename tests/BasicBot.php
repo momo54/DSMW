@@ -63,7 +63,7 @@ $abspath = dirname(__FILE__);
 
 // adjust as necessary
 define('SITECHARSET','UTF-8');
-//if (!defined('SERVER')) { define('SERVER','http://localhost/mediawiki-1.13.5');}
+define('SERVER','');
 define('PREFIX',''); // no trailing slash. The prefix you use for index.php?title= links (e.g. editing links). Set to '' if you use no prefix other than what's in SERVER.
 define('ALTPREFIX','/w'); // no trailing slash. The prefix on valid links that visitors usually see. Might be the same as PREFIX if you don't use "pretty" links.
 define('CACHE', $abspath.'/cache/'); // a path where we can store cache files to. SHOULD EXIST and be writeable by the server. Stored for longer than files in TEMP.
@@ -106,7 +106,7 @@ class BasicBot extends Snoopy{
 	var $wikiCookies; // will hold the file name where our cookies are stored.
 	var $wikiConnected = false;
 	var $wikiTitle; // holds the title that wikiFilter has just called from. Makes it easy to know where we are when doing a FilterAll function.
-	
+        
 	/***************************************
 	FUNCTIONS THAT YOU ARE LIKELY TO INTERACT WITH START HERE
 	****************************************/
@@ -316,7 +316,7 @@ class BasicBot extends Snoopy{
 	// You shouldn't ever need to call this. Call wikiConnect instead if you need to do something that requires a log in.
 	// in fact, you can't call it first; wikiConnect needs to define $this->wikiCookies before this will work right.
 	function wikiLogin(){
-		unset($this->cookies);
+		//unset($this->cookies);
 		$vars['wpName'] = $this->wikiUser;
 		$vars['wpPassword'] = $this->wikiPass;
 		$vars['wpRemember'] = 1;

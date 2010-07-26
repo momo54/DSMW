@@ -9,6 +9,14 @@ require_once 'p2pTest3.php';
 require_once 'p2pTest4.php';
 require_once 'p2pTest5.php';
 require_once 'p2pTest6.php';
+require_once 'p2pTest10.php';
+require_once 'p2pAttachmentsTest1.php';
+require_once 'p2pAttachmentsTest2.php';
+require_once 'p2pAttachmentsTest3.php';
+require_once 'p2pAttachmentsTest4.php';
+require_once 'p2pAttachmentsTest5.php';
+require_once 'p2pAttachmentsTest6.php';
+require_once 'p2pAttachmentsTest7.php';
 
 
 
@@ -32,7 +40,14 @@ class AllTests {
         $suite->addTestSuite('p2pTest4');
         $suite->addTestSuite('p2pTest5');
         $suite->addTestSuite('p2pTest6');
-        $suite->addTestSuite('p2pAttachmentTest1');
+        $suite->addTestSuite('p2pTest10');
+        $suite->addTestSuite('p2pAttachmentsTest1');
+        $suite->addTestSuite('p2pAttachmentsTest2');
+        $suite->addTestSuite('p2pAttachmentsTest3');
+        $suite->addTestSuite('p2pAttachmentsTest4');
+        $suite->addTestSuite('p2pAttachmentsTest5');
+        $suite->addTestSuite('p2pAttachmentsTest6');
+        $suite->addTestSuite('p2pAttachmentsTest7');
         return $suite;
     }
 }

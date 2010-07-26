@@ -10,24 +10,31 @@
  * It's a local changeSet (downloaded from a remote site)
  * @param <String> $changeSetId with NS
  */
-function integrate($changeSetId,$patchIdList,$relatedPushServer) {
+function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
 //global $wgScriptExtension;
 // $patchIdList = getPatchIdList($changeSetId);
 //  $lastPatch = utils::getLastPatchId($pageName);
-    wfDebugLog('p2p',' - function integrate : '.$changeSetId);
+    global $wgServerName,$wgScriptPath,$wgScriptExtension,$wgOut;
+    $urlServer = 'http://'.$wgServerName.$wgScriptPath."/index.php/$csName";
+    wfDebugLog('p2p', ' - function integrate : ' . $changeSetId);
+    $i = 1;
+    $j = count($patchIdList);
+    $pages = array();
     foreach ($patchIdList as $patchId) {
+        $name = 'patch';
+        $sub = substr($patchId, 6, 3);
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
             wfDebugLog('p2p','      -> patch unexist');
-            $url = utils::lcfirst($relatedPushServer)."/api.php?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+            $url = utils::lcfirst($relatedPushServer)."/api.php?action=query&meta=patch&papatchId=".$patchId.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = utils::file_get_contents_curl($url);
 
             /*test if it is a xml file. If not, the server is not reachable via the url
              * Then we try to reach it with the .php5 extension
-             */
-            if(strpos($patch, "<?xml version=\"1.0\"?>")===false){
-                $url = utils::lcfirst($relatedPushServer)."/api.php5?action=query&meta=patch&papatchId="./*substr(*/$patchId/*,strlen('patch:'))*/.'&format=xml';
+            */
+            if(strpos($patch, "<?xml version=\"1.0\"?>")===false) {
+                $url = utils::lcfirst($relatedPushServer)."/api.php5?action=query&meta=patch&papatchId=".$patchId.'&format=xml';
                 wfDebugLog('p2p','      -> getPatch request url '.$url);
                 $patch = utils::file_get_contents_curl($url);
             }
@@ -39,12 +46,12 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             $dom = new DOMDocument();
             $dom->loadXML($patch);
 
-            $patchs = $dom->getElementsByTagName('patch');
+            $patchs = $dom->getElementsByTagName($name);
 
             //when the patch is not found, mostly when the id passed
             //through the url is wrong
             if(empty ($patchs) || is_null($patchs))
-            throw new MWException( __METHOD__.': Error: Patch not found!' );
+                throw new MWException( __METHOD__.': Error: Patch not found!' );
 
             //        $patchID = null;
             foreach($patchs as $p) {
@@ -56,6 +63,24 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
                 }
                 if ($p->hasAttribute("siteID")) {
                     $siteID = $p->getAttribute('siteID');
+                }
+                if ($p->hasAttribute("mime")) {
+                    $Mime = $p->getAttribute('mime');
+                }
+                if ($p->hasAttribute("size")) {
+                    $Size = $p->getAttribute('size');
+                }
+                if ($p->hasAttribute("url")) {
+                    $Url = $p->getAttribute('url');
+                }
+                if ($p->hasAttribute("DateAtt")) {
+                    $Date = $p->getAttribute('DateAtt');
+                }
+                if ($p->hasAttribute("siteUrl")) {
+                    $SiteUrl = $p->getAttribute('siteUrl');
+                }
+                if ($p->hasAttribute("causal")) {
+                    $causal = $p->getAttribute('causal');
                 }
             }
 
@@ -74,15 +99,50 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer) {
             //                    logootIntegrate($operation, $onPage);
             //                }
             //            }
-            if(logootIntegrate($operations, $onPage)===true)
-            {
-             utils::createPatch($patchId, $onPage, $lastPatch, $operations, $siteID);
+
+            if(!in_array($onPage,$pages)) {
+                utils::writeAndFlush("<span style=\"margin-left:60px;\">Page: <A HREF=".'http://'.$wgServerName.$wgScriptPath."/index.php/$onPage>" . $onPage . "</A></span><br/>");
+                $pages[] = $onPage;
             }
-            else{
-                throw new MWException( __METHOD__.': article not saved!');
+            if ($sub === 'ATT') {
+                $DateLastPatch = utils::getLastAttPatchTimestamp($onPage);
+                //$DateOtherPatch = utils::getOtherAttPatchTimestamp($patchIdList);
+                if ($DateLastPatch == null) {
+                    downloadFile($Url);
+                    $edit = true;
+                    utils::writeAndFlush("<span style=\"margin-left:98px;\">download attachment (".round($Size/1000000,2)."Mo)</span><br/>");
+                } elseif ($DateLastPatch < $Date) {
+                    downloadFile($Url);
+                    $edit = true;
+                    utils::writeAndFlush("<span style=\"margin-left:98px;\">download attachment (" . round($Size / 1000000, 2) . "Mo)</span><br/>");
+                } else {
+                    newRev($onPage);
+                    $edit = false;
+                }
             }
-    }//end if pageExists
+            utils::writeAndFlush("<span style=\"margin-left:80px;\">" . $i . "/" . $j . ": Integration of Patch: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$patchId>" . $patchId . "</A></span><br/>");
+            if ($sub === 'ATT') {
+                if (logootIntegrateAtt($onPage, $edit)) {
+                    $patch = new Patch(true, true, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, $Mime, $Size, $Url, $Date);
+                    $patch->storePage($onPage);
+                } else {
+                    throw new MWException(__METHOD__ . ': article not saved!');
+                }
+            }
+
+            else {
+                if (logootIntegrate($operations, $onPage, $sub)) {
+                    $patch = new Patch(true, false, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, null, null, null, null);
+                    $patch->storePage($onPage);
+                }
+                else {
+                    throw new MWException( __METHOD__.': article not saved!');
+                }
+            }
+        }//end if pageExists
+        $i++;
     }
+    utils::writeAndFlush("<span style=\"margin-left:30px;\">Go to <A HREF=".$urlServer.">ChangeSet</A></span> <br/>");
 }
 
 /**
@@ -137,46 +197,50 @@ function operationToLogootOp($operation) {
  * @param <String or Object> $article
  */
 function logootIntegrate($operations, $article) {
-   global $wgCanonicalNamespaceNames;
-   $indexNS=0;
-   wfDebugLog('p2p',' - function logootIntegrate : '.$article);
-
+    global $wgCanonicalNamespaceNames;
+    $indexNS=0;
+    wfDebugLog('p2p',' - function logootIntegrate : '.$article);
     if(is_string($article)) {
         $dbr = wfGetDB( DB_SLAVE );
+        $dbr->immediateBegin();
         //if there is a space in the title, repalce by '_'
         $article = str_replace(" ", "_", $article);
 
-        if(strpos($article, ":")===false){
-        $pageid = $dbr->selectField('page','page_id', array(
-            'page_title'=>$article/*WithoutNS*/));
-        }else{//if there is a namespace
-        preg_match( "/^(.+?)_*:_*(.*)$/S", $article, $tmp );
-        $articleWithoutNS = $tmp[2];
-        $NS = $tmp[1];
-        if(in_array($NS, $wgCanonicalNamespaceNames)){
-            foreach ($wgCanonicalNamespaceNames as $key=>$value){
-                if($NS==$value) $indexNS=$key;
-            }
+        if(strpos($article, ":")===false) {
+            $pageid = $dbr->selectField('page','page_id', array(
+                    'page_title'=>$article/*WithoutNS*/));
         }
-        $pageid = $dbr->selectField('page','page_id', array(
-            'page_title'=>$articleWithoutNS, 'page_namespace'=>$indexNS));
+        else {//if there is a namespace
+            preg_match( "/^(.+?)_*:_*(.*)$/S", $article, $tmp );
+            $articleWithoutNS = $tmp[2];
+            $NS = $tmp[1];
+            if(in_array($NS, $wgCanonicalNamespaceNames)) {
+                foreach ($wgCanonicalNamespaceNames as $key=>$value) {
+                    if($NS==$value) $indexNS=$key;
+                }
+            }
+            $pageid = $dbr->selectField('page','page_id', array(
+                    'page_title'=>$articleWithoutNS, 'page_namespace'=>$indexNS));
         }
         // get the page namespace
         $pageNameSpace = $dbr->selectField('page','page_namespace', array(
-            'page_id'=>$pageid));
+                'page_id'=>$pageid));
 
         /*the ns must not be a pullfeed, pushfeed, changeset or patch namespace.
          If the page name is the same in different ns we can get the wrong
          * page id
-         */
+        */
         if($pageNameSpace==PULLFEED || $pageNameSpace==PUSHFEED ||
-            $pageNameSpace==PATCH || $pageNameSpace==CHANGESET
+                $pageNameSpace==PATCH || $pageNameSpace==CHANGESET
         ) $pageid=0;
 
 
         $lastRev = Revision::loadFromPageId($dbr, $pageid);
-        if(is_null($lastRev)) $rev_id = 0;
+        if(is_null($lastRev)) {
+            $rev_id = 0;
+        }
         else $rev_id = $lastRev->getId();
+
         wfDebugLog('p2p','      -> pageId : '.$pageid);
         wfDebugLog('p2p','      -> rev_id : '.$rev_id);
         $title = Title::newFromText($article);
@@ -189,7 +253,7 @@ function logootIntegrate($operations, $article) {
     //$blobInfo = BlobInfo::loadBlobInfo($rev_id);
     $model = manager::loadModel($rev_id);
     if(($model instanceof boModel)==false)
-    throw new MWException( __METHOD__.': model loading problem!');
+        throw new MWException( __METHOD__.': model loading problem!');
     $logoot = new logootEngine($model);
 
     foreach ($operations as $operation) {
@@ -199,20 +263,106 @@ function logootIntegrate($operations, $article) {
 
         if ($operation!=false && is_object($operation)) {
             $listOp[]=$operation;
-                    wfDebugLog('testlog',' -> Operation: '.$operation->getLogootPosition()->toString());
-        //$blobInfo->integrateBlob($operation);
-    }//end if
-    //    else {
-    //        throw new MWException( __METHOD__.': operation problem '.$operation );
-    //        wfDebugLog('p2p',' - operation problem : '.$operation);
-    //    }
+            wfDebugLog('testlog',' -> Operation: '.$operation->getLogootPosition()->toString());
+            //$blobInfo->integrateBlob($operation);
+        }//end if
+        //    else {
+        //        throw new MWException( __METHOD__.': operation problem '.$operation );
+        //        wfDebugLog('p2p',' - operation problem : '.$operation);
+        //    }
     }//end foreach operations
+
     $modelAfterIntegrate = $logoot->integrate($listOp);
     $revId = utils::getNewArticleRevId();
     manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
     $status = $article->doEdit($modelAfterIntegrate->getText(), $summary="");
+
     //sleep(4);
     if(is_bool($status)) return $status;
     else return $status->isGood();
 }
+
+/**
+ *Integrates for attachment
+ *
+ * @param <String> $article
+ */
+function logootIntegrateAtt($article, $edit) {
+    $dbr = wfGetDB( DB_SLAVE );
+    $dbr->immediateBegin();
+    $title = Title::newFromText($article);
+    $lastRevision = Revision::loadFromTitle($dbr, $title);
+    if($lastRevision->getPrevious()==null) {
+        $rev_id = 0;
+    }
+    else {
+        $rev_id = $lastRevision->getPrevious()->getId();
+    }
+    $revID = $lastRevision->getId();
+    $model = manager::loadModel($rev_id);
+    manager::storeModel($revID, $sessionId=session_id(), $model, $blobCB=0);
+    if($edit){
+        $article = new Article($title);
+        $status = $article->doEdit($model->getText(), $summary="");
+    }
+    return true;
+}
+
+function downloadFile($url) {
+    global $wgServerName, $wgServer, $wgContLang, $wgAuth, $wgScriptPath,
+    $wgScriptExtension, $wgMemc, $wgRequest;
+
+    $apiUrl = $wgServer.$wgScriptPath."/api".$wgScriptExtension;
+
+    $edittoken = $apiUrl."?action=query&prop=info&intoken=edit&titles=Foo&format=xml";
+    $edittoken = utils::file_get_contents_curl($edittoken);
+    $dom = new DOMDocument();
+    $dom->loadXML($edittoken);
+    $edittoken = $dom->getElementsByTagName('page');
+    foreach($edittoken as $p) {
+        if ($p->hasAttribute("edittoken")) {
+            $token = $p->getAttribute('edittoken');
+        }
+    }
+    $token = str_replace("+","%2B",$token);
+
+//    $url = $patch->getUrl();
+    $onPage = preg_split("/^.*\//", $url);
+    $url = str_replace(array(':','Http'),array('%3A','http'), $url);
+    $download = $apiUrl . "?action=upload&filename=".$onPage[1]."&url="
+            .$url."&token=".$token."&ignorewarnings=1";
+    $resp = Http::post($download);
+    libxml_use_internal_errors( true );
+    $sxe = simplexml_load_string( $resp );
+}
+
+function newRev($article) {
+    global $wgCanonicalNamespaceNames;
+    $indexNS = 0;
+    $dbr = wfGetDB(DB_SLAVE);
+
+    $article = str_replace(" ", "_", $article);
+    preg_match("/^(.+?)_*:_*(.*)$/S", $article, $tmp);
+    $articleWithoutNS = $tmp[2];
+    $NS = $tmp[1];
+    if (in_array($NS, $wgCanonicalNamespaceNames)) {
+        foreach ($wgCanonicalNamespaceNames as $key => $value) {
+            if ($NS == $value)
+                $indexNS = $key;
+        }
+    }
+    $title = Title::newFromText($article);
+    if (!$title->exists()) {
+        $article = new Article($title);
+        $article->doEdit('', '');
+    } else {
+        $lastRevision = Revision::loadFromTitle($dbr, $title);
+        $rev_id = $lastRevision->getPrevious()->getId();
+        $revID = $lastRevision->getId();
+        $model = manager::loadModel($rev_id);
+        $article = new Article($title);
+        $article->quickEdit($model->getText(), '');
+    }
+}
+
 ?>

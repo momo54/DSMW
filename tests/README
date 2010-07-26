@@ -26,3 +26,5 @@ DSMW tests :
         "myUser" must have all privileges on the database server
 
     * Be sure that you have the executable permission on initWikiTest.sh
+
+    * Put your wiki location in setting.php

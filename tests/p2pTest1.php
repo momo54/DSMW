@@ -1,12 +1,13 @@
 <?php
 
-define( 'MEDIAWIKI', true );
+if (!defined('MEDIAWIKI')){define( 'MEDIAWIKI', true );}
 require_once 'p2pBot.php';
 require_once 'BasicBot.php';
 include_once 'p2pAssert.php';
 require_once '../../../includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
+require_once 'settings.php';
 
 $wgDebugLogGroups  = array(
     'p2p'=>"/tmp/p2p.log",
@@ -24,6 +25,9 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
     var $p2pBot1;
     var $p2pBot2;
     var $p2pBot3;
+    var $wiki1 = WIKI1;
+    var $wiki2 = WIKI2;
+    var $wiki3 = WIKI3;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -32,18 +36,18 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh  ./createDBTest.sql ./dump.sql');
+        exec('./initWikiTest.sh');
         exec('rm ./cache/*');
         $basicbot1 = new BasicBot();
-        $basicbot1->wikiServer = 'http://localhost/wiki1';
+        $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
 
         $basicbot2 = new BasicBot();
-        $basicbot2->wikiServer = 'http://localhost/wiki2';
+        $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
 
         $basicbot3 = new BasicBot();
-        $basicbot3->wikiServer = 'http://localhost/wiki3';
+        $basicbot3->wikiServer = $this->wiki3;
         $this->p2pBot3 = new p2pBot($basicbot3);
     }
 
@@ -79,8 +83,8 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
 
         //create pull on wiki2
         $pullName = 'PullCity';
-        $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
-            'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
+        $this->assertTrue($this->p2pBot2->createPull($pullName,$this->wiki1, $pushName),
+            'failed to create pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
 
         //pull
         $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
@@ -141,8 +145,8 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
 
         //create pull on wiki2
         $pullName = 'PullCity';
-        $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', $pushName),
-            'failed to create pull '.$pullCity.' ('.$this->p2pBot2->bot->results.')');
+        $this->assertTrue($this->p2pBot2->createPull($pullName,$this->wiki1, $pushName),
+            'failed to create pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');
 
         //pull
         $this->assertTrue($this->p2pBot2->Pull('PullFeed:'.$pullName),
@@ -187,8 +191,8 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
 
         //create pull on wiki1
         $pullName = 'pullCity';
-        $this->assertTrue($this->p2pBot1->createPull($pullName,'http://localhost/wiki2', $pushName),
-            'failed to create pull '.$pullCity.' ('.$this->p2pBot1->bot->results.')');
+        $this->assertTrue($this->p2pBot1->createPull($pullName,$this->wiki2, $pushName),
+            'failed to create pull '.$pullName.' ('.$this->p2pBot1->bot->results.')');
 
         //pull
         $this->assertTrue($this->p2pBot1->Pull('PullFeed:'.$pullName),

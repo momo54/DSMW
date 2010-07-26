@@ -1,12 +1,13 @@
 <?php
 
-define( 'MEDIAWIKI', true );
+if (!defined('MEDIAWIKI')){define( 'MEDIAWIKI', true );}
 require_once '../p2pBot.php';
 require_once '../BasicBot.php';
 require_once '../../../../includes/GlobalFunctions.php';
 require_once '../../patch/Patch.php';
 require_once '../../files/utils.php';
 include_once '../p2pAssert.php';
+require_once '../settings.php';
 
 /**
  * Description of pullTest
@@ -18,6 +19,9 @@ class pullTest extends PHPUnit_Framework_TestCase {
     var $p2pBot1;
     var $p2pBot2;
     var $p2pBot3;
+    var $wiki1 = WIKI1;
+    var $wiki2 = WIKI2;
+    var $wiki3 = WIKI3;
 
 
     /**
@@ -27,21 +31,19 @@ class pullTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-
-        exec('../initWikiTest.sh ../createDBTest.sql ../dump.sql');
+        exec('../initWikiTest.sh');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
-        $basicbot1->wikiServer = 'http://localhost/wiki1';
+        $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
 
         $basicbot2 = new BasicBot();
-        $basicbot2->wikiServer = 'http://localhost/wiki2';
+        $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
 
         $basicbot3 = new BasicBot();
-        $basicbot3->wikiServer = 'http://localhost/wiki3';
+        $basicbot3->wikiServer = $this->wiki3;
         $this->p2pBot3 = new p2pBot($basicbot3);
-
         $this->p2pBot1->bot->wikiConnect();
     }
 
@@ -57,7 +59,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
     public function testCreatePull() {
         $pullName = 'pullCity';
-        $this->assertTrue($this->p2pBot2->createPull($pullName,'http://localhost/wiki1', 'pushCity'),
+        $this->assertTrue($this->p2pBot2->createPull($pullName,$this->wiki1, 'pushCity'),
             'failed to create pull pullCity ('.$this->p2pBot2->bot->results.')');
         assertPageExist($this->p2pBot2->bot->wikiServer,'PullFeed:'.$pullName);
 
@@ -66,8 +68,8 @@ class pullTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals('',$pullFound[0],
             'failed to create pull pullCity, pullHead must be null but '.$pullFound[0].' was found');
-        $this->assertEquals('http://localhost/wiki1',strtolower($pullFound[1]),
-            'failed to create pull pullCity, pushFeedServer must be http://localhost/wiki but '.strtolower($pullFound[1]).' was found');
+        $this->assertEquals($this->wiki1,strtolower($pullFound[1]),
+            'failed to create pull pullCity, pushFeedServer must be '.$this->wiki1.' but '.strtolower($pullFound[1]).' was found');
         $this->assertEquals('pushfeed:pushcity',strtolower($pullFound[2]),
             'failed to create pull pullCity, pushFeedName must be PushFeed:PushCity but '.$pullFound[2].' was found');
     }
@@ -99,7 +101,7 @@ class pullTest extends PHPUnit_Framework_TestCase {
         //create pull on wiki2
         $pullName = 'pullCityonWiki1';
         $pullContent = '[[name::PullFeed:pullCityonWiki1]]
-[[pushFeedServer::http://localhost/wiki1]]
+[[pushFeedServer::'.$this->wiki1.']]
 [[pushFeedName::PushFeed:'.$pushName.']] [[hasPullHead::none]]';
         exec('rm ../cache/*');
         $this->p2pBot2->bot->wikiConnected = false;
@@ -177,13 +179,13 @@ class pullTest extends PHPUnit_Framework_TestCase {
         $this->p2pBot2->bot->wikiConnected = false;
 
         $pullContent = '[[name::PullFeed:PullCityonWiki11]]
-[[pushFeedServer::http://localhost/wiki1]]
+[[pushFeedServer::'.$this->wiki1.']]
 [[pushFeedName::PushFeed:PushCity11]] [[hasPullHead::none]]';
         $this->assertTrue($this->p2pBot2->createPage('PullFeed:pullCityonWiki11',$pullContent),
             'failed on create pull ('.$this->p2pBot2->bot->results.')');
 
         $pullContent = '[[name::PullFeed:PullCityonWiki12]]
-[[pushFeedServer::http://localhost/wiki1]]
+[[pushFeedServer::'.$this->wiki1.']]
 [[pushFeedName::PushFeed:PushCity12]] [[hasPullHead::none]]';
         $this->assertTrue($this->p2pBot2->createPage('PullFeed:pullCityonWiki12',$pullContent),
             'failed on create pull ('.$this->p2pBot2->bot->results.')');

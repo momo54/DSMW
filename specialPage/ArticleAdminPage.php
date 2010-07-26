@@ -105,7 +105,7 @@ if(test==true){
 
 
         $output .= '
-<FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPull">
+<FORM name="formPull">
 
 <table'.$tableStyle.' >
   <a href="javascript:displayRemotePatch(true);">[Display]</a><a href="javascript:displayRemotePatch(false);">[Hide]</a> remote patches
@@ -118,7 +118,7 @@ if(isset ($_GET['display'])){$output .= '    <th colspan="5"'.$style.'>PULL:
 }
         if ($pullFeeds!=false) {
             $output .='<a href="javascript:pullFeedDel();">[Remove]</a>
-  <button type="submit">[Pull]</button></th>
+  <input type="button" value="PULL" onClick="allpull(\''.$url.'\');"></input></th>
   </tr>
   <tr>
     <th colspan="2" >Site</th>
@@ -189,7 +189,6 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
         $output .= '
 
-<input type="hidden" name="action" value="onpull">
 </table>
 </FORM>';
 
@@ -203,7 +202,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
         $pushFeeds = $this->getRequestedPages($req);
 
         $output .= '
-<FORM METHOD="POST" ACTION="'./*dirname($_SERVER['HTTP_REFERER'])*/$url.'" name="formPush">
+<FORM name="formPush">
 <table'.$tableStyle.'  >
   <tr bgcolor=#c0e8f0>
     <th colspan="6"'.$style.'>PUSH:
@@ -212,7 +211,7 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
 
 
             $output .= ' <a href="javascript:pushFeedDel();">[Remove]</a>
-  <button type="submit">[Push]</button></th>
+  <input type="button" value="PUSH" onClick="allpush(\''.$url.'\');"></input></th>
   </tr>
   <tr>
     <th colspan="2" >Site</th>
@@ -306,9 +305,17 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
         }
         $output .= '
 
-<input type="hidden" name="action" value="onpush">
 </table>
-</FORM>';
+</FORM>
+<div id="pullstatus" style="display: none; width: 100%; clear: both;" >
+<a name="PULL_Progress_:" id="PULL_Progress_:"></a><h2> <span class="mw-headline"> PULL Progress&nbsp;: </span></h2>
+<div id="statepull" ></div><br />
+</div>
+<div id="pushstatus" style="display: none; width: 100%; clear: both;" >
+<a name="PUSH_Progress_:" id="PUSH_Progress_:"></a><h2> <span class="mw-headline"> PUSH Progress&nbsp;: </span></h2>
+<div id="statepush" ></div><br />
+</div>
+';
 
 //        if (!$this->getArticle('Property:ChangeSetID')->exists()) {
 //            $output .='
@@ -519,15 +526,17 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
             $url = "http://".$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
             $output .= '
 <h2>Actions</h2>
-<div><FORM METHOD="POST" ACTION='.$url.' name="formPush">
+<div><FORM  name="formPush">
 <table >
-  <tr><td> <button type="submit">[Push page : "'.$title.'"]</button></td></tr>
-<input type="hidden" name="action" value="onpush"/>
-<input type="hidden" name="push" value="PushFeed:PushPage_'.$title.'"/>
-<input type="hidden" name="request" value="[['.$title.']]"/>
-<input type="hidden" name="page" value="'.$title.'"/></table></form></div>
+<tr><td> <input type="button" value="PUSH" onClick="pushpage(\''.$url.'\',\''.$title.'\');"></input></td></tr></table></form></div>
 This [Push page : "'.$title.'"] action will create a PushFeed and
-publish the modifications of the "'.$title.'" article';
+publish the modifications of the "'.$title.'" article
+
+<div id="pushstatus" style="display: none; width: 100%; clear: both;" >
+<a name="PUSH_Progress_:" id="PUSH_Progress_:"></a><h2> <span class="mw-headline"> PUSH Progress&nbsp;: </span></h2>
+<div id="statepush" ></div><br />
+</div>
+';
 
 
             $wgOut->addHTML($output);

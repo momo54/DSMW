@@ -1,12 +1,13 @@
 <?php
 
-define( 'MEDIAWIKI', true );
+if (!defined('MEDIAWIKI')){define( 'MEDIAWIKI', true );}
 require_once 'p2pBot.php';
 require_once 'BasicBot.php';
 include_once 'p2pAssert.php';
 require_once '../../..//includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
+require_once 'settings.php';
 
 /**
  * Description of p2pBotTest
@@ -14,7 +15,9 @@ require_once '../files/utils.php';
  * @author hantz
  */
 class p2pBotTest extends PHPUnit_Framework_TestCase {
+    
     var $p2pBot1;
+    var $wiki1 = WIKI1;
 
     public static function main() {
         require_once 'PHPUnit/TextUI/TestRunner.php';
@@ -31,8 +34,9 @@ class p2pBotTest extends PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         exec('./initWikiTest.sh');
+        exec('rm ./cache/*');
         $basicbot1 = new BasicBot();
-        $basicbot1->wikiServer = 'http://localhost/wiki1';
+        $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
     }
 

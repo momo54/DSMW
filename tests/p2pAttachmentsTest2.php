@@ -14,13 +14,13 @@ $wgDebugLogGroups  = array(
 );
 
 /**
- * Description of p2pAttachmentTest1
+ * Description of p2pAttachmentTest2
  *
  * @author Émile Morel
  */
 
 
-class p2pAttachmentsTest1 extends PHPUnit_Framework_TestCase {
+class p2pAttachmentsTest2 extends PHPUnit_Framework_TestCase {
 
     var $p2pBot1;
     var $p2pBot2;
@@ -94,6 +94,11 @@ d'Amérique du Sud, et en Asie.
 
     /**
      * Create one page with an attachment, push it
+     * pull it on wiki2 and on wiki3
+     * modify the attachment on wiki2 and wiki3
+     * pull on wiki1
+     * re-push on wiki1 and re-pull on wiki2 and wiki3
+     * the three wiki must have the same page an attachment
      */
     public function testSimple1() {
         //create page
@@ -116,7 +121,7 @@ d'Amérique du Sud, et en Asie.
 
         //edit File:Ours.jpg on wiki1
         $this->assertTrue($this->p2pBot1->editPage($this->filePage, $this->pushRequest),
-                'failed to edit page '.$this->filePage.' ( '.$this->p2pBot1->bot->results.' )');
+            'failed to edit page '.$this->filePage.' ( '.$this->p2pBot1->bot->results.' )');
 
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
         $PatchonWiki1 = arraytolower($PatchonWiki1);
@@ -129,120 +134,114 @@ d'Amérique du Sud, et en Asie.
         //push
         $this->assertTrue($this->p2pBot1->push($this->pushFeed),
                 'failed to push '.$this->pushFeed.' ('.$this->p2pBot2->bot->results.')');
-    }
-    
-    /**
-     * Create one page with an attachment, push it
-     * edit Attachment page
-     */
-    public function testSimple2() {
-        $this->testSimple1();
-
-        $addContent = "[[Category:Mammal]]";
-
-        $this->assertTrue($this->p2pBot1->editPage($this->filePage, $addContent),
-                'failed to edit page '.$this->filePage);
-
-        $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
-        $PatchonWiki1 = arraytolower($PatchonWiki1);
-        $this->assertEquals(count($PatchonWiki1),3);
-    }
-
-    /**
-     * Create one page with an attachment, push it
-     * pull it on wiki2
-     * wiki2 must have the attachment on local
-     */
-    public function testSimple3() {
-        $this->testSimple1();
 
         //create pull on wiki2
         $this->assertTrue($this->p2pBot2->createPull($this->pullName,$this->wiki1, $this->pushName),
                 'failed to create pull '.$this->pullName.' ('.$this->p2pBot2->bot->results.')');
 
         //pull
-        $this->assertTrue($this->p2pBot2->pull($this->pullFeed),
+        $this->assertTrue($this->p2pBot2->Pull($this->pullFeed),
                 'failed to pull '.$this->pullFeed.' ('.$this->p2pBot2->bot->results.')');
 
         // assert page Ours exist on wiki2
         assertPageExist($this->p2pBot2->bot->wikiServer, $this->pageName);
-
-        //test if the good file was upload on wiki2
-        $this->assertTrue($this->p2pBot2->getFileFeatures($this->file,$this->file_size1));
         assertPageExist($this->p2pBot2->bot->wikiServer, $this->filePage);
 
-        //assert that there is the same changeSet on the 2 wikis
-        $CSonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]][[inPushFeed::'.$this->pushFeed.']]', '-3FchangeSetID');
-        $CSonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[ChangeSet:+]][[inPullFeed::'.$this->pullFeed.']]', '-3FchangeSetID');
-        $this->assertEquals($CSonWiki1,$CSonWiki2,'changeSet are not equals on the 2 wikis');
+        //create pull on wiki3
+        $this->assertTrue($this->p2pBot3->createPull($this->pullName,$this->wiki1, $this->pushName),
+                'failed to create pull '.$this->pullName.' ('.$this->p2pBot3->bot->results.')');
 
-        //assert that there is the same patch on the 2 wikis
-        $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
-        $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
-        $PatchonWiki1 = arraytolower($PatchonWiki1);
-        $PatchonWiki2 = arraytolower($PatchonWiki2);
-        $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
+        //pull
+        $this->assertTrue($this->p2pBot3->Pull($this->pullFeed),
+                'failed to pull '.$this->pullFeed.' ('.$this->p2pBot3->bot->results.')');
 
-        // assert that wiki1/File:Ours == wiki2/File:Ours
-        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, $this->filePage);
-    }
+        // assert page Ours exist on wiki3
+        assertPageExist($this->p2pBot3->bot->wikiServer, $this->pageName);
+        assertPageExist($this->p2pBot3->bot->wikiServer, $this->filePage);
 
-    /**
-     * Create one page with an attachment, push it
-     * pull it on wiki2
-     * wiki2 change the file, pull the page
-     * wiki1 push the page and must have the new attachment on local
-     */
-    public function testSimple4() {
-        $this->testSimple3();
+
+
 
         //change file on wiki2
         $this->assertTrue($this->p2pBot2->uploadFile($this->fileDir.$this->file2,$this->file,'1'));
 
-        $PatchonWiki1 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
-        $PatchonWiki1 = arraytolower($PatchonWiki1);
-        $this->assertEquals(count($PatchonWiki1),3);
-
-        //test si le fichier a été uploder sur le wiki2
-        $this->assertTrue($this->p2pBot2->getFileFeatures($this->file,$this->file_size2));
-
         //create push on wiki2
         $this->assertTrue($this->p2pBot2->createPush($this->pushName, $this->pushRequest),
-                'Failed to create push : '.$this->pushName.' ('.$this->p2pBot1->bot->results.')');
+                'Failed to create push : '.$this->pushName.' ('.$this->p2pBot2->bot->results.')');
 
         //push
         $this->assertTrue($this->p2pBot2->push($this->pushFeed),
                 'failed to push '.$this->pushFeed.' ('.$this->p2pBot2->bot->results.')');
 
-        //create pull on wiki1 from wiki2
-        $this->assertTrue($this->p2pBot1->createPull($this->pullName,$this->wiki2, $this->pushName),
+        //change file on wiki3
+        $this->assertTrue($this->p2pBot3->uploadFile($this->fileDir.$this->file3,$this->file,'1'));
+
+        //create push on wiki3
+        $this->assertTrue($this->p2pBot3->createPush($this->pushName, $this->pushRequest),
+                'Failed to create push : '.$this->pushName.' ('.$this->p2pBot3->bot->results.')');
+
+        //push 
+        $this->assertTrue($this->p2pBot3->push($this->pushFeed),
+                'failed to push '.$this->pushFeed.' ('.$this->p2pBot3->bot->results.')');
+
+
+
+
+        //create pull on wiki1 from wiki3
+        $this->assertTrue($this->p2pBot1->createPull($this->pullName.'3',$this->wiki3, $this->pushName),
                 'failed to create pull '.$this->pullName.' ('.$this->p2pBot1->bot->results.')');
 
         //pull
-        $this->assertTrue($this->p2pBot1->Pull($this->pullFeed),
+        $this->assertTrue($this->p2pBot1->Pull($this->pullFeed.'3'),
                 'failed to pull '.$this->pullFeed.' ('.$this->p2pBot1->bot->results.')');
 
-        //test if the good file was upload on wiki1 from wiki2
-        $this->assertTrue($this->p2pBot1->getFileFeatures($this->file,$this->file_size2));
-        assertPageExist($this->p2pBot1->bot->wikiServer, $this->filePage);
+        //test if the good file was upload on wiki1 from wiki3
+        $this->assertTrue($this->p2pBot1->getFileFeatures($this->file,$this->file_size3));
+        
+        //create pull on wiki1 from wiki2
+        $this->assertTrue($this->p2pBot1->createPull($this->pullName.'2',$this->wiki2, $this->pushName),
+                'failed to create pull '.$this->pullName.' ('.$this->p2pBot1->bot->results.')');
+        
+        //pull
+        $this->assertTrue($this->p2pBot1->Pull($this->pullFeed.'2'),
+                'failed to pull '.$this->pullFeed.' ('.$this->p2pBot1->bot->results.')');
 
-        //assert that there is the same changeSet on the 2 wikis
-        $CSonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]][[inPullFeed::'.$this->pullFeed.']]', '-3FchangeSetID');
-        $CSonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[ChangeSet:+]][[inPushFeed::'.$this->pushFeed.']]', '-3FchangeSetID');
-        $this->assertEquals($CSonWiki1,$CSonWiki2,'changeSet are not equals on the 2 wikis');
+        //test if the good file was upload on wiki1 from wiki3
+        $this->assertTrue($this->p2pBot1->getFileFeatures($this->file,$this->file_size3));
 
-        //assert that there is the same patch on the 2 wikis
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
-        $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
         $PatchonWiki1 = arraytolower($PatchonWiki1);
-        $PatchonWiki2 = arraytolower($PatchonWiki2);
-        $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
+        $this->assertEquals(count($PatchonWiki1),4);
 
-        // assert that wiki1/File:Ours == wiki2/File:Ours
+
+        //push
+        $this->assertTrue($this->p2pBot1->push($this->pushFeed),
+                'failed to push '.$this->pushFeed.' ('.$this->p2pBot2->bot->results.')');
+
+        //pull
+        $this->assertTrue($this->p2pBot2->Pull($this->pullFeed),
+                'failed to pull '.$this->pullFeed.' ('.$this->p2pBot2->bot->results.')');
+        
+        //pull
+        $this->assertTrue($this->p2pBot3->Pull($this->pullFeed),
+                'failed to pull '.$this->pullFeed.' ('.$this->p2pBot3->bot->results.')');
+
+        $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
+        $PatchonWiki1 = arraytolower($PatchonWiki1);
+        $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
+        $PatchonWiki2 = arraytolower($PatchonWiki2);
+        $PatchonWiki3 = getSemanticRequest($this->p2pBot3->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
+        $PatchonWiki3 = arraytolower($PatchonWiki3);
+        $this->assertEquals(count($PatchonWiki1),count($PatchonWiki2));
+        $this->assertEquals(count($PatchonWiki1),count($PatchonWiki3));
+
+
+        // assert that wiki1/File:Ours == wiki2/File:Ours == wiki3/File:Ours
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, $this->filePage);
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot3->bot->wikiServer, $this->filePage);
     }
 
-    function viderRepertoire() {
+    function viderRepertoire(){
     }
 }
 

@@ -30,63 +30,62 @@ class ApiQueryPatch extends ApiQueryBase {
 
         $params = $this->extractRequestParams();
         wfDebugLog('p2p','ApiQueryPatch params '.$params['patchId']);
-        
 
-        $res = utils::getSemanticQuery('[[patchID::'.$params['patchId'].']]', '?patchID
-?onPage
-?hasOperation
-?previous
-?siteID');
+        $array = array(1 => 'id', 2 => 'onPage', 3 => 'operation', 4 => 'previous', 5 => 'siteID', 6 => 'mime', 7 => 'size', 8 => 'url', 9 => 'DateAtt', 10 => 'siteUrl', 11 => 'causal');
+        $array1 = array(1 => 'patchID', 2 => 'onPage', 3 => 'hasOperation', 4 => 'previous', 5 => 'siteID', 6 => 'mime', 7 => 'size', 8 => 'url', 9 => 'DateAtt', 10 => 'siteUrl', 11 => 'causal');
+        
+        $query = '';
+
+        for($j=1; $j<=count($array1); $j++) {
+            $query = $query.'?'.$array1[$j].'
+';
+        }
+
+        $res = utils::getSemanticQuery('[[patchID::'.$params['patchId'].']]',$query);
+
         $count = $res->getCount();
         for($i=0; $i<$count; $i++) {
-
             $row = $res->getNext();
             if ($row===false) break;
-            $patchId = $row[1];
-            $col = $patchId->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $results[1] = $wikiValue;
-            }
-            $onPage = $row[2];
-            $col = $onPage->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $results[2] = $wikiValue;
-            }
-            $hasOperation = $row[3];
-            $col = $hasOperation->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $op[] = $wikiValue;
-            }
-            $results[3]=$op;
-            $previous = $row[4];
-            $col = $previous->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $results[4] = $wikiValue;
-            }
-            $siteID = $row[5];
-            $col = $siteID->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $results[5] = $wikiValue;
+            for($j=1; $j<=count($array); $j++) {
+                if($j==3){
+                    $col = $row[$j]->getContent();//SMWResultArray object
+                    foreach($col as $object) {//SMWDataValue object
+                        $wikiValue = $object->getWikiValue();
+                        $op[] = $wikiValue;
+                    }
+                    $results[$j]=$op;
+                }
+                else{
+                    $col = $row[$j]->getContent();//SMWResultArray object
+                    foreach($col as $object) {//SMWDataValue object
+                        $wikiValue = $object->getWikiValue();
+                        $results[$j] = $wikiValue;
+                    }
+                }
             }
         }
         $result = $this->getResult();
         //$data = str_replace('"', '', $data);
 
         //$data = explode('!',$data);
-        $op = $results[3];
+        
         if($results[1]) {
-            $title = trim($results[2],":");
-            $result->setIndexedTagName($op, 'operation');
-            $result->addValue(array('query',$this->getModuleName()),'id',$results[1]);
-            $result->addValue(array('query',$this->getModuleName()),'onPage',$title);
-            $result->addValue(array('query',$this->getModuleName()),'previous',$results[4]);
-            $result->addValue(array('query',$this->getModuleName()),'siteID',$results[5]);
-            $result->addValue('query', $this->getModuleName(), $op);
+            for($i=1; $i<=count($array); $i++) {
+                if ($results[$i] != null){
+                if ($i == 2){
+                    $title = trim($results[$i],":");
+                    $result->addValue(array('query',$this->getModuleName()),$array[$i],$title);
+                }
+                elseif ($i == 3){
+                    $op = $results[$i];
+                    $result->setIndexedTagName($op, $array[$i]);
+                    $result->addValue('query', $this->getModuleName(), $op);
+                }
+		else
+		    $result->addValue(array('query',$this->getModuleName()),$array[$i],$results[$i]);
+                }
+            }
         }
     }
 
