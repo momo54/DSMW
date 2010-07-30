@@ -100,11 +100,13 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
             //                }
             //            }
 
-            if(!in_array($onPage,$pages)) {
-                utils::writeAndFlush("<span style=\"margin-left:60px;\">Page: <A HREF=".'http://'.$wgServerName.$wgScriptPath."/index.php/$onPage>" . $onPage . "</A></span><br/>");
+            if (!in_array($onPage, $pages)) {
+                utils::writeAndFlush("<span style=\"margin-left:60px;\">Page: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$onPage>" . $onPage . "</A></span><br/>");
                 $pages[] = $onPage;
             }
             if ($sub === 'ATT') {
+                touch(utils::prepareString($Mime,$Size,$Url));
+
                 $DateLastPatch = utils::getLastAttPatchTimestamp($onPage);
                 //$DateOtherPatch = utils::getOtherAttPatchTimestamp($patchIdList);
                 if ($DateLastPatch == null) {
@@ -119,6 +121,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
                     newRev($onPage);
                     $edit = false;
                 }
+                unlink(utils::prepareString($Mime,$Size,$Url));
             }
             utils::writeAndFlush("<span style=\"margin-left:80px;\">" . $i . "/" . $j . ": Integration of Patch: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$patchId>" . $patchId . "</A></span><br/>");
             if ($sub === 'ATT') {

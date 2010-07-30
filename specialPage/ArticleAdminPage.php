@@ -556,7 +556,7 @@ publish the modifications of the "'.$title.'" article
      * @param <type> $content_actions
      * @return <type>
      */
-    function onSkinTemplateTabs(&$skin, &$content_actions) {
+    function onSkinTemplateTabs($skin, $content_actions) {
         global $wgRequest, $wgServerName, $wgScriptPath;
         $urlServer = 'http://'.$wgServerName.$wgScriptPath;
 

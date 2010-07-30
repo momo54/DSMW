@@ -101,7 +101,7 @@ d'Amérique du Sud, et en Asie.
      * pull it on wiki2 
      * modify the attachment on wiki2 , push it
      * pull it on wiki1
-     * the tow wiki must have the same page an attachment
+     * the tow wiki must have the same page and attachment
      */
     public function testSimple1() {
         //create page

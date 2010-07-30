@@ -278,7 +278,7 @@ window.open('" . $specialAsk . "&q='+query1+'&eq=yes&p%5Bformat%5D=broadtable','
 
 ==Actions==
 
-{{#input:type=ajax|value=PUSH|onClick=doit('" . $urlServer . "','PushFeed:" . $name . "', 'onpush');}}
+{{#input:type=ajax|value=PUSH|onClick=pushpull('" . $urlServer . "','PushFeed:" . $name . "', 'onpush');}}
 The \"PUSH\" action publishes the (unpublished) modifications of the articles listed above.
 
 == PUSH Progress : ==
@@ -469,7 +469,7 @@ This ChangeSet is in : [[inPushFeed::" . $name . "]]<br>
 
 ==Actions==
 
-{{#input:type=ajax|value=PULL|onClick=doit('" . $urlServer . "','PullFeed:" . $pullname . "','onpull');}}
+{{#input:type=ajax|value=PULL|onClick=pushpull('" . $urlServer . "','PullFeed:" . $pullname . "','onpull');}}
 
 The \"PULL\" action gets the modifications published in the PushFeed of the PushFeedServer above.
 
@@ -749,12 +749,18 @@ function attemptSave($editpage) {
 }
 
 function uploadComplete($image) {
-    global $wgServerName, $wgScriptPath;
+    global $wgServerName, $wgScriptPath, $wgServer,$wgVersion;
     $urlServer = 'http://' . $wgServerName . $wgScriptPath;
 
-    $classe = get_class($image);
-    if ($image instanceof UploadForm) {
+    //$classe = get_class($image);
+    if (compareMWVersion($wgVersion, '1.16.0') == -1) {
         $localfile = $image->mLocalFile;
+    } else {
+
+        $localfile = $image->getLocalFile();
+    }
+    $path = utils::prepareString($localfile->mime, $localfile->size, $wgServer . $localfile->url);
+    if (!file_exists($path)) {
         $dbr = wfGetDB(DB_SLAVE);
         $lastRevision = Revision::loadFromTitle($dbr, $localfile->getTitle());
         if ($lastRevision->getPrevious() == null) {

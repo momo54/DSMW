@@ -89,7 +89,7 @@ class DSMWExhibits {
         }
     }
 
-    public function onSkinTemplateTabs( &$skin, &$content_actions ) {
+    public function onSkinTemplateTabs( $skin, $content_actions ) {
         global $wgRequest;
 
         $action = $wgRequest->getText( 'action' );

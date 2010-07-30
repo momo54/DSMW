@@ -17,7 +17,7 @@ function test(urlserveur){
     }
 }
 
-function doit(urlserveur,name, action)
+function pushpull(urlserveur,name, action)
 {
     //$("#T2").html(''); //Clear the Packet list
     $("#state").html('');
@@ -50,7 +50,7 @@ function pushpage(urlserveur,title)
     $('#pushstatus').show();
     $.post(urlserveur,{
         action: "onpush",
-        push: 'PushFeed:PushPage_'+title,
+        name: 'PushFeed:PushPage_'+title,
         request: '[['+title+']]',
         page: title
     },
@@ -84,7 +84,7 @@ function allpull(urlserveur)
     });
     $.post(urlserveur,{
         action: "onpull",
-        pull: allVals
+        name: allVals
     },
     function(data, status) /* On Request Complete */
     {
@@ -116,7 +116,7 @@ function allpush(urlserveur)
     });
     $.post(urlserveur,{
         action: "onpush",
-        push: allVals
+        name: allVals
     },
     function(data, status) /* On Request Complete */
     {

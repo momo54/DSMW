@@ -984,5 +984,13 @@ to be loaded else "allow_url_fopen" set to "On"' );
         flush();
     }
 
+    static function prepareString($Mime,$Size,$Url) {
+        $Url = preg_split("/^.*\//", $Url);
+        $var = $Url[1];
+        $var = str_replace(array('.', '/', ':'), array('', '', ''), $var);
+        $var = strtolower($var);
+        return '/tmp/'.$var.'.dsmw';
+    }
+
 }
 ?>

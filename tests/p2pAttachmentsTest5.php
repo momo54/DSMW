@@ -213,6 +213,7 @@ d'Amérique du Sud, et en Asie.
 
         // assert that wiki1/File:Ours == wiki2/File:Ours
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, $this->filePage);
+        assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot3->bot->wikiServer, $this->filePage);
     }
 
     /**
@@ -251,6 +252,8 @@ d'Amérique du Sud, et en Asie.
         $this->assertTrue($this->p2pBot1->push($this->pushFeed),
                 'failed to push '.$this->pushFeed.' ('.$this->p2pBot2->bot->results.')');
 
+
+
         //create pull on wiki2
         $this->assertTrue($this->p2pBot2->createPull($this->pullName,$this->wiki1, $this->pushName),
                 'failed to create pull '.$this->pullName.' ('.$this->p2pBot2->bot->results.')');
@@ -272,6 +275,8 @@ d'Amérique du Sud, et en Asie.
         //push
         $this->assertTrue($this->p2pBot2->push($this->pushFeed),
                 'failed to push '.$this->pushFeed.' ('.$this->p2pBot2->bot->results.')');
+
+
 
         //create pull on wiki3
         $this->assertTrue($this->p2pBot3->createPull($this->pullName,$this->wiki2, $this->pushName),
@@ -295,6 +300,8 @@ d'Amérique du Sud, et en Asie.
         $this->assertTrue($this->p2pBot3->push($this->pushFeed),
                 'failed to push '.$this->pushFeed.' ('.$this->p2pBot3->bot->results.')');
 
+
+
         //create pull on wiki2 from wiki3
         $this->assertTrue($this->p2pBot2->createPull($this->pullName,$this->wiki3, $this->pushName),
                 'failed to create pull '.$this->pullName.' ('.$this->p2pBot1->bot->results.')');
@@ -310,6 +317,8 @@ d'Amérique du Sud, et en Asie.
         $this->assertTrue($this->p2pBot2->push($this->pushFeed),
                 'failed to push '.$this->pushFeed.' ('.$this->p2pBot2->bot->results.')');
 
+
+
         //create pull on wiki3
         $this->assertTrue($this->p2pBot1->createPull($this->pullName,$this->wiki2, $this->pushName),
                 'failed to create pull '.$this->pullName.' ('.$this->p2pBot1->bot->results.')');
@@ -317,6 +326,9 @@ d'Amérique du Sud, et en Asie.
         //pull
         $this->assertTrue($this->p2pBot1->Pull($this->pullFeed),
                 'failed to pull '.$this->pullFeed.' ('.$this->p2pBot2->bot->results.')');
+
+        //test if the good file was upload on wiki1 from wiki3
+        $this->assertTrue($this->p2pBot1->getFileFeatures($this->file,$this->file_size3));
 
         $PatchonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'.$this->filePage.']]', '-3FpatchID');
         $PatchonWiki1 = arraytolower($PatchonWiki1);
