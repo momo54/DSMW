@@ -30,15 +30,17 @@ class p2pTest3 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
+        exec('./initWikiTest.sh ./dump.sql');
         exec('rm ./cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
+        $this->p2pBot1->updateProperies();
 
         $basicbot2 = new BasicBot();
         $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
+        $this->p2pBot2->updateProperies();
     }
 
     /**
@@ -276,7 +278,7 @@ The informations are updated!  You can  display remote patches:
         $PatchonWiki3 = arraytolower($PatchonWiki3);
         $PatchonWiki4 = arraytolower($PatchonWiki4);
         $this->assertEquals($PatchonWiki3,$PatchonWiki4,'patch are not equals on the 2 wikis');
- 
+
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Conflict_Management1');
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Subscription_Procedure1');
     }

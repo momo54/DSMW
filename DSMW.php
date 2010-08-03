@@ -22,6 +22,7 @@ $wgSpecialPageGroups['DSMWGeneralExhibits'] = 'dsmw_group';
 $wgGroupPermissions['*']['upload_by_url'] = true;
 $wgGroupPermissions['*']['reupload'] = true;
 $wgGroupPermissions['*']['upload'] = true;
+$wgAllowCopyUploads = true;
 $wgExtensionMessagesFiles['DSMW'] = $wgDSMWIP . '/languages/DSMW_Messages.php';
 
 $wgHooks['UnknownAction'][] = 'onUnknownAction';
@@ -151,7 +152,7 @@ function conflict(&$editor, &$out) {
 function onUnknownAction($action, $article) {
     global $wgOut, $wgServerName, $wgScriptPath, $wgUser, $wgScriptExtension, $wgDSMWIP;
     $urlServer = 'http://' . $wgServerName . $wgScriptPath . "/index{$wgScriptExtension}";
-
+    $urlAjax = 'http://'.$wgServerName.$wgScriptPath;
     //////////pull form page////////
     if (isset($_GET['action']) && $_GET['action'] == 'addpullpage') {
         wfDebugLog('p2p', 'addPullPage ');
@@ -179,7 +180,6 @@ pushUrl = urlTmp;
 }
 //alert(pushUrl);
 
-
 //alert(pushUrl+'api.php?action=query&meta=patch&papatchId=1&format=xml');
 var xhr_object = null;
 
@@ -191,8 +191,7 @@ var xhr_object = null;
 	      alert('Votre navigateur ne supporte pas les objets XMLHTTPRequest...');
 	      return;
 	   }
-
-	  try{ xhr_object.open('GET', pushUrl+'api.php?action=query&meta=patch&papatchId=1&format=xml', true);}
+          try{ xhr_object.open('GET', '".$urlAjax."/extensions/DSMW/files/ajax.php?url='+escape(pushUrl+'api.php?action=query&meta=patch&papatchId=1&format=xml'), true);}
           catch(e){
                     //alert('There is no DSMW Server responding at this URL');
                     document.getElementById('dsmw').innerHTML = 'There is no DSMW Server responding at this URL!';
@@ -202,12 +201,17 @@ var xhr_object = null;
 
 if(xhr_object.readyState == 4) {
             if(xhr_object.statusText=='OK'){
-                //alert('URL valid, there is a DSMW Server responding');
-                document.getElementById('dsmw').innerHTML = 'URL valid, there is a DSMW Server responding!';
-                document.getElementById('dsmw').style.color = 'green';
-
-}
+                if(xhr_object.responseText == 'true'){ //alert('URL valid, there is a DSMW Server responding');
+                        document.getElementById('dsmw').innerHTML = 'URL valid, there is a DSMW Server responding!';
+                        document.getElementById('dsmw').style.color = 'green';
+                  }
                 else{ //alert('There is no DSMW Server responding at this URL');
+                        document.getElementById('dsmw').innerHTML = 'There is no DSMW Server responding at this URL!';
+                        document.getElementById('dsmw').style.color = 'red';
+                  }
+                }
+                else{
+                //alert('There is no DSMW Server responding at this URL');
                 document.getElementById('dsmw').innerHTML = 'There is no DSMW Server responding at this URL!';
                 document.getElementById('dsmw').style.color = 'red';
 }
@@ -657,12 +661,12 @@ function compareMWVersion($version1, $version2='1.14.0') {
 
 /* * *************************************************************************** */
 /*
-  V0 : initial revision
-  /  \
-  /
+        V0 : initial revision
+       /  \
+      /
   P1 /      \P2
-  /
-  /          \
+    /
+   /          \
   V1          V2:2nd edit of the same article
   1st Edit
  */

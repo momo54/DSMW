@@ -36,7 +36,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
+        exec('./initWikiTest.sh ./dump.sql');
         exec('rm ./cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = $this->wiki1;
@@ -186,7 +186,7 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->p2pBot2->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
-        // assert that wiki1/Lambach == wiki2/Lambach
+        // assert that wiki10/Lambach == wiki11/Lambach
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Lambach');
 
         //create pull on wiki1

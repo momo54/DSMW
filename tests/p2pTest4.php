@@ -32,7 +32,7 @@ class p2pTest4 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
+        exec('./initWikiTest.sh ./dump.sql');
         exec('rm ./cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = $this->wiki1;
@@ -58,7 +58,7 @@ class p2pTest4 extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * create one page, push it on wiki1 and pull it on wiki2
+     * create one page, push it on wiki10 and pull it on wiki11
      */
     public function testSimple1() {
         $pageName = "Category:Lambach";
@@ -118,26 +118,26 @@ class p2pTest4 extends PHPUnit_Framework_TestCase {
 //        $this->assertTrue($this->p2pBot1->createPage($pageName,$content),
 //            'Failed to create page '.$pageName.' ('.$this->p2pBot1->bot->results.')');
 
-        //create push on wiki1
+        //create push on wiki10
         $pushName = 'PushCity10';
         $pushRequest = '[[category:Lambach]]';
 
         $this->assertTrue($this->p2pBot1->createPush($pushName, $pushRequest),
             'Failed to create push : '.$pushName.' ('.$this->p2pBot1->bot->results.')');
 
-        //push on wiki1
+        //push on wiki10
         $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
-        //edit on wiki1
+        //edit on wiki10
         $this->assertTrue($this->p2pBot1->editPage($pageName, 'create the second changeSet'),
             'failed to edit page '.$pageName.' ( '.$this->p2pBot1->bot->results.' )');
 
-        //push on wiki1
+        //push on wiki10
         $this->assertTrue($this->p2pBot1->push('PushFeed:'.$pushName),
             'failed to push '.$pushName.' ('.$this->p2pBot2->bot->results.')');
 
-        //create pull on wiki2
+        //create pull on wiki11
         $pullName = 'PullCity';
         $this->assertTrue($this->p2pBot2->createPull($pullName,$this->wiki1, $pushName),
             'failed to create pull '.$pullName.' ('.$this->p2pBot2->bot->results.')');

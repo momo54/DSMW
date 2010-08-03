@@ -42,19 +42,22 @@ class apiTest extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('../initWikiTest.sh');
+        exec('../initWikiTest.sh ../dump.sql');
         exec('rm ../cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
+        $this->p2pBot1->updateProperies();
 
         $basicbot2 = new BasicBot();
         $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
+        $this->p2pBot2->updateProperies();
 
         $basicbot3 = new BasicBot();
         $basicbot3->wikiServer = $this->wiki3;
         $this->p2pBot3 = new p2pBot($basicbot3);
+        $this->p2pBot3->updateProperies();
     }
 
     /**
@@ -69,7 +72,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
      */
     function testGetPatch() {
         $patchName = 'patch:localhost/wiki1';
-        $content = '[[patchID::'.$patchName.']] [[onPage::Berlin]] [[previous::localhost/wiki0]]
+        $content = '[[patchID::'.$patchName.']] [[onPage::Berlin]] [[previous::localhost/wiki0]] [[siteID::id1]]
         [[hasOperation::Localhost/wiki111;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page berlin]]';
         $this->assertTrue($this->p2pBot1->createPage($patchName,$content),
             'failed to create page '.$patchName.' ('.$this->p2pBot1->bot->results.')');
@@ -77,7 +80,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->p2pBot1->createPage($patchName,$content),
             'failed to create page '.$patchName.' ('.$this->p2pBot1->bot->results.')');
         $patchName = 'Patch:localhost/wiki2';
-        $content = '[[patchID::'.$patchName.']] [[onPage::Paris]] [[previous::none]]
+        $content = '[[patchID::'.$patchName.']] [[onPage::Paris]] [[previous::none]] [[siteID::id1]]
         [[hasOperation::Localhost/wiki121;Insert;(15555995255933583146:900c17ebee311fb6dd00970d26727577) ;content page Paris]]';
 
         $this->assertTrue($this->p2pBot1->createPage($patchName,$content),
@@ -118,7 +121,7 @@ class apiTest extends PHPUnit_Framework_TestCase {
  onPage: [[onPage::Moldova]]
 [[hasOperation::46B0DDA330CB057434586A52435CE43223;Delete;(6394517056216502886:26a70380f78f203e27ed3db9322b2f78) ;JycnTW9sZG92YScnJyB7e0F1ZGlvLUlQQXxlbi11cy1Nb2xkb3ZhLm9nZ3wvbcmSbMuIZG/KinbJmS99fSwgb2ZmaWNpYWxseSB0aGUgJycnUmVwdWJsaWMgb2YgTW9sZG92YScnJyAoJydSZXB1YmxpY2EgTW9sZG92YScnKSBpcyBhIFtbbGFuZGxvY2tlZF1dIGNvdW50cnkgaW4gW1tsb2NhdGVkX2luOjpFdXJvcF1dLCBsb2NhdGVkIGJldHdlZW4gW1tSb21hbmlhXV0gdG8gdGhlIHdlc3QgYW5kIFtbVWtyYWluZV1dIHRvIHRoZSBub3J0aCwgZWFzdCBhbmQgc291dGgu]]
 hasOperation: [[hasOperation::46B0DDA330CB057434586A52435CE43224;Insert;(587539302497374424:26a70380f78f203e27ed3db9322b2f78) ;JycnTW9sZG92YScnJywgb2ZmaWNpYWxseSB0aGUgJycnUmVwdWJsaWMgb2YgTW9sZG92YScnJyAoJydSZXB1YmxpY2EgTW9sZG92YScnKSBpcyBhIFtbbGFuZGxvY2tlZF1dIGNvdW50cnkgaW4gW1tsb2NhdGVkX2luOjpFdXJvcF1dLCBsb2NhdGVkIGJldHdlZW4gW1tSb21hbmlhXV0gdG8gdGhlIHdlc3QgYW5kIFtbVWtyYWluZV1dIHRvIHRoZSBub3J0aCwgZWFzdCBhbmQgc291dGgus]]
-previous: [[previous::Patch:46B0DDA330CB057434586A52435CE4329]]'),'failed to create page Patch : ('.$this->p2pBot1->bot->results.')');
+previous: [[previous::Patch:46B0DDA330CB057434586A52435CE4329]] [[siteID::id1]]'),'failed to create page Patch : ('.$this->p2pBot1->bot->results.')');
 
        /* $this->p2pBot1->createPage('Toto','Moldova en-us-Moldova.ogg /mɒlˈdoʊvə/ (help·info), officially the Republic of Moldova (Republica Moldova) is a landlocked country in Eastern Europe, located between Romania to the west and Ukraine to the north, east and south.
 

@@ -31,7 +31,7 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
      * @access protected
      */
     protected function setUp() {
-        exec('./initWikiTest.sh');
+        exec('./initWikiTest.sh ./dump.sql');
         exec('rm ./cache/*');
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = $this->wiki1;

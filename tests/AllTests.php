@@ -23,7 +23,7 @@ require_once 'p2pAttachmentsTest7.php';
 /**
  * Description of AllTests
  * execute all functionnal tests
- * @author hantz
+ * @author hantz, jean-philippe muller
  */
 
 class AllTests {
