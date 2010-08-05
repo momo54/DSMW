@@ -86,7 +86,7 @@ and `page_title` != \"Administration_push_site_addition\"";
                 $tmp = serialize($listOp);
                 $patchid = sha1($tmp);
                 $patch = new Patch(false, false, $listOp, $urlServer);
-                $patch->storePage($lastRev->getTitle()->getText());
+                $patch->storePage($lastRev->getTitle()->getText(),$lastRev->getId());
                 manager::storeModel($lastRev->getId(), $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
             }
         }

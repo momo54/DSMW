@@ -722,13 +722,11 @@ function attemptSave($editpage) {
         $listOp1 = $logoot1->generate($text, $actualtext);
         //creation Patch P2
         $tmp = serialize($listOp1);
-        $patchid = sha1($tmp);
-        $patch = new Patch(false, false, $listOp1, $urlServer);
+        $patch = new Patch(false, false, $listOp1, $urlServer, $rev_id1);
         if ($editpage->mTitle->getNamespace() == 0)
             $title = $editpage->mTitle->getText();
         else
             $title = $editpage->mTitle->getNsText() . ':' . $editpage->mTitle->getText();
-        $patch->storePage($title); //stores the patch in a wikipage
         //integration: diffs between VO and V2 into V1
 
         $modelAfterIntegrate = $logoot->integrate($listOp1);
@@ -736,18 +734,17 @@ function attemptSave($editpage) {
         $listOp = $logoot->generate($conctext, $actualtext);
         $modelAfterIntegrate = $logoot->getModel();
         $tmp = serialize($listOp);
-        $patchid = sha1($tmp);
-        $patch = new Patch(false, false, $listOp, $urlServer);
+        $patch = new Patch(false, false, $listOp, $urlServer, $rev_id1);
         if ($editpage->mTitle->getNamespace() == 0)
             $title = $editpage->mTitle->getText();
         else
             $title = $editpage->mTitle->getNsText() . ':' . $editpage->mTitle->getText();
-        $patch->storePage($title); //stores the patch in a wikipage
     }
     $revId = utils::getNewArticleRevId();
     wfDebugLog('p2p', ' -> store model rev : ' . $revId . ' session ' . session_id() . ' model ' . $modelAfterIntegrate->getText());
-    manager::storeModel($revId, $sessionId = session_id(), $modelAfterIntegrate, $blobCB = 0);
+    manager::storeModel($revId+1, $sessionId = session_id(), $modelAfterIntegrate, $blobCB = 0);
 
+    $patch->storePage($title, $revId+1); //stores the patch in a wikipage
     $editpage->textbox1 = $modelAfterIntegrate->getText();
     return true;
 }
@@ -774,8 +771,8 @@ function uploadComplete($image) {
         }
         $revID = $lastRevision->getId();
         $model = manager::loadModel($rev_id);
-        $patch = new Patch(false, true, null, $urlServer, null, null, null, null, $localfile->mime, $localfile->size, $localfile->url, null);
-        $patch->storePage($localfile->getTitle()); //stores the patch in a wikipage
+        $patch = new Patch(false, true, null, $urlServer, $rev_id, null, null, null, $localfile->mime, $localfile->size, $localfile->url, null);
+        $patch->storePage($localfile->getTitle(),$revID); //stores the patch in a wikipage
         manager::storeModel($revID, $sessionId = session_id(), $model, $blobCB = 0);
     }
     return true;

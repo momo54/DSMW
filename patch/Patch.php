@@ -72,7 +72,7 @@ class Patch {
         }
     }
 
-    public function storePage($pageName) {
+    public function storePage($pageName, $rev) {
         global $wgUser;
         $text = '
 [[Special:ArticleAdminPage|DSMW Admin functions]]
@@ -83,6 +83,8 @@ class Patch {
 \'\'\'SiteID:\'\'\' [[siteID::' . $this->mSiteId . ']]
     
 \'\'\'SiteUrl:\'\'\' [[siteUrl::' . $this->mSiteUrl . ']]
+    
+\'\'\'Rev:\'\'\' [[Rev::' . $rev . ']]
 
 ';
 
@@ -95,10 +97,7 @@ class Patch {
             if ($this->mPrevPatch == false) {
                 $this->mPrevPatch = "none";
             }
-            $this->mCausal = utils::searchCausalLink($pageName);
-            if ($this->mCausal == false) {
-                $this->mCausal = "none";
-            }
+            $this->mCausal = utils::searchCausalLink($pageName,$this->mCausal);
         }
 
 
@@ -178,24 +177,11 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
 ==Previous patch(es)==
 [[previous::' . $this->mPrevPatch . ']]';
         }
-        
-        if (is_array($this->mCausal)) {
-            $text.='
-
-==Causal Link(s)==
-';
-            foreach ($this->mCausal as $caus) {
-                $text.='[[causal::'.$caus . ']]
-
-';
-            }
-        } else {
-            $text.='
+        $text.='
 
 ==Causal Link==
 [[causal::' . $this->mCausal . ']]';
-        }
-        
+
         $title = Title::newFromText($this->mID, PATCH);
         $article = new Article($title);
         $article->doEdit($text, $summary = "");

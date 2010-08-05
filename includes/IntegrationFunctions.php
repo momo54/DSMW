@@ -125,18 +125,20 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
             }
             utils::writeAndFlush("<span style=\"margin-left:80px;\">" . $i . "/" . $j . ": Integration of Patch: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$patchId>" . $patchId . "</A></span><br/>");
             if ($sub === 'ATT') {
-                if (logootIntegrateAtt($onPage, $edit)) {
+                $rev = logootIntegrateAtt($onPage, $edit);
+                if ($rev>0) {
                     $patch = new Patch(true, true, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, $Mime, $Size, $Url, $Date);
-                    $patch->storePage($onPage);
+                    $patch->storePage($onPage,$rev);
                 } else {
                     throw new MWException(__METHOD__ . ': article not saved!');
                 }
             }
 
             else {
-                if (logootIntegrate($operations, $onPage, $sub)) {
+                $rev = logootIntegrate($operations, $onPage, $sub);
+                if ($rev>0) {
                     $patch = new Patch(true, false, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, null, null, null, null);
-                    $patch->storePage($onPage);
+                    $patch->storePage($onPage,$rev);
                 }
                 else {
                     throw new MWException( __METHOD__.': article not saved!');
@@ -201,11 +203,11 @@ function operationToLogootOp($operation) {
  */
 function logootIntegrate($operations, $article) {
     global $wgCanonicalNamespaceNames;
-    $indexNS=0;
-    wfDebugLog('p2p',' - function logootIntegrate : '.$article);
-    if(is_string($article)) {
-        $dbr = wfGetDB( DB_SLAVE );
-        $dbr->immediateBegin();
+    $indexNS = 0;
+    wfDebugLog('p2p', ' - function logootIntegrate : ' . $article);
+    $dbr = wfGetDB(DB_SLAVE);
+    $dbr->immediateBegin();
+    if (is_string($article)) {
         //if there is a space in the title, repalce by '_'
         $article = str_replace(" ", "_", $article);
 
@@ -276,10 +278,11 @@ function logootIntegrate($operations, $article) {
     }//end foreach operations
 
     $modelAfterIntegrate = $logoot->integrate($listOp);
-    $revId = utils::getNewArticleRevId();
-    manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
+    //$revId = utils::getNewArticleRevId();
     $status = $article->doEdit($modelAfterIntegrate->getText(), $summary="");
-
+    $revId = $status->value['revision']->getId();
+    manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
+    return $revId;
     //sleep(4);
     if(is_bool($status)) return $status;
     else return $status->isGood();
@@ -308,7 +311,7 @@ function logootIntegrateAtt($article, $edit) {
         $article = new Article($title);
         $status = $article->doEdit($model->getText(), $summary="");
     }
-    return true;
+    return $revID;
 }
 
 function downloadFile($url) {

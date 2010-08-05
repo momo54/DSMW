@@ -356,45 +356,30 @@ This is a patch of the article: [[onPage::'.$onPage.']]
      * Return the causal link of a patch
      *
      * @param <String> $pageName
-     * @return <array or String> the causal link
+     * @param <Integer> $rev
+     * @return <String> the causal link
      */
-    static function searchCausalLink($pageName) {
-        $ID = DSMWSiteId::getInstance();
-        $ID = $ID->getSiteId();
-        $results = array();
-        $resID = array();
-        $lastPatch = utils::getLastPatchId($pageName);
-        if ($lastPatch === null)
-            return false;
-        $res = true;
-        while ($res) {
-            $res1 = utils::getSemanticQuery('[[' . $lastPatch . ']]', '?previous
-?siteID');
+    static function searchCausalLink($pageName, $rev) {
+        if ($rev == 0) {
+            return 'none';
+        } else {
+            $res = utils::getSemanticQuery('[[Patch:+]][[onPage::' . $pageName . ']][[Rev::' . $rev . ']]','?PatchID');
+            if ($res === false) return 'none';
+            $count1 = $res->getCount();
+            for ($j = 0; $j < $count1; $j++) {
 
-            $row1 = $res1->getNext();
+                $row1 = $res->getNext();
+                if ($row1 === false)
+                    break;
+                $row1 = $row1[0];
 
-            $col2 = $row1[1]->getContent(); //SMWResultArray object
-            foreach ($col2 as $object2) {//SMWDataValue object
-                $wikiValue2 = $object2->getWikiValue();
-                $siteID = $wikiValue2;
-            }
-
-            if (!in_array($siteID, $resID)) {
-                $results[] = $lastPatch;
-                $resID[] = $siteID;
-            }
-
-            $col1 = $row1[0]->getContent(); //SMWResultArray object
-            foreach ($col1 as $object1) {//SMWDataValue object
-                $wikiValue1 = $object1->getWikiValue();
-                $lastPatch = $wikiValue1;
-            }
-            if ($siteID == $ID || $lastPatch == 'None' )
-                if (count($results) == 1) {
-                    return $results[0];
-                } else {
-                    return $results;
+                $col1 = $row1->getContent(); //SMWResultArray object
+                foreach ($col1 as $object1) {//SMWDataValue object
+                    $wikiValue1 = $object1->getWikiValue();
+                    $res = $wikiValue1;
                 }
+            }
+            return $res;
         }
     }
 
