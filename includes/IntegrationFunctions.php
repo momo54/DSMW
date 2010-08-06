@@ -334,8 +334,10 @@ function downloadFile($url) {
 
 //    $url = $patch->getUrl();
     $onPage = preg_split("/^.*\//", $url);
+    $onPage = $onPage[1];
+    $onPage = str_replace(array(' '),array('%20'), $onPage);
     $url = str_replace(array(':','Http'),array('%3A','http'), $url);
-    $download = $apiUrl . "?action=upload&filename=".$onPage[1]."&url="
+    $download = $apiUrl . "?action=upload&filename=".$onPage."&url="
             .$url."&token=".$token."&ignorewarnings=1";
     $resp = Http::post($download);
     libxml_use_internal_errors( true );

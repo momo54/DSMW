@@ -17,7 +17,7 @@ class DSMWUpdateJob extends Job {
     }
 
     function run() {
-        global $wgServerName,$wgScriptPath;
+        global $wgServerName,$wgScriptPath, $wgServer, $wgScriptExtension;
         $urlServer = 'http://'.$wgServerName;
         wfProfileIn('DSMWUpdateJob::run()');
         $revids = array();
@@ -73,7 +73,8 @@ and `page_title` != \"Administration_push_site_addition\"";
 //Now we can logootize:
         if(count($page_ids)!=0) {
             foreach($page_ids as $pageid) {
-
+                $title = Title::newFromID($pageid);
+                $ns = $title->getNamespace();
                 $lastRev = Revision::loadFromPageId($db, $pageid);
                 $pageText = $lastRev->getText();
 
@@ -85,9 +86,26 @@ and `page_title` != \"Administration_push_site_addition\"";
                 $modelAfterIntegrate = $logoot->getModel();
                 $tmp = serialize($listOp);
                 $patchid = sha1($tmp);
-                $patch = new Patch(false, false, $listOp, $urlServer);
-                $patch->storePage($lastRev->getTitle()->getText(),$lastRev->getId());
-                manager::storeModel($lastRev->getId(), $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
+                if ($ns == NS_FILE || $ns == NS_IMAGE || $ns == NS_MEDIA) {
+                    $apiUrl = $wgServer . $wgScriptPath . "/api" . $wgScriptExtension;
+                    $onPage = str_replace(array(' '), array('%20'), $lastRev->getTitle()->getText());
+                    $download = $apiUrl . "?action=query&titles=File:" . $onPage . "&prop=imageinfo&format=php&iiprop=mime|url|size";
+                    $resp = Http::get($download);
+                    $resp = unserialize( $resp );
+                    $a = $resp['query']['pages'];
+                    $a = current($a);
+                    $a = $a['imageinfo'];
+                    $a = current($a);
+                    $mime = $a['mime'];
+                    $size = $a['size'];
+                    $url = $a['url'];
+                    $patch = new Patch(false, true, null, $urlServer. $wgScriptPath, 0, null, null, null, $mime, $size, $url, null);
+                    $patch->storePage('File:'.$lastRev->getTitle()->getText(), $lastRev->getId());
+                } else {
+                    $patch = new Patch(false, false, $listOp, $urlServer, 0);
+                    $patch->storePage($lastRev->getTitle()->getText(), $lastRev->getId());
+                }
+                manager::storeModel($lastRev->getId(), $sessionId = session_id(), $modelAfterIntegrate, $blobCB = 0);
             }
         }
 
