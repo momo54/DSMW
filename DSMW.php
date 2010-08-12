@@ -15,7 +15,7 @@ require_once("$wgDSMWIP/includes/Ajax/include.php");
 
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
-define('DSMW_VERSION', '0.7');
+define('DSMW_VERSION', '1.0');
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWGeneralExhibits'] = 'dsmw_group';
