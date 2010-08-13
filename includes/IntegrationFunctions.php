@@ -101,7 +101,8 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
             //            }
 
             if (!in_array($onPage, $pages)) {
-                utils::writeAndFlush("<span style=\"margin-left:60px;\">Page: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$onPage>" . $onPage . "</A></span><br/>");
+                $onPage1 = str_replace(array(' '), array('_'), $onPage);
+                utils::writeAndFlush("<span style=\"margin-left:60px;\">Page: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$onPage1>" . $onPage . "</A></span><br/>");
                 $pages[] = $onPage;
             }
             if ($sub === 'ATT') {
