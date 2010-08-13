@@ -972,7 +972,7 @@ to be loaded else "allow_url_fopen" set to "On"' );
     static function prepareString($Mime,$Size,$Url) {
         $Url = preg_split("/^.*\//", $Url);
         $var = $Url[1];
-        $var = str_replace(array('.', '/', ':'), array('', '', ''), $var);
+        $var = str_replace(array('.', '/', ':',' '), array('', '', '','_'), $var);
         $var = strtolower($var);
         return '/tmp/'.$var.'.dsmw';
     }
