@@ -19,6 +19,7 @@ class ArticleAdminPage extends SpecialPage {
         # Add all our needed hooks
         $wgHooks["UnknownAction"][] = $this;
         $wgHooks["SkinTemplateTabs"][] = $this;
+        $wgHooks['SkinTemplateNavigation'][] = $this;
         SpecialPage::SpecialPage('ArticleAdminPage'/*, "block"*/);// avec block => pasges speciales restreintes
         wfLoadExtensionMessages('DSMW');
     }
@@ -600,6 +601,59 @@ publish the modifications of the "'.$title.'" article
         return false;
     }
 
+        /**
+     * Defines the "Article Admin tab"
+     *
+     * @global <type> $wgRequest
+     * @global <type> $wgServerName
+     * @global <type> $wgScriptPath
+     * @param <type> $skin
+     * @param <type> $content_actions
+     * @return <type>
+     */
+    function onSkinTemplateNavigation($skin, $content_actions) {
+        global $wgRequest, $wgServerName, $wgScriptPath;
+        $urlServer = 'http://'.$wgServerName.$wgScriptPath;
+
+        $action = $wgRequest->getText("action");
+        $db = &wfGetDB(DB_SLAVE);
+
+        $patchCount = 0;
+        if($skin->mTitle->getNamespace()==0) $title = $skin->mTitle->getText();
+        else $title = $skin->mTitle->getNsText().':'.$skin->mTitle->getText();
+
+        $patchList = array();
+        $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']]', '?patchID');
+        $count = $res->getCount();
+        for($i=0; $i<$count; $i++) {
+
+            $row = $res->getNext();
+            if ($row===false) break;
+            $row = $row[1];
+
+            $col = $row->getContent();//SMWResultArray object
+            foreach($col as $object) {//SMWDataValue object
+                $wikiValue = $object->getWikiValue();
+                $patchList[] = $wikiValue;
+            }
+        }
+
+        $patchCount = count($patchList);
+        if($skin->mTitle->mNamespace == PATCH
+            || $skin->mTitle->mNamespace == PULLFEED
+            || $skin->mTitle->mNamespace == PUSHFEED
+            || $skin->mTitle->mNamespace == CHANGESET
+        ) {
+        }else {
+
+            $content_actions['views']["admin"] = array(
+                "class" => ($action == "admin") ? "selected" : false,
+                "text" => "DSMW (".$patchCount." patches)",
+                "href" => $skin->mTitle->getLocalURL("action=admin")
+            );
+        }
+        return true;
+    }
 
     /**
      *replaces the deleted semantic attribute in the feed page (pullfeed:.... or
