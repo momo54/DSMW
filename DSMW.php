@@ -760,7 +760,7 @@ function uploadComplete($image) {
 
         $localfile = $image->getLocalFile();
     }
-    $path = utils::prepareString($localfile->mime, $localfile->size, $wgServer . $localfile->url);
+    $path = utils::prepareString($localfile->mime, $localfile->size, $wgServer . urldecode($localfile->url));
     if (!file_exists($path)) {
         $dbr = wfGetDB(DB_SLAVE);
         $lastRevision = Revision::loadFromTitle($dbr, $localfile->getTitle());
@@ -771,7 +771,7 @@ function uploadComplete($image) {
         }
         $revID = $lastRevision->getId();
         $model = manager::loadModel($rev_id);
-        $patch = new Patch(false, true, null, $urlServer, $rev_id, null, null, null, $localfile->mime, $localfile->size, $localfile->url, null);
+        $patch = new Patch(false, true, null, $urlServer, $rev_id, null, null, null, $localfile->mime, $localfile->size, urldecode($localfile->url), null);
         $patch->storePage($localfile->getTitle(),$revID); //stores the patch in a wikipage
         manager::storeModel($revID, $sessionId = session_id(), $model, $blobCB = 0);
     }
