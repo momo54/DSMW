@@ -5,7 +5,7 @@
  * page.
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author muller jean-philippe
+ * @author muller jean-philippe & Morel Émile
  */
 class Patch {
 

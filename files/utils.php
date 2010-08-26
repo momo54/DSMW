@@ -4,7 +4,7 @@
  * Static utility methods used in the whole DSMW extension
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author muller jean-philippe - hantz
+ * @author muller jean-philippe - hantz - Morel
  */
 class utils {
 

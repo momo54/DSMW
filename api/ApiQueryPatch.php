@@ -9,7 +9,7 @@ if( !defined('MEDIAWIKI') ) {
  * return the patch contain given by the parameter patchId
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author hantz
+ * @author hantz & Morel Émile
  */
 class ApiQueryPatch extends ApiQueryBase {
     public function __construct( $query, $moduleName ) {

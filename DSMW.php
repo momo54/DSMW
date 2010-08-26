@@ -2,7 +2,7 @@
 
 /**
  * @copyright 2009 INRIA-LORIA-ECOO project
- * @author jean-philippe muller
+ * @author jean-philippe muller & Morel Émile
  */
 if (!defined('MEDIAWIKI')) {
     exit;

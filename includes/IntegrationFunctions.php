@@ -1,6 +1,6 @@
 <?php
 /**
- * @author jean-philippe muller
+ * @author jean-philippe muller & Morel Émile
  * @copyright INRIA-LORIA-ECOO project
  */
 
