@@ -58,7 +58,7 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
 		sleep(5);
 
         //edit Main_Page on wiki1
-        $this->assertTrue($this->p2pBot1->editPage('Main_Page', 'another edition test'),
+        $this->assertFalse($this->p2pBot1->editPage('Main_Page', 'another edition test'),
             'failed to edit page Main_Page ( '.$this->p2pBot1->bot->results.' )');
 
         //edit UNTITLED on wiki1
@@ -85,7 +85,7 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
         //    'succeeded to edit page Server_push ( '.$this->p2pBot1->bot->results.' )');
 
         //edit WAI-ARIA on wiki1
-        $this->assertFalse($this->p2pBot1->editPage('WAI-ARIA', 'edition test'),
+        $this->assertTrue($this->p2pBot1->editPage('WAI-ARIA', 'edition test'),
             'succeeded to edit page WAI-ARIA ( '.$this->p2pBot1->bot->results.' )');
 
         //edit AxsJAX on wiki1

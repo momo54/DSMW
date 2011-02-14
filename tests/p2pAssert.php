@@ -1,6 +1,7 @@
 <?php
 //require_once 'PHPUnit/Framework/Assert.php';
 //require_once '../files/utils.php';
+require_once '../files/ajax.php';
 
 function assertPageExist($server,$pageName) {
     $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
@@ -72,12 +73,30 @@ function getSemanticRequest($server,$request,$param,$sep='!') {
     if( count($array)==1) {
         return $array;
     }
+    
+    
     $arrayRes[] = $array[1];
     for ($i = 2 ; $i < count($array) ; $i++) {
         $arrayRes[] = ereg_replace('"', '',$array[$i]);
     }
     return $arrayRes;
 }
+
+/**
+ * return in an array format the results of the semantic request
+ */
+function getSemanticRequestArrayResult($server,$request,$sep='!') {
+    $request = utils::encodeRequest($request);
+    
+    $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
+   
+   // 
+    
+    return   split("\n", $php);
+    
+
+}
+
 
 function getPatchXML($server,$patchId) {
     $url = $server.'/api.php?action=query&meta=patch&papatchId='.$patchId.'&format=xml';

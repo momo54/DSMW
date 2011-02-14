@@ -8,15 +8,17 @@
 class LogootIns {
     private $mLogootPosition;
     private $mLineContent;
+    private $mOpDegree;
 
     /**
      *
      * @param <Object> $position LogootPosition
      * @param <String> $content line content
      */
-    function  __construct($position, $content) {
+    public function __construct($position, $content, $degree='1') {
         $this->setLogootPosition($position);
         $this->setLineContent($content);
+        $this->setLogootDegree($degree);
     }
 
     public function getLogootPosition(){
@@ -35,6 +37,15 @@ class LogootIns {
         $this->mLineContent = $content;
     }
 
+    
+    public function setLogootDegree($degree){
+    	$this->mOpDegree=$degree;
+    }
+    
+	public function getLogootDegree(){
+    	return $this->mOpDegree;
+    }
+    
     public function execute(){
 
     }
