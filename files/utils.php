@@ -32,8 +32,9 @@ class utils {
      */
     static function encodeRequest($request) {
         $req = str_replace(
-                array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'),
-                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'), $request);
+                array('-',   '#',   "\n",  ' ',   '/',   '[',   ']',   '<',   '>',   '&lt;', '&gt;', '&amp;', '\'\'',   '|',   '&',   '%',   '?',   '{',   '}',   ':'),
+                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C',  '-3E',  '-26',   '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
+                $request);
         return $req;
     }
 
@@ -44,8 +45,9 @@ class utils {
      */
     static function decodeRequest($req) {
         $request = str_replace(
-                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
-                array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'), $req);
+        		array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C',  '-3E',  '-26',   '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
+                array('-',   '#',   "\n",  ' ',   '/',   '[',   ']',   '<',   '>',   '&lt;', '&gt;', '&amp;', '\'\'',   '|',   '&',   '%',   '?',   '{',   '}',   ':'),
+                $req);
         return $request;
     }
 
@@ -179,6 +181,48 @@ This ChangeSet is in : [[inPullFeed::'.$inPullFeed.']]<br>
         $article->doEdit($newtext, $summary="");
     }
 
+    
+    
+    /**
+     * Reads the patch id from a text.
+     * The text should be Patch:THEPATCHID
+     * @param <String> $patchId 
+     */
+    static function readIdFromText($patchId) {
+    	if(count($patchId > strlen('Patch:'))) {
+    		return substr($patchId,strlen('Patch:'));
+    	} else {
+    		return NULL;
+    	}
+    } 
+    
+    
+    /**
+     * Reads a array of strings, and returns a array with the read ids.
+     * 
+     * @param <String[]> $patchids
+     */
+    static function readIdsFromText($patchIds) {
+    	if(is_array($patchIds)) {
+    		$retour;
+    		foreach ($patchIds as $val) {
+    			$val2 = utils::readIdFromtext($val);
+    			if(!is_null($val2)) {
+    				$retour[] = $val2;
+    			}
+    			 
+    		}
+    		return $retour;
+    	} else {
+    		$val2 = utils::readIdFromtext($patchIds);
+    		if(!is_null($val2)) {
+    			return array($val2); 
+    		} else {
+    			return array();
+    		}
+    	}
+    }
+    
 
     /**
      * create a new patch (page)

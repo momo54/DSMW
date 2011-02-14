@@ -22,6 +22,7 @@ class Patch {
     private $mUrl;
     private $mDate;
     private $mID;
+    private $mDegree;
 
     /**
      *

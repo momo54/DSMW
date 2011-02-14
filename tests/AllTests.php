@@ -17,7 +17,7 @@ require_once 'p2pAttachmentsTest4.php';
 require_once 'p2pAttachmentsTest5.php';
 require_once 'p2pAttachmentsTest6.php';
 require_once 'p2pAttachmentsTest7.php';
-
+require_once 'undoTest1.php';
 
 
 /**
@@ -48,6 +48,7 @@ class AllTests {
         $suite->addTestSuite('p2pAttachmentsTest5');
         $suite->addTestSuite('p2pAttachmentsTest6');
         $suite->addTestSuite('p2pAttachmentsTest7');
+        $suite->addTestSuite('undoTest1');
         return $suite;
     }
 }

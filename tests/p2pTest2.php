@@ -109,7 +109,7 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
             'failed to pull Prof2Course1 ('.$this->p2pBot1->bot->results.')');
 
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Lesson1');
-        assertContentEquals($this->p2pBot1->bot->wikiServer,$this->p2pBot2->bot->wikiServer, $pageNameLesson1);
+        assertContentEquals($this->p2pBot2->bot->wikiServer, $this->p2pBot1->bot->wikiServer, $pageNameLesson1);
 
         //push on wiki1 for student, lessons and exercises
         $this->assertTrue($this->p2pBot1->createPush('S1Course1', '[[type::!Exam]][[forYear::2009]]'),

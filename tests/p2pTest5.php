@@ -53,7 +53,9 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
 
         //perform the "articles update" feature
         $this->assertTrue($this->p2pBot1->articlesUpdate());
-
+        
+		// We should wait 'til everything is updated ?
+		sleep(5);
 
         //edit Main_Page on wiki1
         $this->assertTrue($this->p2pBot1->editPage('Main_Page', 'another edition test'),
@@ -76,7 +78,7 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
      */
     public function testDSMWPagesUpdateFunction1(){
         //import procedure
-        $this->assertTrue($this->p2pBot1->importXML('Import/Wikipedia-20091119095555.xml'));
+        $this->assertTrue($this->p2pBot1->importXML('Import/Wikipedia-20091119095555.xml'), 'Should have correctly imported');
 
         //edit Server_push on wiki1
         //$this->assertFalse($this->p2pBot1->editPage('Server_push', 'edition test'),

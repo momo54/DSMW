@@ -29,6 +29,13 @@ class p2pBot {
 //        return $content;
 //    }
 
+    /**
+     * Appends $line to the content of the page.
+     * 
+     * @param <String> $pageName
+     * @param <String> $line
+     * @return Boolean : true if edit went well, false otherwise.
+     */
     function editPage($pageName,$line) {
         $res = $this->bot->wikiFilter($pageName,'append','summary',$line);
         return $res;
@@ -260,7 +267,7 @@ class p2pBot {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
-                echo "import failed with error 200:(".$this->bot->results.")";
+                echo "upload failed with error 200:(".$this->bot->results.")";
                 return true;
             }
             elseif ('302'==$code)
@@ -279,9 +286,11 @@ class p2pBot {
         $url = $this->bot->wikiServer.PREFIX.'/api.php?action=query&titles=File:'.$file.'&prop=imageinfo&iilimit=50&iiend=20071231235959&iiprop=timestamp|user|url|size&format=php';
         $image = file_get_contents($url);
         $image = unserialize($image);
+        
         $array = array_shift($image);
         $array = array_shift($array);
         $array = array_shift($array);
+
         if ($array['imageinfo'][0]['size'] == '')
             return false;
         elseif ($array['imageinfo'][0]['size'] == $size)
@@ -289,6 +298,48 @@ class p2pBot {
         else
             return false;
     }
+    
+    /**
+     * 
+     * Calls patch undo
+     * 
+     */
+    function undo($patchId){
+    	echo "undo\n";
+    	$res = $this->bot->wikiFilter('Page1','undoTest');
+    	return $res;
+    	
+       /* if(is_array($patchId)) {
+            $post_vars['name'] = $patchId;
+        }else {
+            $post_vars['name[]'] = $patchId;
+        }
+        $post_vars['action'] = 'undo';
+        
+	    if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php',$post_vars) ) {
+	        // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
+	            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
+	            if ('200'==$code) {
+	                if(strpos($this->bot->results, "<html") > 0 ){
+	                    echo "undo failed with error 200:(".$this->bot->results.")\n";
+	                    return false;
+	                }
+	                else{ // Push return some information with Ajax
+	                    echo $this->bot->results."\n";
+	                    return true;
+	                }
+	            }
+	            elseif ('302'==$code)
+	                return true;
+	            else {
+	                echo "undo failed error not 200:(".$this->bot->results.")";
+	                return false;
+	            }
+	        }else {
+	            echo "undo submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
+	            return false;
+	        }*/
+	    }
 
 }
 
@@ -300,4 +351,11 @@ function append($content,$line) {
     $content.=$line;
     return $content;
 }
+
+function undoTest($content, $line) {
+	echo "undoTest\n";
+	$c = "[[Category : city]]";
+	return $c;
+}
+
 ?>
