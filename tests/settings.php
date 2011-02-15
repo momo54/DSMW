@@ -11,7 +11,7 @@
 #define('WIKI1','http://localhost/16/wiki1');
 #define('WIKI2','http://localhost/16/wiki2');
 #define('WIKI3','http://localhost/16/wiki3');
-define('WIKI1','http://localhost/15/wiki1');
-define('WIKI2','http://localhost/15/wiki2');
-define('WIKI3','http://localhost/15/wiki3');
+define('WIKI1','http://localhost/wiki1');
+define('WIKI2','http://localhost/wiki2');
+define('WIKI3','http://localhost/wiki3');
 ?>
