@@ -309,18 +309,18 @@ class p2pBot {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
-                echo 'Create push failed with error 200 : ('.$this->bot->results.')';
+                echo 'Create undo failed with error 200 : ('.$this->bot->results.')';
                 return false;
             }
             elseif ('302'==$code) {
                 return true;
             }
             else {
-                echo 'push failed error not 200 : ('.$this->bot->results.')';
+                echo 'undo failed error not 200 : ('.$this->bot->results.')';
                 return false;
             }
         }else {
-            echo 'push submit failed ('. $this->bot->wikiServer . PREFIX . '/index.php?action=undoPage', $post_vars .')';
+            echo 'push undo failed ('. $this->bot->wikiServer . PREFIX . '/index.php?action=undoPage', $post_vars .')';
             return false;
         }
     	
