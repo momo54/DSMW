@@ -22,7 +22,7 @@ class Patch {
     private $mUrl;
     private $mDate;
     private $mID;
-    private $mDegree;
+    private $mVisible;
 
     /**
      *
@@ -39,7 +39,7 @@ class Patch {
      * @param <string> $Url
      * @param <string> $Date
      */
-    public function __construct($remote, $attachment, $operations, $siteUrl = '', $causalLink = '', $patchid = '', $previousPatch = '', $siteID = '', $Mime = '', $Size = '', $Url = '', $Date = '') {
+    public function __construct($remote, $attachment, $operations, $siteUrl = '', $causalLink = '', $patchid = '', $previousPatch = '', $siteID = '', $Mime = '', $Size = '', $Url = '', $Date = '', $Visible= '1') {
         global $wgServer;
         $this->mRemote = $remote;
         $this->mID = utils::generateID();
@@ -55,6 +55,8 @@ class Patch {
         $this->mPrevPatch = $previousPatch;
         $this->mSiteUrl = $siteUrl;
         $this->mCausal = $causalLink;
+        
+        $this->mVisible= $Visible;
 
         $this->mAttachment = $attachment;
         if ($attachment == true) {
@@ -86,6 +88,8 @@ class Patch {
 \'\'\'SiteUrl:\'\'\' [[siteUrl::' . $this->mSiteUrl . ']]
     
 \'\'\'Rev:\'\'\' [[Rev::' . $rev . ']]
+
+\'\'\'Visibilite:\'\'\' [[Visibilite::' . $this->mVisible. ']]
 
 ';
 
@@ -144,10 +148,13 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
                     $lineContent = $operation->getLineContent();
                     $lineContent1 = utils::contentEncoding($lineContent); //base64 encoding
                     $type = "";
-                    if ($operation instanceof LogootIns)
-                        $type = "Insert";
-                    else
+                    if ($operation instanceof LogootIns){
+                    	        $type = "Insert";
+                    }  elseif ($operation instanceof LogootDel){
                         $type="Delete";
+                    } else {
+                    	$type="Undo";
+                    }
                     $operationID = utils::generateID();
                     $text.='|[[hasOperation::' . $operationID . ';' . $type . ';'
                             . $operation->getLogootPosition()->toString() . ';' . $lineContent1 . '| ]]' . $type;

@@ -92,8 +92,11 @@ class logootEngine implements logoot {
     public function generate($oldText, $newText) {
     //first revision, if model is empty
         if(count($this->model->getPositionlist())==0
-            && count($this->model->getPositionlist())==0) $firstRev=1;
-        else $firstRev=0;
+            && count($this->model->getPositionlist())==0){
+            	$firstRev=1;
+            } else {
+            	$firstRev=0;
+            }
         //$blobInfo = $this;
 
 /* explode into lines*/
@@ -101,7 +104,9 @@ class logootEngine implements logoot {
         $nta = explode( "\n", $newText  );
         $counter = 0;
 
-        if(count($ota)==1 && $ota[0]=="") unset ($ota[0]);
+        if(count($ota)==1 && $ota[0]=="") {
+        	unset ($ota[0]);
+        }
 
         $listOp = array();
         $diffs = new Diff1( $ota, $nta );
@@ -227,11 +232,12 @@ class logootEngine implements logoot {
         while (true) {
             $inf = new Math_BigInteger($start->get($i)->getInt());
 
-            if($isInf==true)
+            if($isInf==true){
                 $sup = new Math_BigInteger(INT_MAX);
-            else
+            } else {
                 $sup = new Math_BigInteger($end->get($i)->getInt());
-
+            }
+            
             $tmpVal = $sup->subtract($inf);
             $tmpVal1 = $tmpVal->subtract(new Math_BigInteger("1"));
             if (($tmpVal1->compare($N))>0) {
@@ -244,13 +250,15 @@ class logootEngine implements logoot {
 
             $i++;
 
-            if ($i == $start->size())
+            if ($i == $start->size()){
                 $start->add($Id_Min);
-
-            if ($i == $end->size())
+            }
+            if ($i == $end->size()){
                 $end->add($Id_Max);
-
-            if(($inf->compare($sup))<0)$isInf=true;
+            }
+            if(($inf->compare($sup))<0){
+            	$isInf=true;
+            }
 
         }
 
@@ -272,9 +280,10 @@ class logootEngine implements logoot {
 
             $result[]=$r;//result est une arraylist<Position>
             return $result;
-        } else
+        } else {
             $lstep = $step;
-
+        }
+        
         if (($lstep->compare(new Math_BigInteger("0"))) == 0) {
             $lstep = new Math_BigInteger("1");
         }
@@ -293,9 +302,9 @@ class logootEngine implements logoot {
             $add = $tmpVal6->random($tmpVal6, $tmpVal5);
 
                 $r->set($i, $add->toString(), $sid/*, $clock*/);
-            } else
+            } else {
                 $r->add1($i, new Math_BigInteger("1"), $sid/*, $clock*/);
-
+            }
 
             $result[]=clone $r;//voir
             $old = clone $r;
@@ -541,9 +550,10 @@ class logootEngine implements logoot {
                 wfDebugLog('p2p','      - the value is greater than the last element');
                 return -2;/* if the value is greater than the last element of the array*/
             }
-            else  /*else we return the values surrounding the ressearched
+            else { /*else we return the values surrounding the ressearched
                     value */
                 return array(0=>$gauche, 1=>$droite);
+            }
         }
     }
 
