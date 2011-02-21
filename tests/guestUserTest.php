@@ -12,7 +12,13 @@ $wgDebugLogGroups  = array(
         'p2p'=>"/tmp/p2p.log",
 );
 
-
+/**
+ * Description of guestUserTestUndo
+ * 
+ * This is the test for the correspondant user story
+ * 
+ * @author Manoël Fortun
+ */
 class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 	
 	
@@ -50,11 +56,11 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
         $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
 
-        /**
+        
         $basicbot2 = new BasicBot();
         $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
-
+/*
         $basicbot3 = new BasicBot();
         $basicbot3->wikiServer = $this->wiki3;
         $this->p2pBot3 = new p2pBot($basicbot3);
@@ -81,8 +87,62 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
         
     }
 	
+    
+    public function testUnexistentPatch(){
+		
+		$patch="Patch:defzfnviizn1581fze15v1z5";
+		
+		
+		//must Fail
+		assert($this->p2pBot1->undos($pageName, $patch));
+		
+	} 
+    
+    public function testUndoUndo(){
+		      $content=" Du contenu ";
+		     $this->p2pBot2->createPage($pageName,$content);
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the four changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the nine changeSet');	
+    	
+    	
+    	
+		$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
+		//utils::orderPatchByPrevious($pageName);
+	
+		$nbPatchPreUndo=count($res);
+		
+		//UNdo last patch
+		assert($this->p2pBot1->undos($pageName, count($res)-1));
+		//
+		$resUndo=getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
+		//check if there a new patch
+		assert(($nbPatchPreUndo+1)==count($resUndo));
+		
+		//undo last patch that now is an undo
+		assert($this->p2pBot1->undos($pageName, count($resUndo)-1));
+		
+		$resUndoUndo =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
+		
+		
+		//check if the number of pacth is expected
+		assert(($nbPatchPreUndo+2)==count($resUndoUndo));
+		
+		//check the content
+			assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
+	} 
+	
+	
 	
 	public function testUndoAllPatch(){
+		
+		
+		$this->p2pBot2->createPage($pageName,"");
 		
 			
 		$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
@@ -91,7 +151,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$nbPatchPreUndo=count($res);
 		
 		
-		assert($this->p2pBot1->undo($pageName, $res));
+		assert($this->p2pBot1->undos($pageName, $res));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -99,16 +159,31 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		//check if the number of pacth is expected
 		assert(($nbPatchPreUndo*2)==count($resPostTest));
 		
-		//check content of the patch that they are inverse
+		//check the content
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	} 
 	
 	
 	public function testUndoNoPatch(){
 		$res=array();
-		assert($this->p2pBot1->undo($pageName, $res));
+		assert($this->p2pBot1->undos($pageName, $res));
 	}
 	
 	public function testUndoOnePatch(){
+		
+		//second wiki fixture
+		  $content=" Du contenu ";
+		$this->p2pBot2->createPage($pageName,$content);
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the nine changeSet');	
+		
+		
+		
 			$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -117,7 +192,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$res=$this->orderPatches($res);
 		
 		
-		assert($this->p2pBot1->undo($pageName, $res[3]));
+		assert($this->p2pBot1->undos($pageName, $res[3]));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -126,11 +201,26 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+1)==count($resPostTest));
 		
 		//check the content
-		
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 		
 	}
 	
 	public function testUndoLastPacth(){
+		
+			//second wiki fixture
+		  $content=" Du contenu ";
+		$this->p2pBot2->createPage($pageName,$content);
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the four changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+
+        	
+		
+		
 		$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -140,7 +230,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		
 	
 		
-		assert($this->p2pBot1->undo($pageName,$res[count($res)-1] ));
+		assert($this->p2pBot1->undos($pageName,$res[count($res)-1] ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -149,10 +239,26 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+2)==count($resPostTest));
 		
 		//check the content
-		
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	}
 	
 	public function testUndoFirstPatch(){
+		
+				//second wiki fixture
+	
+		$this->p2pBot2->createPage($pageName,"");
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the four changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the nine changeSet');	
+		
+		
+		
+		
 		$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -161,7 +267,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$res=$this->orderPatches($res);
 		
 		
-		assert($this->p2pBot1->undo($pageName,$res[0] ));
+		assert($this->p2pBot1->undos($pageName,$res[0] ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -170,11 +276,26 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+2)==count($resPostTest));
 		
 		//check the content
-		
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	}
 	
 	
 	public function testUndoTwoLastPatches(){
+		
+		
+				//second wiki fixture
+		  $content=" Du contenu ";
+		$this->p2pBot2->createPage($pageName,$content);
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the four changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+
+		
+		
+		
 			$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -185,7 +306,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[count($res)-1];
 		$tempPatch[1]=$res[count($res)-2];
 		
-		assert($this->p2pBot1->undo($pageName,$tempPatch ));
+		assert($this->p2pBot1->undos($pageName,$tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -194,9 +315,25 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+2)==count($resPostTest));
 		
 		//check the content
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	}
 	
 	public function testUndoTwoFirstPatches(){
+		
+				//second wiki fixture
+		  $content=" Du contenu ";
+		$this->p2pBot2->createPage($pageName,"");
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the four changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the nine changeSet');	
+		
+		
+		
+		
 		$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -207,7 +344,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[0];
 		$tempPatch[1]=$res[1];
 		
-		assert($this->p2pBot1->undo($pageName,$tempPatch ));
+		assert($this->p2pBot1->undos($pageName,$tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -216,11 +353,26 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+2)==count($resPostTest));
 		
 		//check the content
-		
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	}
 	
 	
 	public function testUndoTwoFollowingPatches(){
+		
+		
+				//second wiki fixture
+		  $content=" Du contenu ";
+		$this->p2pBot2->createPage($pageName,$content);
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the third changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the seven changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the nine changeSet');	
+		
+		
+		
+		
 	$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -231,7 +383,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[3];
 		$tempPatch[1]=$res[4];
 		
-		assert($this->p2pBot1->undo($pageName,$tempPatch ));
+		assert($this->p2pBot1->undos($pageName,$tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -240,10 +392,29 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+2)==count($resPostTest));
 		
 		//check the content
-		
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	}
 	
 	public function testUndoTwoNonFollowingPacthes(){
+		
+		
+				//second wiki fixture
+		  $content=" Du contenu ";
+		$this->p2pBot2->createPage($pageName,$content);
+        $this->p2pBot2->editPage($pageName, 'create the second changeSet');
+
+        $this->p2pBot2->editPage($pageName, 'create the four changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the five changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the six changeSet');
+
+        $this->p2pBot2->editPage($pageName, 'create the height changeSet');
+        $this->p2pBot2->editPage($pageName, 'create the nine changeSet');	
+		
+		
+		
+		
+		
+		
 		$res =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//utils::orderPatchByPrevious($pageName);
 	
@@ -254,7 +425,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[2];
 		$tempPatch[1]=$res[6];
 		
-		assert($this->p2pBot1->undo($pageName,$tempPatch ));
+		assert($this->p2pBot1->undos($pageName,$tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -263,7 +434,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		assert(($nbPatchPreUndo+2)==count($resPostTest));
 		
 		//check the content
-		
+		assert(getContentPage($this->p2pBot2->bot->wikiServer, $pageName) == getContentPage($this->p2pBot1->bot->wikiServer, $pageName));
 	}
 	
 	public function orderPatches($patches){

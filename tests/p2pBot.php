@@ -301,7 +301,7 @@ class p2pBot {
 
     
     
-    function undo( $pageName, $patches){
+    function undos( $pageName, $patches){
     	$post_vars['title']=$pageName;
         $post_vars['pacthes'] = $patches;
         $this->bot->maxredirs = 0;
