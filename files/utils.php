@@ -257,9 +257,11 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         foreach ($operations as $op) {
             $opArr = explode(";", $op);
             $text .= '|[[hasOperation::'.$op.'| ]]'.$opArr[1].'
-|<nowiki>'.utils::contentDecoding($opArr[3]).'</nowiki>
+|<nowiki>'.utils::contentDecoding($opArr[3]).$opArr[4].'</nowiki>
 |-
 ';
+            //TODO $opArr[4] de rajouté
+            
         }
         if (is_array($previousPatch)) {
             $text.='|}';
@@ -489,10 +491,12 @@ This is a patch of the article: [[onPage::'.$onPage.']]
     static function countOperation($opInPatch) {
         $res['insert'] = 0;
         $res['delete'] = 0;
+        $res['undo'] = 0;
         foreach ($opInPatch as $op) {
             $op = strtolower($op);
             $res['insert'] += substr_count($op, 'insert');
             $res['delete'] += substr_count($op, 'delete');
+            $res['undo'] += substr_count($op, 'undo');
         }
         return $res;
     }

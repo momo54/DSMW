@@ -138,9 +138,9 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
                 foreach ($this->mOperations as $op) {
                     $opArr = explode(";", $op);
                     $text .= '|[[hasOperation::' . $op . '| ]]' . $opArr[1] . '
-|<nowiki>' . utils::contentDecoding($opArr[3]) . '</nowiki>
+|<nowiki>' . utils::contentDecoding($opArr[3]) .$opArr[4] . '</nowiki>
 |-
-';
+';//TODO on a rajouté opArr[4]
                 }
             } else {
                 $i = 1; //op counter
@@ -157,10 +157,10 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
                     }
                     $operationID = utils::generateID();
                     $text.='|[[hasOperation::' . $operationID . ';' . $type . ';'
-                            . $operation->getLogootPosition()->toString() . ';' . $lineContent1 . '| ]]' . $type;
-
+                            . $operation->getLogootPosition()->toString() . ';' . $lineContent1 . ';'.$operation->getLogootDegree(). '| ]]' . $type;
+																											
                     //displayed text
-                    $lineContent2 = $lineContent;
+                    $lineContent2 = $lineContent;//.
                     $text.='
 |<nowiki>' . $lineContent2 . '</nowiki>
 |-

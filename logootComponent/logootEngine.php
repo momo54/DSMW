@@ -66,7 +66,7 @@ class logootEngine implements logoot {
                     $this->deleteLine($result);
 
                 }
-
+			//	TODO rajouter logootundo ?  
             }
         }//end foreach
         return $this->model;

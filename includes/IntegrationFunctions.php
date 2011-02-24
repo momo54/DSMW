@@ -184,6 +184,8 @@ function operationToLogootOp($operation) {
     $res[3] = utils::contentDecoding($res[3]);
     //    if($res[3]=="") $res[3]="\r\n";
 
+    //TODO ici gestion du degree + operation undo
+    
     if($res[1]=="Insert") {
         $logootOp = new LogootIns($logootPos, $res[3]);
     }

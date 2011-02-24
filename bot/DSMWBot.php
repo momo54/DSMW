@@ -49,7 +49,7 @@ $result = $myBot->wikiFilter($source, 'addType','',$args);
 $source = "Property:hasOperation";
 //$args['type'] = "String;String;String;Text";
 $args['type'] = "Record]]
-[[has fields::String;String;String;Text";
+[[has fields::String;String;String;Text;Number]]";
 $result = $myBot->wikiFilter($source, 'addType','',$args);
 
 echo "Property types are updated!";

@@ -774,22 +774,23 @@ function attemptSave($editpage) {
 		//creation Patch P2
 		$tmp = serialize($listOp1);
 		$patch = new Patch(false, false, $listOp1, $urlServer, $rev_id1);
-		if ($editpage->mTitle->getNamespace() == 0)
-		$title = $editpage->mTitle->getText();
-		else
-		$title = $editpage->mTitle->getNsText() . ':' . $editpage->mTitle->getText();
-		//integration: diffs between VO and V2 into V1
-
+		if ($editpage->mTitle->getNamespace() == 0){
+			$title = $editpage->mTitle->getText();
+		}else{
+			$title = $editpage->mTitle->getNsText() . ':' . $editpage->mTitle->getText();
+			//integration: diffs between VO and V2 into V1
+		}
 		$modelAfterIntegrate = $logoot->integrate($listOp1);
 	}else {//no edition conflict
 		$listOp = $logoot->generate($conctext, $actualtext);
 		$modelAfterIntegrate = $logoot->getModel();
 		$tmp = serialize($listOp);
 		$patch = new Patch(false, false, $listOp, $urlServer, $rev_id1);
-		if ($editpage->mTitle->getNamespace() == 0)
-		$title = $editpage->mTitle->getText();
-		else
-		$title = $editpage->mTitle->getNsText() . ':' . $editpage->mTitle->getText();
+		if ($editpage->mTitle->getNamespace() == 0){
+			$title = $editpage->mTitle->getText();
+		}else{
+			$title = $editpage->mTitle->getNsText() . ':' . $editpage->mTitle->getText();
+		}
 	}
 	$revId = utils::getNewArticleRevId();
 	wfDebugLog('p2p', ' -> store model rev : ' . $revId . ' session ' . session_id() . ' model ' . $modelAfterIntegrate->getText());
