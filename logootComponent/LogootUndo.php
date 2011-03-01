@@ -38,6 +38,6 @@ class LogootUndo {
 	public function getLogootDegree(){
     	return $this->mOpDegree;
     }
-
+    
 }
 ?>
