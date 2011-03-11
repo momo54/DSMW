@@ -94,7 +94,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		
 		
 		//must Fail
-		assert($this->p2pBot1->undos($pageName, $patch));
+		assert($this->p2pBot1->undo( $patch));
 		
 	} 
     
@@ -118,14 +118,14 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$nbPatchPreUndo=count($res);
 		
 		//UNdo last patch
-		assert($this->p2pBot1->undos($pageName, count($res)-1));
+		assert($this->p2pBot1->undo( $res[(count($res)-1)]));
 		//
 		$resUndo=getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]'); 
 		//check if there a new patch
 		assert(($nbPatchPreUndo+1)==count($resUndo));
 		
 		//undo last patch that now is an undo
-		assert($this->p2pBot1->undos($pageName, count($resUndo)-1));
+		assert($this->p2pBot1->undo( $res[count($resUndo)-1]));
 		
 		$resUndoUndo =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -151,7 +151,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$nbPatchPreUndo=count($res);
 		
 		
-		assert($this->p2pBot1->undos($pageName, $res));
+		assert($this->p2pBot1->undo( $res));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -166,7 +166,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 	
 	public function testUndoNoPatch(){
 		$res=array();
-		assert($this->p2pBot1->undos($pageName, $res));
+		assert($this->p2pBot1->undo( $res));
 	}
 	
 	public function testUndoOnePatch(){
@@ -192,7 +192,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$res=$this->orderPatches($res);
 		
 		
-		assert($this->p2pBot1->undos($pageName, $res[3]));
+		assert($this->p2pBot1->undo( $res[3]));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -230,7 +230,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		
 	
 		
-		assert($this->p2pBot1->undos($pageName,$res[count($res)-1] ));
+		assert($this->p2pBot1->undo($res[count($res)-1] ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -267,7 +267,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$res=$this->orderPatches($res);
 		
 		
-		assert($this->p2pBot1->undos($pageName,$res[0] ));
+		assert($this->p2pBot1->undo($res[0] ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -306,7 +306,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[count($res)-1];
 		$tempPatch[1]=$res[count($res)-2];
 		
-		assert($this->p2pBot1->undos($pageName,$tempPatch ));
+		assert($this->p2pBot1->undo($tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -344,7 +344,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[0];
 		$tempPatch[1]=$res[1];
 		
-		assert($this->p2pBot1->undos($pageName,$tempPatch ));
+		assert($this->p2pBot1->undo($tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -383,7 +383,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[3];
 		$tempPatch[1]=$res[4];
 		
-		assert($this->p2pBot1->undos($pageName,$tempPatch ));
+		assert($this->p2pBot1->undo($tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		
@@ -425,7 +425,7 @@ class guestUserTestUndo extends PHPUnit_Framework_TestCase {
 		$tempPatch[0]=$res[2];
 		$tempPatch[1]=$res[6];
 		
-		assert($this->p2pBot1->undos($pageName,$tempPatch ));
+		assert($this->p2pBot1->undo($tempPatch ));
 		
 		$resPostTest =getSemanticRequestArrayResult($this->p2pBot1->bot->wikiServer, '[[Patch:+]][[onPage::'. $this->pageName.']]');
 		

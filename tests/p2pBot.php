@@ -300,12 +300,23 @@ class p2pBot {
     }
 
     
-    
-    function undos( $pageName, $patches){
-    	$post_vars['title']=$pageName;
-        $post_vars['pacthes'] = $patches;
+       
+    /**
+     * 
+     * Calls patch undo
+     * 
+     */
+    function undo($patches){
+    	/*
+    	echo "undo\n";
+    	$res = $this->bot->wikiFilter('Page1','undoTest');
+    	return $res;
+    	*/
+    	
+
+      //  $post_vars['pacthes'] = $patches;
         $this->bot->maxredirs = 0;
-        if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=undoPage', $post_vars ) ) {
+        if ($this->bot->submit( $this->bot->wikiServer . PREFIX . '/index.php?action=undoPage', $patches ) ) {
         // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
             $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
             if ('200'==$code) {
@@ -324,49 +335,11 @@ class p2pBot {
             return false;
         }
     	
-    }
-
-    
-    /**
-     * 
-     * Calls patch undo
-     * 
-     */
-    function undo($patchId){
-    	echo "undo\n";
-    	$res = $this->bot->wikiFilter('Page1','undoTest');
-    	return $res;
     	
-       /* if(is_array($patchId)) {
-            $post_vars['name'] = $patchId;
-        }else {
-            $post_vars['name[]'] = $patchId;
-        }
-        $post_vars['action'] = 'undo';
-        
-	    if ($this->bot->submit($this->bot->wikiServer . PREFIX . '/index.php',$post_vars) ) {
-	        // Now we need to check whether our edit was accepted. If it was, we'll get a 302 redirecting us to the article. If it wasn't (e.g. because of an edit conflict), we'll get a 200.
-	            $code = substr($this->bot->response_code,9,3); // shorten 'HTTP 1.1 200 OK' to just '200'
-	            if ('200'==$code) {
-	                if(strpos($this->bot->results, "<html") > 0 ){
-	                    echo "undo failed with error 200:(".$this->bot->results.")\n";
-	                    return false;
-	                }
-	                else{ // Push return some information with Ajax
-	                    echo $this->bot->results."\n";
-	                    return true;
-	                }
-	            }
-	            elseif ('302'==$code)
-	                return true;
-	            else {
-	                echo "undo failed error not 200:(".$this->bot->results.")";
-	                return false;
-	            }
-	        }else {
-	            echo "undo submit failed:(".$this->bot->wikiServer.PREFIX.'/index.php'.$post_vars.")";
-	            return false;
-	        }*/
+    	
+    	
+    	
+   
 	    }
 
 }
