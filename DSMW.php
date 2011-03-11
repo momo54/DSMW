@@ -142,6 +142,7 @@ function conflict(&$editor, &$out) {
 //    return true;
 //}
 
+//XXX le hook qui capture les actions exotiques
 /**
  * MW Hook used to redirect to page creation (pushfeed, pullfeed, changeset),
  * to forms or to push/pull action testing the action param
@@ -644,8 +645,8 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 		//TODO:  get the patch id then call undo
 		$name1 = '';
 
-		if (isset($_POST['name'])) {
-			$name1 = $_POST['name'];
+		if (isset($_POST['patchesID'])) {
+			$name1 = $_POST['patchesID'];
 			wfDebugLog('p2p', 'undo ');
 			if (!is_array($name1)) {
 				$name1 = array($name1);
@@ -672,7 +673,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 		foreach($ids as $patchId) {
 			utils::writeAndFlush('<span>'.$patchId.'</span>');
-			$logootplus->undo($patchId);
+			$logootplus->deliver($patchId);
 		}
 
 		utils::writeAndFlush("now return false"); // Log purpose : remove this for prod

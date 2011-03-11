@@ -184,16 +184,18 @@ function operationToLogootOp($operation) {
     $res[3] = utils::contentDecoding($res[3]);
     //    if($res[3]=="") $res[3]="\r\n";
 
-    //TODO ici gestion du degree + operation undo
+    //TODO ici gestion du degree + operation undo DEGREE HOW ?
     
     if($res[1]=="Insert") {
-        $logootOp = new LogootIns($logootPos, $res[3]);
+        $logootOp = new LogootIns($logootPos, $res[3], $res[4]);
     }
     elseif($res[1]=="Delete") {
-        $logootOp = new LogootDel($logootPos, $res[3]);
+        $logootOp = new LogootDel($logootPos, $res[3], $res[4]);
     }
-    else {
-        $logootOp = false;
+    elseif ($res[1]=="undo"){
+        $logootOp = new LogootUndo($res[3], $res[4]);
+    } else{
+    	$logootOp = false;
     }
     return $logootOp;
 }
