@@ -402,11 +402,21 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
                 $countOp = utils::countOperation($results);//old code passed $op parameter
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete, '.$countOp['undo'].'  undo </td>';
-                $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
+                if($countOp['undo']>0)
+                	$output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'"><font color="red">'.$patch.'</font></a>)</td>';
+                else
+                	$output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td>';
+                $output .= '<td><input type="checkbox" name="patchesToUndo" value="'.$patch.'" /></td></tr>';
                 /*$titlePatch = Title::newFromText( $patch,PATCH );
                 $article = new Article( $title );*/
             }
-            $output .= '</table></div>';
+            $output .= '
+	                <tr>
+	                	<td colspan="4" align="right"> 
+							<form name="reverseSelection"> <input type="button" value="REVERSE" onClick="reverseUndoSelection();"></input></form>
+	                	</td>
+	               	</tr>
+	               	</table></div>';
 
             //list of push
 
@@ -449,7 +459,8 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
                         $output .= '<td align="left" width="50%"> all '.$title."'".'patchs are pushed </td></tr>';
                     }
                 }
-                $output .= '</table></div>';
+                $output .= '
+               	</table></div>';
 
             }//end if empty $pushs
 
@@ -526,6 +537,7 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
             //part push page
             $url = "http://".$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
             $output .= '
+
 <h2>Actions</h2>
 <div><FORM  name="formPush">
 <table >
@@ -533,9 +545,20 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 This [Push page : "'.$title.'"] action will create a PushFeed and
 publish the modifications of the "'.$title.'" article
 
+<div><FORM  name="formUndo">
+<table>
+<tr><td> <input type="button" value="UNDO" onClick="undoPatches(\''.$url.'\');"></input></td></tr></table></form></div>
+This [Undo page : ] action will undo selected patches
+
 <div id="pushstatus" style="display: none; width: 100%; clear: both;" >
 <a name="PUSH_Progress_:" id="PUSH_Progress_:"></a><h2> <span class="mw-headline"> PUSH Progress&nbsp;: </span></h2>
 <div id="statepush" ></div><br />
+</div>
+
+
+<div id="undostatus" style="display: none; width: 100%; clear: both;" >
+<a name="UNDO_Progress_:" id="UNDO_Progress_:"></a><h2> <span class="mw-headline"> UNDO Progress&nbsp;: </span></h2>
+<div id="stateundo" ></div><br />
 </div>
 ';
 

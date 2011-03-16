@@ -135,3 +135,46 @@ function allpush(urlserveur)
         );
 
 }
+
+
+function reverseUndoSelection(){
+	for(i=0;i<$("input[name=patchesToUndo]").length;i++)
+	{
+		$("input[name=patchesToUndo]")[i].checked = !$("input[name=patchesToUndo]")[i].checked
+	}
+}
+
+function undoPatches(urlserveur){
+	$("#stateundo").html('');
+    $('#undostatus').show();
+    var patches = new Array();
+    var indiceArray = 0;
+    var stringToRemove = "Patch:";
+	for(i=0;i<$("input[name=patchesToUndo]").length;i++)
+	{
+		if($("input[name=patchesToUndo]")[i].checked){
+			patches[indiceArray] = $("input[name=patchesToUndo]")[i].value.substring(stringToRemove.length, $("input[name=patchesToUndo]")[i].value.length);
+			indiceArray++;
+		}
+	}
+	$.post(
+	urlserveur,{
+        action: "undo",
+        patchesID : patches
+    },
+    function(data, status) 
+    {
+        //$('#T1').html(data); // put all the data in there
+        //$("#state").html(status); // update status
+    },
+    function(packet,status,fulldata, xhr)  If the third argument is a function it is used as the OnDataRecieved callback 
+    {
+        //$("#len").html(fulldata.length); // total how much was recieved so far
+        //$("#state").html(status); // status (can be any ajax state or "stream"
+        var data = $("#stateundo").html(); // get text of what we received so far
+        data += packet; // append the last packet we got
+        $("#stateundo").html(data); // update the div
+    //$("<li></li>").html(packet).appendTo("#T2"); // add this packet to the list
+    }
+    );
+}
