@@ -673,7 +673,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 		foreach($ids as $patchId) {
 			utils::writeAndFlush('<span>'.$patchId.'</span>');
-			$logootplus->deliver($patchId);
+			$logootplus->undo($patchId);
 		}
 
 		utils::writeAndFlush("now return false"); // Log purpose : remove this for prod

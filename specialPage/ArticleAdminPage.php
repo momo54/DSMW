@@ -401,7 +401,7 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
 
                 $countOp = utils::countOperation($results);//old code passed $op parameter
-                $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete'.$countOp['undo'].'  undo</td>';
+                $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete, '.$countOp['undo'].'  undo </td>';
                 $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
                 /*$titlePatch = Title::newFromText( $patch,PATCH );
                 $article = new Article( $title );*/

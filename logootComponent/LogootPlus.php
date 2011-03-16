@@ -4,6 +4,10 @@
 interface  LogootPlus {
 
 /*
+ * function that must create the patch with the undo operation
+ * with the $patchid patch in the operation undo 
+ * function undo($patchid)
+ * 
  * 
  * 
  *    function deliver(patch):
