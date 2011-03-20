@@ -153,7 +153,7 @@ function undoPatches(urlserveur){
 	for(i=0;i<$("input[name=patchesToUndo]").length;i++)
 	{
 		if($("input[name=patchesToUndo]")[i].checked){
-			patches[indiceArray] = $("input[name=patchesToUndo]")[i].value.substring(stringToRemove.length, $("input[name=patchesToUndo]")[i].value.length);
+			patches[indiceArray] = $("input[name=patchesToUndo]")[i].value;
 			indiceArray++;
 		}
 	}
