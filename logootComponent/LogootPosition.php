@@ -10,9 +10,11 @@
 
 class LogootPosition {
     private $mPosition=array();
+    private $mDegree;
     
-    public function __construct($pos) {
+    public function __construct($pos, $degree='1') {
         $this->mPosition = $pos;
+        $this->mDegree=$degree;
     }
 
     public function compareTo($position){
@@ -247,5 +249,12 @@ class LogootPosition {
         return $string;
     }
 
+    function getDegree(){
+    	return $this->mDegree;
+    }
+    
+    function setDegree($deg){
+    	$this->mDegree=$deg;
+    }
 }
 ?>
