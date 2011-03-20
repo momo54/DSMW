@@ -179,3 +179,10 @@ function undoPatches(urlserveur){
     }
     );
 }
+
+$(document).ready(function() {
+	for(i=0;i<$("input[name=patchesToUndo]").length;i++)
+	{
+		$("input[name=patchesToUndo]")[i].checked = false
+	}
+	});
