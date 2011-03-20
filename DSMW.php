@@ -56,6 +56,7 @@ $wgAutoloadClasses['dao'] = "$wgDSMWIP/logootModel/dao.php";
 $wgAutoloadClasses['manager'] = "$wgDSMWIP/logootModel/manager.php";
 
 $wgAutoloadClasses['Patch'] = "$wgDSMWIP/patch/Patch.php";
+$wgAutoloadClasses['EditablePatch'] = "$wgDSMWIP/patch/EditablePatch.php";
 $wgAutoloadClasses['persistentClock'] = "$wgDSMWIP/clockEngine/persistentClock.php";
 $wgAutoloadClasses['ApiQueryPatch'] = "$wgDSMWIP/api/ApiQueryPatch.php";
 $wgAutoloadClasses['ApiQueryChangeSet'] = "$wgDSMWIP/api/ApiQueryChangeSet.php";
@@ -680,6 +681,31 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 		
 		return false;
 
+	}
+	elseif (isset($_POST['action']) && $_POST['action'] == 'TESTUNDO') {
+		
+		utils::writeAndFlush("Begin TESTUNDO");
+		
+		if(isset($_POST['patchID'])) {
+			$pId = $_POST['patchID'];
+		}
+		
+		$patch = new EditablePatch($pId);
+		
+		
+		utils::writeAndFlush("foreach");
+		foreach($patch->getOperations() as $op) {
+			utils::writeAndFlush('OP content : ' . $op->getLineContent());
+		}
+		
+		utils::writeAndFlush("end foreach");
+		
+		$title = Title::newFromText($pId);
+		$article = new Article($title);
+		$article->doRedirect();
+		
+		return false;
+		
 	} else {
 		return true;
 	}
@@ -716,10 +742,10 @@ function compareMWVersion($version1, $version2='1.14.0') {
  V0 : initial revision
  /  \
  /
- P1 /      \P2
- /
- /          \
- V1          V2:2nd edit of the same article
+ P1 / \P2
+ /     \
+ /      \
+ V1      V2:2nd edit of the same article
  1st Edit
  */
 /* * *************************************************************************** */
@@ -771,7 +797,7 @@ function attemptSave($editpage) {
 		//        wfDebugLog('testlog',' -> +'.$text.'+('.$rev_id1.') ts '.$editpage->edittime.' '.$rev->getTimestamp());
 		$model1 = manager::loadModel($rev_id1);
 		$logoot1 = new logootEngine($model1);
-		$listOp1 = $logoot1->generate($text, $actualtext);
+		$listOp1 = $logoot1->generate($text, $actualtext); // Diff V0 my_version
 		//creation Patch P2
 		$tmp = serialize($listOp1);
 		$patch = new Patch(false, false, $listOp1, $urlServer, $rev_id1);

@@ -147,7 +147,7 @@ class BasicBot extends Snoopy{
 			return false;
 		$content = htmlspecialchars_decode( $content[1] ); // turn all the &quot; back into ", else MediaWiki will turn the &quot; into &amp;quot;
 		$post_vars['wpTextbox1'] = call_user_func( $callback, $content, $callbackParams );
-		echo "called callback\n";
+		
 		if (false===$post_vars['wpTextbox1'])
 			die( 'Callback returns an error.' );
 		if ($content == $post_vars['wpTextbox1']) {// no editing necessary; our callback made no changes

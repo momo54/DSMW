@@ -166,6 +166,10 @@ function operationToLogootOp($operation) {
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
     }
+    
+    
+    $opIds = explode(':', $res[0]);
+    $opId = $opIds[2];
 
     $position = $res[2];
     $position = str_ireplace('(', '', $position);
@@ -187,13 +191,13 @@ function operationToLogootOp($operation) {
     //TODO ici gestion du degree + operation undo DEGREE HOW ?
     
     if($res[1]=="Insert") {
-        $logootOp = new LogootIns($logootPos, $res[3], $res[4]);
+        $logootOp = new LogootIns($logootPos, $res[3], $opId, $res[4]);
     }
     elseif($res[1]=="Delete") {
-        $logootOp = new LogootDel($logootPos, $res[3], $res[4]);
+        $logootOp = new LogootDel($logootPos, $res[3], $opId, $res[4]);
     }
     elseif ($res[1]=="undo"){
-        $logootOp = new LogootUndo($res[3], $res[4]);
+        $logootOp = new LogootUndo($res[3], $opId, $res[4]);
     } else{
     	$logootOp = false;
     }

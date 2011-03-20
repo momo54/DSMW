@@ -25,6 +25,8 @@ class ApiQueryPatch extends ApiQueryBase {
             array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'), $request);
         return $req;
     }
+    
+    
     private function run() {
         global $wgServerName, $wgScriptPath;
 
@@ -111,7 +113,7 @@ class ApiQueryPatch extends ApiQueryBase {
 
     protected function getExamples() {
         return array(
-        'api.php?action=query&meta=patch&papatchId=1&format=xml',
+        'api.php?action=query&meta=patch&patchId=1&format=xml',
         );
     }
 

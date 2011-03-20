@@ -9,18 +9,20 @@
 class LogootUndo {
     
 	private $mLogootPosition;
-    private $mPatchId;
+    private $mLineContent;
     private $mOpDegree;
+    private $mId;
 
     /**
      *
      * @param <Object> $patchId patch id 
      * @param <String> $degree operation degree 
      */
-    public function __construct($logootPosition, $patchId, $degree='1') {
+    public function __construct($logootPosition, $patchId, $id='', $degree='1') {
     	$this->setLogootPosition($position);
-        $this->setPatchId($patchId);
+        $this->setLineContent($patchId);
         $this->mOpDegree=$degree;
+        $this->mId = $id;
     }
 
 
@@ -31,12 +33,12 @@ class LogootUndo {
         return $this->mLogootPosition;
     }
 
-    public function getPatchId(){
-        return $this->mPatchId;
+    public function getLineContent(){
+        return $this->mLineContent;
     }
 
-    public function setPatchId($patchId){
-        $this->mPatchId = $patchId;
+    public function setLineContent($patchId){
+        $this->mLineContent = $patchId;
     }
 
 
@@ -46,6 +48,10 @@ class LogootUndo {
     
 	public function getLogootDegree(){
     	return $this->mOpDegree;
+    }
+    
+    public function getId() {
+    	return $this->mId;
     }
     
 }

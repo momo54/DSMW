@@ -6,48 +6,55 @@
  * @author muller jean-philippe
  */
 class LogootIns {
-    private $mLogootPosition;
-    private $mLineContent;
-    private $mOpDegree;
+	private $mLogootPosition;
+	private $mLineContent;
+	private $mOpDegree;
+	private $mId;
 
-    /**
-     *
-     * @param <Object> $position LogootPosition
-     * @param <String> $content line content
-     */
-    public function __construct($position, $content, $degree='1') {
-        $this->setLogootPosition($position);
-        $this->setLineContent($content);
-        $this->setLogootDegree($degree);
-    }
 
-    public function getLogootPosition(){
-        return $this->mLogootPosition;
-    }
+	/**
+	 *
+	 * @param <Object> $position LogootPosition
+	 * @param <String> $content line content
+	 */
+	public function __construct($position, $content, $id = '', $degree='1') {
+		$this->setLogootPosition($position);
+		$this->setLineContent($content);
+		$this->setLogootDegree($degree);
+		$this->mId = $id;
+	}
 
-    public function getLineContent(){
-        return $this->mLineContent;
-    }
+	public function getLogootPosition(){
+		return $this->mLogootPosition;
+	}
 
-    public function setLogootPosition($position){
-        $this->mLogootPosition = $position;
-    }
+	public function getLineContent(){
+		return $this->mLineContent;
+	}
 
-    public function setLineContent($content) {
-        $this->mLineContent = $content;
-    }
+	public function setLogootPosition($position){
+		$this->mLogootPosition = $position;
+	}
 
-    
-    public function setLogootDegree($degree){
-    	$this->mOpDegree=$degree;
-    }
-    
+	public function setLineContent($content) {
+		$this->mLineContent = $content;
+	}
+
+
+	public function setLogootDegree($degree){
+		$this->mOpDegree=$degree;
+	}
+
 	public function getLogootDegree(){
-    	return $this->mOpDegree;
-    }
-    
-    public function execute(){
+		return $this->mOpDegree;
+	}
 
-    }
+	public function execute(){
+
+	}
+
+	public function getId() {
+		return $this->mId;
+	}
 }
 ?>

@@ -10,16 +10,18 @@ class LogootDel {
     private $mLogootPosition;
     private $mLineContent;
     private $mOpDegree;
+    private $mId;
 
     /**
      *
      * @param <Object> $position LogootPosition
      * @param <String> $content line content 
      */
-    public function __construct($position, $content, $degree='1') {
+    public function __construct($position, $content, $id = '', $degree='1') {
         $this->setLogootPosition($position);
         $this->setLineContent($content);
         $this->mOpDegree=$degree;
+        $this->mId = $id;
     }
 
     public function getLogootPosition(){
@@ -44,6 +46,10 @@ class LogootDel {
     
 	public function getLogootDegree(){
     	return $this->mOpDegree;
+    }
+    
+    public function getId() {
+    	return $this->mId;
     }
 
 }

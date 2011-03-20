@@ -1,4 +1,5 @@
 <?php
+//require_once('../files/utils.php');
 
 /**
  * Object that wraps an operation list and other features concerning an article
@@ -73,6 +74,12 @@ class Patch {
         }
     }
 
+    /**
+     * Creates a page from the patch object
+     *
+     * @param unknown_type $pageName
+     * @param unknown_type $rev
+     */
     public function storePage($pageName, $rev) {
         global $wgUser;
         $text = '
@@ -151,7 +158,12 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
                     } else {
                     	$type="Undo";
                     }
-                    $operationID = utils::generateID();
+                    if($operation->getId() != '') {
+                    	$operationID = $operation->getId(); 
+                    } else {
+						$operationID = utils::generateID();                    	
+                    }
+                    
                     $text.='|[[hasOperation::' . $operationID . ';' . $type . ';'
                             . $operation->getLogootPosition()->toString() . ';' . $lineContent1 . ';'.$operation->getLogootDegree(). '| ]]' . $type;
 																											

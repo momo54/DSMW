@@ -15,7 +15,7 @@ class utils {
     static function generateID() {
         //global $serverId;
         $serverId = DSMWSiteId::getInstance();
-
+		
         $pc = new persistentClock();
         $pc->load();
         $pc->incrementClock();
@@ -779,13 +779,13 @@ Pages concerned:
                 $rawparams[] = $param;
             }
         }
-
+        
         SMWQueryProcessor::processFunctionParams($rawparams, $query,$params,$printouts);
 
         $queryobj = SMWQueryProcessor::createQuery($query, $params, SMWQueryProcessor::SPECIAL_PAGE , '', $printouts);
         $queryobj->setLimit(5000);
         $res = smwfGetStore()->getQueryResult($queryobj);
-
+        
         if(!($res instanceof SMWQueryResult))return false;
         return $res;
     }
