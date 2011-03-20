@@ -22,7 +22,7 @@ class Patch {
     private $mUrl;
     private $mDate;
     private $mID;
-    private $mVisible;
+   
 
     /**
      *
@@ -39,7 +39,7 @@ class Patch {
      * @param <string> $Url
      * @param <string> $Date
      */
-    public function __construct($remote, $attachment, $operations, $siteUrl = '', $causalLink = '', $patchid = '', $previousPatch = '', $siteID = '', $Mime = '', $Size = '', $Url = '', $Date = '', $Visible= '1') {
+    public function __construct($remote, $attachment, $operations, $siteUrl = '', $causalLink = '', $patchid = '', $previousPatch = '', $siteID = '', $Mime = '', $Size = '', $Url = '', $Date = '') {
         global $wgServer;
         $this->mRemote = $remote;
         $this->mID = utils::generateID();
@@ -56,8 +56,6 @@ class Patch {
         $this->mSiteUrl = $siteUrl;
         $this->mCausal = $causalLink;
         
-        $this->mVisible= $Visible;
-
         $this->mAttachment = $attachment;
         if ($attachment == true) {
             $this->mMime = $Mime;
@@ -88,8 +86,6 @@ class Patch {
 \'\'\'SiteUrl:\'\'\' [[siteUrl::' . $this->mSiteUrl . ']]
     
 \'\'\'Rev:\'\'\' [[Rev::' . $rev . ']]
-
-\'\'\'Visibilite:\'\'\' [[Visibilite::' . $this->mVisible. ']]
 
 ';
 

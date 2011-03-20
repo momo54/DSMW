@@ -164,10 +164,11 @@ function undoPatches(urlserveur){
     },
     function(data, status) 
     {
+    	location.reload();
         //$('#T1').html(data); // put all the data in there
         //$("#state").html(status); // update status
     },
-    function(packet,status,fulldata, xhr) /* If the third argument is a function it is used as the OnDataRecieved callback 
+    function(packet,status,fulldata, xhr) /* If the third argument is a function it is used as the OnDataRecieved callback */
     {
         //$("#len").html(fulldata.length); // total how much was recieved so far
         //$("#state").html(status); // status (can be any ajax state or "stream"
