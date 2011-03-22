@@ -249,11 +249,11 @@ class LogootPosition {
         return $string;
     }
 
-    function getDegree(){
+    public function getDegree(){
     	return $this->mDegree;
     }
     
-    function setDegree($deg){
+    public function setDegree($deg){
     	$this->mDegree=$deg;
     }
 }

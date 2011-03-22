@@ -66,7 +66,9 @@ class logootEngine implements logoot {
 					$this->deleteLine($result);
 
 				}
-				//	TODO rajouter logootundo ?
+
+			}elseif ($operation instanceof LogootUndo){
+				$this->undoIntegrate($operation);
 			}
 		}//end foreach
 		return $this->model;
@@ -619,5 +621,128 @@ class logootEngine implements logoot {
 	public function getModel() {
 		return $this->model;
 	}
+
+
+	/**
+	 * 
+	 * redo operation 
+	 * @param unknown_type $op
+	 */
+	
+	//XXX missing edition of the model
+	private function redoOp($op){
+		if ($op instanceof LogootIns){
+			$op->getLogootPosition()->setDegree($op->getLogootPosition()->getDegree()+1);
+			$op->setLogootDegree($op->getLogootDegree()+1);
+		}else if( $op instanceof  LogootDel){
+			$op->getLogootPosition()->setDegree($op->getLogootPosition()->getDegree()+1);
+			$op->setLogootDegree($op->getLogootDegree()+1);
+		}
+		return $op;
+	}
+
+
+	/**
+	 * 
+	 * Undo operation 
+	 * @param unknown_type $op
+	 */
+		//XXX missing edition of the model
+	private function undoOp($op){
+		if ($op instanceof LogootIns){
+			$op->getLogootPosition()->setDegree($op->getLogootPosition()->getDegree()-1);
+			$op->setLogootDegree($op->getLogootDegree()-1);
+		}else if( $op instanceof  LogootDel){
+			$op->getLogootPosition()->setDegree($op->getLogootPosition()->getDegree()-1);
+			$op->setLogootDegree($op->getLogootDegree()-1);
+		}
+		return $op;
+	}
+
+
+
+	/**
+	 * 
+	 * 
+	 * @param unknown_type $operations
+	 * @param int $deg initial degree
+	 */
+	private function undosOp($operations, $deg){
+
+		$result=array();
+		
+		foreach ($operations as $op){
+			if ($op instanceof LogootUndo){
+				$op->setLogootDegree($op->getLogootDegree()+$deg);
+
+				$patchID=$op->getPatchId();
+				
+				$patch=new  EditablePatch($patchID);
+
+				$opesPathUndo=$patch->getOperations();
+				
+
+				$res=$this->undosOp($opesPathUndo, -$deg);
+
+				$patch->setOperations($res);
+				$patch->resave();
+				$result= array_merge($result, (array)$op);
+
+			}else{
+				if ($deg == 1){
+					$op= $this->redoOp($op);
+				}else{
+					$op= $this->undoOp($op);
+				}
+				$result= array_merge($result, (array)$op);
+			}
+		}
+		return $result;
+	}
+
+
+	/**
+	 * Undo the patch with the $patchId, return the undo patch,
+	 * that containt the undo operation.
+	 * @param $patchId the id of the pacth that must be undone
+	 */
+	public function undo($patchId) {
+			
+		
+		
+		$undoPatch=new Patch($remote, $attachment, $operations);
+				
+		
+		$patch=new  EditablePatch($patchId);
+
+		$opesPathUndo=$patch->getOperations();
+
+		$res=$this->undosOp($opesPathUndo, -1);
+
+		$patch->setOperations($res);
+		
+			
+			
+	}
+
+	/**
+	 * 
+	 * function called by the integrate function
+	 * it call the undoOps function
+	 * @param unknown_type $operation
+	 */
+	private function undoIntegrate($operation){
+
+		$patchID=$op->getPatchId();
+		
+		$patch=new  EditablePatch($patchId);
+
+		$opesPathUndo=$patch->getOperations();
+
+		$this->undosOp($opesPathUndo, -1);
+
+	}
+
+
 }
 ?>

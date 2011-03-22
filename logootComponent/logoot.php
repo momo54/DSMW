@@ -27,5 +27,17 @@ interface  logoot {
     function integrate($opList);
     
     function getModel();
+    
+    
+    /**
+     * 
+     * Undo the patch with the $patchId, return the undo patch, 
+     * that containt the undo operation.
+     * @param $patchId the id of the pacth that must be undone
+     */
+    function undo($patchId);
+    
+    
+    
 }
 ?>
