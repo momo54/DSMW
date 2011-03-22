@@ -143,7 +143,7 @@ function conflict(&$editor, &$out) {
 //    return true;
 //}
 
-//XXX le hook qui capture les actions exotiques
+
 /**
  * MW Hook used to redirect to page creation (pushfeed, pullfeed, changeset),
  * to forms or to push/pull action testing the action param
@@ -565,7 +565,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 			if ($cs === false) {
 				throw new MWException(__METHOD__ . ': Cannot connect to Push Server (ChangeSet API)');
 			}
-				
+
 			$cs = trim($cs);
 			$dom = new DOMDocument();
 			$dom->loadXML($cs);
@@ -612,7 +612,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 				if ($cs === false){
 					throw new MWException(__METHOD__ . ': Cannot connect to Push Server (ChangeSet API)');
 				}
-				
+
 				$cs = trim($cs);
 
 				$dom = new DOMDocument();
@@ -643,7 +643,11 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 	/////  Undo a patch ////////
 	elseif (isset($_POST['action']) && $_POST['action'] == 'undo') {
+		global $wgServerName, $wgScriptPath;
+		$urlServer = 'http://' . $wgServerName . $wgScriptPath;
+
 		//TODO:  get the patch id then call undo
+		//XXX FIXME work in progress here
 		$name1 = '';
 
 		if (isset($_POST['patchesID'])) {
@@ -657,55 +661,88 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 			$name1="";
 		}
 		$pageName = '';
-		
+
 		utils::writeAndFlush("<p>Start undo</p>");
 
 		$ids = utils::readIdsFromText($name1);
 
 		utils::writeAndFlush("id read"); // Log purpose : remove this for prod
 
-		$model = manager::loadModel($rev_id);
-
-		utils::writeAndFlush("model loaded"); // Log purpose : remove this for prod
-
-		//$logootplus = new LogootPlus($model);
-
-		utils::writeAndFlush("logootplus created"); // Log purpose : remove this for prod
-
 		foreach($ids as $patchId) {
 			utils::writeAndFlush('<span>'.$patchId.'</span>');
-			//$logootplus->undo($patchId);
+			//création de operation UNDO
+			//plus création de patch avec l'op correspondant
+			//plus
+			//XXX
+			//récup la page pour le nom et tout
+			utils::writeAndFlush('<span>debut operation créé</span>');
+			//$operationUndo= new LogootUndo(new LogootPosition(new LogootId(0, 0)), $patchId);
+				
+			
+			//we need the page of the patchID
+			$editpage="la page ";
+			//then the title
+			$title="Joel";
+			//we search for the revision id of the page
+			utils::writeAndFlush('<span>last rev</span>');
+			$dbr = wfGetDB(DB_SLAVE);
+			$lastRevision = Revision::loadFromTitle($dbr, $title);
+			
+			utils::writeAndFlush('<span>'.$lastRevision.'</span>');
+			$rev_id=$lastRevision->getId();
+			//load the model
+			utils::writeAndFlush('<span>model</span>');
+			$model = manager::loadModel($rev_id);
+	 		$logootplus = new logootEngine($model);
+			//make the undo
+			utils::writeAndFlush('<span>avant undo</span>');
+	 		$logootplus->undo($patchId);
+			
+	 		utils::writeAndFlush('<span>apre undo</span>');
+	 		
+	 		//create the patch
+			$patch = new Patch(false, false, array($operationUndo), $urlServer, $rev_id+1);
+			utils::writeAndFlush('<span>apre ucreer patch</span>');
+				
+			$modelAfterUndo= $logootplus->getModel();
+			utils::writeAndFlush('<span>get new model/span>');
+
+			manager::storeModel($rev_id+1, $sessionId = session_id(), $modelAfterIntegrate, $blobCB = 0);
+			utils::writeAndFlush('<span>apre store</span>');
+			$patch->storePage($title, $rev_id+1); //stores the patch in a wikipage
+			utils::writeAndFlush('<span>apre store patch</span>');
+			//$editpage->textbox1 = $modelAfterUndo->getText();
 		}
 
 		utils::writeAndFlush("now return false"); // Log purpose : remove this for prod
-		
+
 		return false;
 
 	}
 	elseif (isset($_POST['action']) && $_POST['action'] == 'TESTUNDO') {
-		
+
 		utils::writeAndFlush("Begin TESTUNDO");
-		
+
 		if(isset($_POST['patchID'])) {
 			$pId = $_POST['patchID'];
 		}
-		
+
 		$patch = new EditablePatch($pId);
-		
-		
+
+
 		utils::writeAndFlush("foreach");
 		foreach($patch->getOperations() as $op) {
 			utils::writeAndFlush('OP content : ' . $op->getLineContent());
 		}
-		
+
 		utils::writeAndFlush("end foreach");
-		
+
 		$title = Title::newFromText($pId);
 		$article = new Article($title);
 		$article->doRedirect();
-		
+
 		return false;
-		
+
 	} else {
 		return true;
 	}

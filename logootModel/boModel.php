@@ -39,9 +39,12 @@ class boModel {
 
         $nb = sizeof($tmp);
         for($i=1; $i<=$nb; $i++){
-
-            if($i==1) $textImage = $tmp[$i];
-            else $textImage = $textImage."\n".$tmp[$i];
+			//TODO need to do something with the degree ?
+            if($i==1){
+            	$textImage = $tmp[$i];
+            } else {
+            	$textImage = $textImage."\n".$tmp[$i];
+            }
         }
         return $textImage;
     }

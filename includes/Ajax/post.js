@@ -164,7 +164,7 @@ function undoPatches(urlserveur){
     },
     function(data, status) 
     {
-    	location.reload();
+    	//location.reload();
         //$('#T1').html(data); // put all the data in there
         //$("#state").html(status); // update status
     },
