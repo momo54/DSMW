@@ -148,19 +148,15 @@ function undoPatches(urlserveur){
 	$("#stateundo").html('');
     $('#undostatus').show();
     var patches = new Array();
-    var indiceArray = 0;
-    var stringToRemove = "Patch:";
-	for(i=0;i<$("input[name=patchesToUndo]").length;i++)
-	{
-		if($("input[name=patchesToUndo]")[i].checked){
-			patches[indiceArray] = $("input[name=patchesToUndo]")[i].value;
-			indiceArray++;
-		}
-	}
+    $("input[name=patchesToUndo]:checked").each(function() {
+    	patches.push(this.value);
+   });
+    
+    req = { 'tab[]' : patches , type : 'demo'};
 	$.post(
 	urlserveur,{
         action: "undo",
-        patchesID : patches
+        'patchesID[]' : patches
     },
     function(data, status) 
     {
