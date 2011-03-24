@@ -4,18 +4,6 @@ class EditablePatch {
 	private $mPatchPage;
 	
 	private $mPatchId;
-    private $mOperations = array();
-    private $mPrevPatch;
-    private $mCausal;
-    private $mSiteId;
-    private $mSiteUrl;
-    private $mRemote;
-    private $mAttachment;
-    private $mMime;
-    private $mSize;
-    private $mUrl;
-    private $mDate;
-    private $mID;
 
 
 	/**
@@ -49,7 +37,7 @@ class EditablePatch {
 	 * Returns an array that contains the operations.
 	 */
 	public function getOperations() {
-		preg_match_all('`\[\[hasOperation::([^[]+)]]`',$this->mPatchPage,$out);
+		preg_match_all('`\[\[hasOperation::([^%]+)]]`',$this->mPatchPage,$out);
 		 
 		if(count($out) == 2) {
 			foreach($out[0] as $op) {
@@ -61,12 +49,16 @@ class EditablePatch {
 	}
 
 
+	/**
+	 * Replaces all operations of the patch by the given $ops.
+	 * 
+	 * @param unknown_type $ops
+	 */
 	public function setOperations($ops) {
 		
-		$res = preg_replace('`\[\[hasOperation::([^[]+)]]`', '', $this->mPatchPage);
+		$res = preg_replace('`\|\[\[hasOperation::([^%]+)\|\-\n`', '', $this->mPatchPage, -1);
 		
-		utils::writeAndFlush($res);
-		
+		$opstxt = '';
 		
 		foreach ($ops as $operation) {
 			$lineContent = $operation->getLineContent();
@@ -89,15 +81,15 @@ class EditablePatch {
 |<nowiki>' . $lineContent2 . '</nowiki>
 |-
 ';
-			
-			//TODO:replace the lines
-			
+			$opstxt = $opstxt . $text;
 		}
-		 
-		 
-		 
-		//TODO: replace the string in mPatchPage
-		 
+		
+		
+		$bouts_de_page = preg_split("`Content\n\|\-\n`", $res);
+		
+		$newpage = $bouts_de_page[0] . "Content\n|-\n" . $opstxt . $bouts_de_page[1];
+		
+		$this->mPatchPage = $newpage;
 	}
 	
 	

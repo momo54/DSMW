@@ -738,6 +738,9 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 		utils::writeAndFlush("end foreach");
 
+		
+		$patch->setOperations($patch->getOperations());
+		
 		$title = Title::newFromText($pId);
 		$article = new Article($title);
 		$article->doRedirect();
