@@ -191,13 +191,13 @@ function operationToLogootOp($operation) {
     //TODO ici gestion du degree + operation undo DEGREE HOW ?
     
     if($res[1]=="Insert") {
-        $logootOp = new LogootIns($logootPos, $res[3], $opId, $res[4]);
+        $logootOp = new LogootIns($logootPos, $res[3], $res[4], $opId);
     }
     elseif($res[1]=="Delete") {
-        $logootOp = new LogootDel($logootPos, $res[3], $opId, $res[4]);
+        $logootOp = new LogootDel($logootPos, $res[3], $res[4], $opId);
     }
     elseif ($res[1]=="undo"){
-        $logootOp = new LogootUndo($res[3], $opId, $res[4]);
+        $logootOp = new LogootUndo($logootPos, $res[3], $res[4], $opId);
     } else{
     	$logootOp = false;
     }

@@ -17,7 +17,7 @@ class LogootIns {
 	 * @param <Object> $position LogootPosition
 	 * @param <String> $content line content
 	 */
-	public function __construct($position, $content, $id = '', $degree='1') {
+	public function __construct($position, $content, $degree='1', $id = '') {
 		$this->setLogootPosition($position);
 		$this->setLineContent($content);
 		$this->setLogootDegree($degree);

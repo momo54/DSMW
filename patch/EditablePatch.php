@@ -1,8 +1,21 @@
 <?php
 
 class EditablePatch {
-	private $mPatchId;
 	private $mPatchPage;
+	
+	private $mPatchId;
+    private $mOperations = array();
+    private $mPrevPatch;
+    private $mCausal;
+    private $mSiteId;
+    private $mSiteUrl;
+    private $mRemote;
+    private $mAttachment;
+    private $mMime;
+    private $mSize;
+    private $mUrl;
+    private $mDate;
+    private $mID;
 
 
 	/**
@@ -50,6 +63,11 @@ class EditablePatch {
 
 	public function setOperations($ops) {
 		
+		$res = preg_replace('`\[\[hasOperation::([^[]+)]]`', '', $this->mPatchPage);
+		
+		/*
+		
+		
 		foreach ($ops as $operation) {
 			$lineContent = $operation->getLineContent();
 			$lineContent1 = utils::contentEncoding($lineContent); //base64 encoding
@@ -74,7 +92,7 @@ class EditablePatch {
 			
 			//TODO:replace the lines
 			
-		}
+		}*/
 		 
 		 
 		 

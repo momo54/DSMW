@@ -143,7 +143,7 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
                     $text .= '|[[hasOperation::' . $op . '| ]]' . $opArr[1] . '
 |<nowiki>' . utils::contentDecoding($opArr[3]) .$opArr[4] . '</nowiki>
 |-
-';//TODO on a rajouté opArr[4]
+';// on a rajouté opArr[4]
                 }
             } else {
                 $i = 1; //op counter
@@ -152,7 +152,7 @@ This is a patch of the article: [[onPage::' . $pageName . ']] <br>
                     $lineContent1 = utils::contentEncoding($lineContent); //base64 encoding
                     $type = "";
                     if ($operation instanceof LogootIns){
-                    	        $type = "Insert";
+                    	$type = "Insert";
                     }  elseif ($operation instanceof LogootDel){
                         $type="Delete";
                     } else {

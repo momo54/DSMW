@@ -729,6 +729,8 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
 		$patch = new EditablePatch($pId);
 
+		utils::writeAndFlush($patch->getPageTitle());
+		
 
 		utils::writeAndFlush("foreach");
 		foreach($patch->getOperations() as $op) {

@@ -18,7 +18,7 @@ class LogootUndo {
      * @param <Object> $patchId patch id 
      * @param <String> $degree operation degree 
      */
-    public function __construct($logootPosition, $patchId, $id='', $degree='1') {
+    public function __construct($logootPosition, $patchId, $degree='1', $id='') {
     	$this->setLogootPosition($position);
         $this->setLineContent($patchId);
         $this->mOpDegree=$degree;
