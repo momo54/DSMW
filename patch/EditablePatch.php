@@ -39,7 +39,7 @@ class EditablePatch {
 
 	
 	public function getPageTitle() {
-		preg_match('`\[\[onPage::([^[]+)]]', $this->mPatchPage, $out);
+		preg_match('`\[\[onPage::([^[]+)]]`', $this->mPatchPage, $out);
 		
 		return $out[1];
 	}
@@ -65,7 +65,7 @@ class EditablePatch {
 		
 		$res = preg_replace('`\[\[hasOperation::([^[]+)]]`', '', $this->mPatchPage);
 		
-		/*
+		utils::writeAndFlush($res);
 		
 		
 		foreach ($ops as $operation) {
@@ -92,7 +92,7 @@ class EditablePatch {
 			
 			//TODO:replace the lines
 			
-		}*/
+		}
 		 
 		 
 		 
