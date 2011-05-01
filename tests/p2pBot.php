@@ -283,20 +283,22 @@ class p2pBot {
 	}
 
 	function getFileFeatures($file,$size){
-		$url = $this->bot->wikiServer.PREFIX.'/api.php?action=query&titles=File:'.$file.'&prop=imageinfo&iilimit=50&iiend=20071231235959&iiprop=timestamp|user|url|size&format=php';
+		$url = $this->bot->wikiServer.PREFIX.'/api.php?action=query&titles=File:'.$file.'&prop=imageinfo&iilimit=50&iiprop=timestamp|user|url|size&format=php';
 		$image = file_get_contents($url);
 		$image = unserialize($image);
 
 		$array = array_shift($image);
 		$array = array_shift($array);
 		$array = array_shift($array);
+              
+                if (!(isset($array['imageinfo'][0]['size']))) return false;                
 
 		if ($array['imageinfo'][0]['size'] == '')
-		return false;
+		  return false;
 		elseif ($array['imageinfo'][0]['size'] == $size)
-		return true;
+		  return true;
 		else
-		return false;
+		  return false;
 	}
 
 

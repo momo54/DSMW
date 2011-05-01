@@ -55,11 +55,13 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
         $this->assertTrue($this->p2pBot1->articlesUpdate());
         
 		// We should wait 'til everything is updated ?
-		sleep(5);
+
+// doesn't work, permission denied
+//       system('../../../maintenance/runJobs.php --server http://localhost/wiki1');
 
         //edit Main_Page on wiki1
         $this->assertFalse($this->p2pBot1->editPage('Main_Page', 'another edition test'),
-            'failed to edit page Main_Page ( '.$this->p2pBot1->bot->results.' )');
+           'failed to edit page Main_Page ( '.$this->p2pBot1->bot->results.' )');
 
         //edit UNTITLED on wiki1
         $this->assertTrue($this->p2pBot1->editPage('UNTITLED', 'another edition test'),

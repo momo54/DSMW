@@ -114,10 +114,10 @@ d'Amérique du Sud, et en Asie.
         assertPageExist($this->p2pBot1->bot->wikiServer, $this->pageName);
         
         //upload the file on wiki1
-        $this->assertTrue($this->p2pBot1->uploadFile($this->fileDir.$this->file1,$this->file,'0'));
+        $this->assertTrue($this->p2pBot1->uploadFile($this->fileDir.$this->file1,$this->file,'0'), 'File was not uploaded');
 
         //test if the good file was upload on wiki1 from wiki3
-        $this->assertTrue($this->p2pBot1->getFileFeatures($this->file,$this->file_size1));
+        $this->assertTrue($this->p2pBot1->getFileFeatures($this->file,$this->file_size1),'The size should be ' . $this->file_size1);
 
         //edit File:Ours.jpg on wiki1
         $this->assertTrue($this->p2pBot1->editPage($this->filePage, $this->pushRequest),
