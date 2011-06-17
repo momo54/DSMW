@@ -19,7 +19,6 @@ class ArticleAdminPage extends SpecialPage {
         # Add all our needed hooks
         $wgHooks["UnknownAction"][] = $this;
         $wgHooks["SkinTemplateTabs"][] = $this;
-        $wgHooks['SkinTemplateNavigation'][] = $this;
         SpecialPage::SpecialPage('ArticleAdminPage'/*, "block"*/);// avec block => pasges speciales restreintes
         wfLoadExtensionMessages('DSMW');
     }
@@ -380,7 +379,7 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
                 }
 
-                //count the number of delete and insert  and undo operations into the patch
+                //count the number of delete and insert operations into the patch
 
                
                 $results = array();
@@ -401,22 +400,12 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
 
                 $countOp = utils::countOperation($results);//old code passed $op parameter
-                $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete, '.$countOp['undo'].'  undo </td>';
-                if($countOp['undo']>0)
-                	$output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'"><font color="red">'.$patch.'</font></a>)</td>';
-                else
-                	$output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td>';
-                $output .= '<td><input type="checkbox" name="patchesToUndo" value="'.$patch.'" /></td></tr>';
+                $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
+                $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
                 /*$titlePatch = Title::newFromText( $patch,PATCH );
                 $article = new Article( $title );*/
             }
-            $output .= '
-	                <tr>
-	                	<td colspan="4" align="right"> 
-							<form name="reverseSelection"> <input type="button" value="REVERSE" onClick="reverseUndoSelection();"></input></form>
-	                	</td>
-	               	</tr>
-	               	</table></div>';
+            $output .= '</table></div>';
 
             //list of push
 
@@ -459,8 +448,7 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
                         $output .= '<td align="left" width="50%"> all '.$title."'".'patchs are pushed </td></tr>';
                     }
                 }
-                $output .= '
-               	</table></div>';
+                $output .= '</table></div>';
 
             }//end if empty $pushs
 
@@ -537,7 +525,6 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
             //part push page
             $url = "http://".$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
             $output .= '
-
 <h2>Actions</h2>
 <div><FORM  name="formPush">
 <table >
@@ -545,20 +532,9 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 This [Push page : "'.$title.'"] action will create a PushFeed and
 publish the modifications of the "'.$title.'" article
 
-<div><FORM  name="formUndo">
-<table>
-<tr><td> <input type="button" value="UNDO" onClick="undoPatches(\''.$url.'\');"></input></td></tr></table></form></div>
-This [Undo page : ] action will undo selected patches
-
 <div id="pushstatus" style="display: none; width: 100%; clear: both;" >
 <a name="PUSH_Progress_:" id="PUSH_Progress_:"></a><h2> <span class="mw-headline"> PUSH Progress&nbsp;: </span></h2>
 <div id="statepush" ></div><br />
-</div>
-
-
-<div id="undostatus" style="display: none; width: 100%; clear: both;" >
-<a name="UNDO_Progress_:" id="UNDO_Progress_:"></a><h2> <span class="mw-headline"> UNDO Progress&nbsp;: </span></h2>
-<div id="stateundo" ></div><br />
 </div>
 ';
 
@@ -624,59 +600,6 @@ This [Undo page : ] action will undo selected patches
         return false;
     }
 
-        /**
-     * Defines the "Article Admin tab"
-     *
-     * @global <type> $wgRequest
-     * @global <type> $wgServerName
-     * @global <type> $wgScriptPath
-     * @param <type> $skin
-     * @param <type> $content_actions
-     * @return <type>
-     */
-    function onSkinTemplateNavigation($skin, $content_actions) {
-        global $wgRequest, $wgServerName, $wgScriptPath;
-        $urlServer = 'http://'.$wgServerName.$wgScriptPath;
-
-        $action = $wgRequest->getText("action");
-        $db = &wfGetDB(DB_SLAVE);
-
-        $patchCount = 0;
-        if($skin->mTitle->getNamespace()==0) $title = $skin->mTitle->getText();
-        else $title = $skin->mTitle->getNsText().':'.$skin->mTitle->getText();
-
-        $patchList = array();
-        $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']]', '?patchID');
-        $count = $res->getCount();
-        for($i=0; $i<$count; $i++) {
-
-            $row = $res->getNext();
-            if ($row===false) break;
-            $row = $row[1];
-
-            $col = $row->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $patchList[] = $wikiValue;
-            }
-        }
-
-        $patchCount = count($patchList);
-        if($skin->mTitle->mNamespace == PATCH
-            || $skin->mTitle->mNamespace == PULLFEED
-            || $skin->mTitle->mNamespace == PUSHFEED
-            || $skin->mTitle->mNamespace == CHANGESET
-        ) {
-        }else {
-
-            $content_actions['views']["admin"] = array(
-                "class" => ($action == "admin") ? "selected" : false,
-                "text" => "DSMW (".$patchCount." patches)",
-                "href" => $skin->mTitle->getLocalURL("action=admin")
-            );
-        }
-        return true;
-    }
 
     /**
      *replaces the deleted semantic attribute in the feed page (pullfeed:.... or

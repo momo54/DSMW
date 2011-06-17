@@ -9,7 +9,7 @@ if( !defined('MEDIAWIKI') ) {
  * return the patch contain given by the parameter patchId
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author hantz & Morel Émile
+ * @author hantz
  */
 class ApiQueryPatch extends ApiQueryBase {
     public function __construct( $query, $moduleName ) {
@@ -25,8 +25,6 @@ class ApiQueryPatch extends ApiQueryBase {
             array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D'), $request);
         return $req;
     }
-    
-    
     private function run() {
         global $wgServerName, $wgScriptPath;
 
@@ -39,24 +37,29 @@ class ApiQueryPatch extends ApiQueryBase {
         $query = '';
 
         for($j=1; $j<=count($array1); $j++) {
-            $query = $query.'?'.$array1[$j].'
-';
+            $query = $query.'?'.$array1[$j]."\n";
         }
 
         $res = utils::getSemanticQuery('[[patchID::'.$params['patchId'].']]',$query);
-
+		
         $count = $res->getCount();
         for($i=0; $i<$count; $i++) {
+        	
             $row = $res->getNext();
+            
             if ($row===false) break;
+            //wfDebugLog('p2p',"ApiQueryPatch res ($i,$j)". serialize($row[3]->getContent()));
             for($j=1; $j<=count($array); $j++) {
+            	
                 if($j==3){
-                    $col = $row[$j]->getContent();//SMWResultArray object
+                	$col = $row[$j]->getContent();//SMWResultArray object
+                    
                     foreach($col as $object) {//SMWDataValue object
                         $wikiValue = $object->getWikiValue();
                         $op[] = $wikiValue;
                     }
                     $results[$j]=$op;
+                    //wfDebugLog('p2p',"ApiQueryPatch op". serialize($op));
                 }
                 else{
                     $col = $row[$j]->getContent();//SMWResultArray object
@@ -74,7 +77,7 @@ class ApiQueryPatch extends ApiQueryBase {
         
         if($results[1]) {
             for($i=1; $i<=count($array); $i++) {
-                if ($results[$i] != null){
+                if (isset($results[$i])){
                 if ($i == 2){
                     $title = trim($results[$i],":");
                     $result->addValue(array('query',$this->getModuleName()),$array[$i],$title);
@@ -113,7 +116,7 @@ class ApiQueryPatch extends ApiQueryBase {
 
     protected function getExamples() {
         return array(
-        'api.php?action=query&meta=patch&patchId=1&format=xml',
+        'api.php?action=query&meta=patch&papatchId=1&format=xml',
         );
     }
 

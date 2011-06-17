@@ -4,9 +4,25 @@
  * Static utility methods used in the whole DSMW extension
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author muller jean-philippe - hantz - Morel
+ * @author muller jean-philippe - hantz
  */
 class utils {
+
+	static public function getNextClock() {
+		$pc = new persistentClock();
+        $pc->load();
+        $pc->incrementClock();
+        $clock = $pc->getValue();
+        $pc->store();
+        return $clock;
+	}
+	
+	static public function getClock() {
+		$pc = new persistentClock();
+        $pc->load();
+        $clock = $pc->getValue();
+        return $clock;
+	}
 
     /**
      * generates IDs ==> SiteURL.SiteName.localclock   (ChangeSetID,patchID,OperationID)
@@ -15,7 +31,7 @@ class utils {
     static function generateID() {
         //global $serverId;
         $serverId = DSMWSiteId::getInstance();
-		
+
         $pc = new persistentClock();
         $pc->load();
         $pc->incrementClock();
@@ -32,9 +48,8 @@ class utils {
      */
     static function encodeRequest($request) {
         $req = str_replace(
-                array('-',   '#',   "\n",  ' ',   '/',   '[',   ']',   '<',   '>',   '&lt;', '&gt;', '&amp;', '\'\'',   '|',   '&',   '%',   '?',   '{',   '}',   ':'),
-                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C',  '-3E',  '-26',   '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
-                $request);
+                array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'),
+                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'), $request);
         return $req;
     }
 
@@ -45,9 +60,8 @@ class utils {
      */
     static function decodeRequest($req) {
         $request = str_replace(
-        		array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C',  '-3E',  '-26',   '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
-                array('-',   '#',   "\n",  ' ',   '/',   '[',   ']',   '<',   '>',   '&lt;', '&gt;', '&amp;', '\'\'',   '|',   '&',   '%',   '?',   '{',   '}',   ':'),
-                $req);
+                array('-2D', '-23', '-0A', '-20', '-2F', '-5B', '-5D', '-3C', '-3E', '-3C', '-3E', '-26', '-27-27', '-7C', '-26', '-25', '-3F', '-7B', '-7D', '-3A'),
+                array('-', '#', "\n", ' ', '/', '[', ']', '<', '>', '&lt;', '&gt;', '&amp;', '\'\'', '|', '&', '%', '?', '{', '}', ':'), $req);
         return $request;
     }
 
@@ -181,48 +195,6 @@ This ChangeSet is in : [[inPullFeed::'.$inPullFeed.']]<br>
         $article->doEdit($newtext, $summary="");
     }
 
-    
-    
-    /**
-     * Reads the patch id from a text.
-     * The text should be Patch:THEPATCHID
-     * @param <String> $patchId 
-     */
-    static function readIdFromText($patchId) {
-    	if(count($patchId > strlen('Patch:'))) {
-    		return substr($patchId,strlen('Patch:'));
-    	} else {
-    		return NULL;
-    	}
-    } 
-    
-    
-    /**
-     * Reads a array of strings, and returns a array with the read ids.
-     * 
-     * @param <String[]> $patchids
-     */
-    static function readIdsFromText($patchIds) {
-    	if(is_array($patchIds)) {
-    		$retour;
-    		foreach ($patchIds as $val) {
-    			$val2 = utils::readIdFromtext($val);
-    			if(!is_null($val2)) {
-    				$retour[] = $val2;
-    			}
-    			 
-    		}
-    		return $retour;
-    	} else {
-    		$val2 = utils::readIdFromtext($patchIds);
-    		if(!is_null($val2)) {
-    			return array($val2); 
-    		} else {
-    			return array();
-    		}
-    	}
-    }
-    
 
     /**
      * create a new patch (page)
@@ -257,11 +229,9 @@ This is a patch of the article: [[onPage::'.$onPage.']]
         foreach ($operations as $op) {
             $opArr = explode(";", $op);
             $text .= '|[[hasOperation::'.$op.'| ]]'.$opArr[1].'
-|<nowiki>'.utils::contentDecoding($opArr[3]).$opArr[4].'</nowiki>
+|<nowiki>'.utils::contentDecoding($opArr[3]).'</nowiki>
 |-
 ';
-            //TODO $opArr[4] de rajouté
-            
         }
         if (is_array($previousPatch)) {
             $text.='|}';
@@ -491,12 +461,10 @@ This is a patch of the article: [[onPage::'.$onPage.']]
     static function countOperation($opInPatch) {
         $res['insert'] = 0;
         $res['delete'] = 0;
-        $res['undo'] = 0;
         foreach ($opInPatch as $op) {
             $op = strtolower($op);
             $res['insert'] += substr_count($op, 'insert');
             $res['delete'] += substr_count($op, 'delete');
-            $res['undo'] += substr_count($op, 'undo');
         }
         return $res;
     }
@@ -779,13 +747,13 @@ Pages concerned:
                 $rawparams[] = $param;
             }
         }
-        
+
         SMWQueryProcessor::processFunctionParams($rawparams, $query,$params,$printouts);
 
         $queryobj = SMWQueryProcessor::createQuery($query, $params, SMWQueryProcessor::SPECIAL_PAGE , '', $printouts);
         $queryobj->setLimit(5000);
         $res = smwfGetStore()->getQueryResult($queryobj);
-        
+
         if(!($res instanceof SMWQueryResult))return false;
         return $res;
     }

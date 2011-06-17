@@ -17,12 +17,9 @@ class dao {
     function loadModel($rev_id){
         wfProfileIn( __METHOD__ );
         $dbr = wfGetDB( DB_SLAVE );
-        $model1 = $dbr->selectField('model','blob_info', array(
-        'rev_id'=>$rev_id), __METHOD__);
-        if ($model1===false) {
-        	throw new MWException( __METHOD__.': This page has not been processed by DSMW' );
-        }
-            
+        $model1 = $dbr->selectField('model','blob_info', array('rev_id'=>$rev_id), __METHOD__);
+        if ($model1===false)
+            throw new MWException( __METHOD__.': This page has not been processed by DSMW' );
         wfProfileOut( __METHOD__ );
         $model = unserialize($model1);
         return $model;

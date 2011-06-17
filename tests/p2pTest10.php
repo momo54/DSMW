@@ -66,9 +66,9 @@ d'Amérique du Sud, et en Asie.
 
         // je ne sais pas pourquoi mais il faut initialiser les 3 wiki sinon
         // on a un "Unable to connect" (en tous cas chez moi)
-        $this->p2pBot1->createPage("init","test");
-        $this->p2pBot2->createPage("init","test");
-        $this->p2pBot3->createPage("init","test");
+        //$this->p2pBot1->createPage("init","test");
+        //$this->p2pBot2->createPage("init","test");
+        //$this->p2pBot3->createPage("init","test");
     }
 
     /**

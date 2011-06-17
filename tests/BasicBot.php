@@ -77,7 +77,7 @@ if (file_exists('username.php'))
 // ELSE you need to fill out the next few settings.
 if (!defined('USERID')){	define('USERID','1');} // find it at Special:Preferences
 if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
-if (!defined('PASSWORD')){	define('PASSWORD','momo44');} // password in plain text. No md5 or anything.
+if (!defined('PASSWORD')){	define('PASSWORD','admin');} // password in plain text. No md5 or anything.
 
 
 ##########################################################
@@ -147,13 +147,10 @@ class BasicBot extends Snoopy{
 			return false;
 		$content = htmlspecialchars_decode( $content[1] ); // turn all the &quot; back into ", else MediaWiki will turn the &quot; into &amp;quot;
 		$post_vars['wpTextbox1'] = call_user_func( $callback, $content, $callbackParams );
-		
 		if (false===$post_vars['wpTextbox1'])
 			die( 'Callback returns an error.' );
-		if ($content == $post_vars['wpTextbox1']) {// no editing necessary; our callback made no changes
-			echo "nothing changed";
+		if ($content == $post_vars['wpTextbox1']) // no editing necessary; our callback made no changes
 			return true;
-		}
 
 		// all done. Let's submit the form.
 		$this->maxredirs = 0; // we don't want to redirect from edit from back to article, or else we won't be able to sniff response codes to check for success.

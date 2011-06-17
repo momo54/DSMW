@@ -40,7 +40,7 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
  * And we test if these articles are now editable (they should)
  */
 
-    public function testDSMWPagesUpdateFunction(){
+    public function testDSMWPagesUpdateFunction1(){
 
 
        //edit Main_Page on wiki1
@@ -54,20 +54,16 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
         //perform the "articles update" feature
         $this->assertTrue($this->p2pBot1->articlesUpdate());
         
-		// We should wait 'til everything is updated ?
-
-// doesn't work, permission denied
-//       system('../../../maintenance/runJobs.php --server http://localhost/wiki1');
 
         //edit Main_Page on wiki1
-        $this->assertFalse($this->p2pBot1->editPage('Main_Page', 'another edition test'),
-           'failed to edit page Main_Page ( '.$this->p2pBot1->bot->results.' )');
+        $this->assertTrue($this->p2pBot1->editPage('Main_Page', 'another edition test'),
+            'failed to edit page Main_Page ( '.$this->p2pBot1->bot->results.' )');
 
         //edit UNTITLED on wiki1
         $this->assertTrue($this->p2pBot1->editPage('UNTITLED', 'another edition test'),
             'failed to edit page UNTITLED ( '.$this->p2pBot1->bot->results.' )');
 
-    }
+    } 
 
     /**
      * On this test we import articles (with the mediawiki import procedure)
@@ -78,16 +74,16 @@ class p2pTest5 extends PHPUnit_Framework_TestCase {
      * Than we execute the "Articles update" feature
      * And we test if these articles are now editable (they should)
      */
-    public function testDSMWPagesUpdateFunction1(){
+    public function testDSMWPagesUpdateFunction2(){
         //import procedure
-        $this->assertTrue($this->p2pBot1->importXML('Import/Wikipedia-20091119095555.xml'), 'Should have correctly imported');
+        $this->assertTrue($this->p2pBot1->importXML('Import/Wikipedia-20091119095555.xml'));
 
         //edit Server_push on wiki1
         //$this->assertFalse($this->p2pBot1->editPage('Server_push', 'edition test'),
         //    'succeeded to edit page Server_push ( '.$this->p2pBot1->bot->results.' )');
 
         //edit WAI-ARIA on wiki1
-        $this->assertTrue($this->p2pBot1->editPage('WAI-ARIA', 'edition test'),
+        $this->assertFalse($this->p2pBot1->editPage('WAI-ARIA', 'edition test'),
             'succeeded to edit page WAI-ARIA ( '.$this->p2pBot1->bot->results.' )');
 
         //edit AxsJAX on wiki1

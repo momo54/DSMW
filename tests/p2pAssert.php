@@ -1,21 +1,29 @@
 <?php
 //require_once 'PHPUnit/Framework/Assert.php';
 //require_once '../files/utils.php';
-require_once '../files/ajax.php';
 
 function assertPageExist($server,$pageName) {
-    $rev = file_get_contents($server.'/api.php?action=query&prop=info&titles='.$pageName.'&format=php');
+	$url = $server.'/api.php?'.'action=query&prop=info&titles='.urlencode($pageName).'&format=php';
+	echo "assertPageExist($server,$pageName) ie $url\n";
+    $rev = file_get_contents($url);
     $rev =  unserialize($rev);
     $count = count(end($rev['query']['pages']));
     PHPUnit_Framework_Assert::assertTrue($count>3,
         'Page '.$pageName.' does not exist on '.$server);
 }
 
+function view($page,$name){
+	$s="\n==$name==\n";
+	$s .= $page;
+	$s .= "\n====\n";
+	return $s;	
+}
+
 function assertContentEquals($server1,$server2,$pageName) {
     $contentPage1 = getContentPage($server1,$pageName);
     $contentPage2 = getContentPage($server2,$pageName);
     PHPUnit_Framework_Assert::assertEquals($contentPage1,$contentPage2,
-        'content page '.$pageName.' is not equals between '.$server1.' and '.$server2);
+        'content page '.$pageName.' is not equals between '.$server1.' and '.$server2.view($contentPage1,"page $server1 $pageName").view($contentPage2,"page $server2 $pageName"));
 }
 
 function assertContentPatch($server,$patchId,$clock,$pageName,$op,$previousPatch) {
@@ -73,30 +81,12 @@ function getSemanticRequest($server,$request,$param,$sep='!') {
     if( count($array)==1) {
         return $array;
     }
-    
-    
     $arrayRes[] = $array[1];
     for ($i = 2 ; $i < count($array) ; $i++) {
         $arrayRes[] = ereg_replace('"', '',$array[$i]);
     }
     return $arrayRes;
 }
-
-/**
- * return in an array format the results of the semantic request
- */
-function getSemanticRequestArrayResult($server,$request,$sep='!') {
-    $request = utils::encodeRequest($request);
-    
-    $php = file_get_contents($server.'/index.php/Special:Ask/'.$request.'/headers=hide/format=csv/sep='.$sep.'/limit=100');
-   
-   // 
-    
-    return   split("\n", $php);
-    
-
-}
-
 
 function getPatchXML($server,$patchId) {
     $url = $server.'/api.php?action=query&meta=patch&papatchId='.$patchId.'&format=xml';

@@ -208,6 +208,10 @@ class Math_BigInteger {
      * @return Math_BigInteger
      * @access public
      */
+    function __construct($x = 0, $base = 10) {
+        return $this->Math_BigInteger($x,$base);
+    }
+    
     function Math_BigInteger($x = 0, $base = 10)
     {
         if ( !defined('MATH_BIGINTEGER_MODE') ) {
@@ -569,7 +573,7 @@ class Math_BigInteger {
      * @access public
      * @internal Performs base-2**52 addition
      */
-    function add($y)
+    function add(Math_BigInteger $y)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case MATH_BIGINTEGER_MODE_GMP:
@@ -656,7 +660,7 @@ class Math_BigInteger {
      * @access public
      * @internal Performs base-2**52 subtraction
      */
-    function subtract($y)
+    function subtract(Math_BigInteger $y)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case MATH_BIGINTEGER_MODE_GMP:
@@ -756,7 +760,7 @@ class Math_BigInteger {
      * @access public
      * @internal Modeled after 'multiply' in MutableBigInteger.java.
      */
-    function multiply($x)
+    function multiply(Math_BigInteger $x)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case MATH_BIGINTEGER_MODE_GMP:
@@ -894,7 +898,7 @@ class Math_BigInteger {
      *    with a slight variation due to the fact that this script, initially, did not support negative numbers.  Now,
      *    it does, but I don't want to change that which already works.
      */
-    function divide($y)
+    function divide(Math_BigInteger $y)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case MATH_BIGINTEGER_MODE_GMP:
@@ -1088,7 +1092,7 @@ class Math_BigInteger {
      *    the other, a power of two - and recombine them, later.  This is the method that this modPow function uses.
      *    {@link http://islab.oregonstate.edu/papers/j34monex.pdf Montgomery Reduction with Even Modulus} elaborates.
      */
-    function modPow($e, $n)
+    function modPow(Math_BigInteger $e, Math_BigInteger $n)
     {
         $n = $n->abs();
         if ($e->compare(new Math_BigInteger()) < 0) {
@@ -1485,7 +1489,7 @@ class Math_BigInteger {
      *    the more traditional algorithim requires "relatively costly multiple-precision divisions".  See
      *    {@link http://www.cacr.math.uwaterloo.ca/hac/about/chap14.pdf#page=21 HAC 14.64} for more information.
      */
-    function modInverse($n)
+    function modInverse(Math_BigInteger $n)
     {
         switch ( MATH_BIGINTEGER_MODE ) {
             case MATH_BIGINTEGER_MODE_GMP:
@@ -1936,9 +1940,9 @@ class Math_BigInteger {
      * @return Math_BigInteger
      * @access public
      */
-    function random($min = false, $max = false, $generator = 'mt_rand')
+    function random(Math_BigInteger $min = NULL, Math_BigInteger $max = NULL, $generator = 'mt_rand')
     {
-        if ($min === false) {
+        if ($min === NULL) {
             $min = new Math_BigInteger(0);
         }
         /*
@@ -1946,11 +1950,11 @@ class Math_BigInteger {
          * This condition is used to exclude the min value from the possible
          *values returned by this random
          */
-        else {
+        /*else {
             $min = $min->add(new Math_BigInteger(1));
-        }
+        }*/
         // end of modification
-        if ($max === false) {
+        if ($max === NULL) {
             $max = new Math_BigInteger(0x7FFFFFFF);
         }
 
@@ -2195,5 +2199,17 @@ class Math_BigInteger {
     {
         $temp = unpack('Nint', str_pad($x, 4, chr(0), STR_PAD_LEFT));
         return $temp['int'];
+    }
+
+    function min(Math_BigInteger $x){
+        $min = $this;
+        if ($this->compare($x) > 0 ) $min = $x;
+        return $min;
+    }
+
+    function max(Math_BigInteger $x){
+        $max = $this;
+        if ($this->compare($x) < 0 ) $max = $x;
+        return $max;
     }
 }

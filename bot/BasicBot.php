@@ -115,7 +115,7 @@ class BasicBot extends Snoopy{
 	// grabs the content of $title, then passes it to $callback, which returns the new content. If the new content is different from the old content, this function edits the wiki with the new content.
 	function wikiFilter($title,$callback,$summary='',$callbackParams=array()){
 		if (!$this->wikiConnect())
-			die ("Unable to connect.");
+			die ("Unable to connect. !!");
 		// $this->fetchform doesn't work for us because it strips out the content of the <textarea>. So use $this->fetch instead first:
 		$this->wikiTitle = $title; // for use by callbacks in our various bots, if needed. E.g. see FindRelatedLinksBot
 		if (!$this->fetch( $this->wikiServer . PREFIX . '/index.php?title=' . $title . '&action=edit' ) )
@@ -327,7 +327,7 @@ class BasicBot extends Snoopy{
 				    [wikisum_Token] => efd9573b9255c93bcfee1d8a990de617
 				Now we need to store this information somewhere.
 			*/
-			if (is_array($this->cookies)){
+			if (isset($this->cookies) && (is_array($this->cookies))) {
 				$cookiesCache = '<?php $cookiesCache = array( '; // yeah, I know, I could have just used "serialize". Sue me.
 				foreach( $this->cookies as $name => $value )
 					$cookiesCache .= "'$name' => '$value',";

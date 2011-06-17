@@ -4,7 +4,7 @@ if (!defined('MEDIAWIKI')){define( 'MEDIAWIKI', true );}
 require_once 'p2pBot.php';
 require_once 'BasicBot.php';
 include_once 'p2pAssert.php';
-require_once '../../..//includes/GlobalFunctions.php';
+require_once '../../../includes/GlobalFunctions.php';
 require_once '../patch/Patch.php';
 require_once '../files/utils.php';
 require_once 'settings.php';
@@ -61,20 +61,22 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
     //wiki2 = prof2
     //wiki3 = student
 
-    //create page on wiki1
+        //create page on wiki1
         $pageNameLesson1 = 'Lesson1';
         $this->assertTrue($this->p2pBot1->createPage($pageNameLesson1,'Intro.... [[type::Lesson]][[forYear::2009]]'),
-            'Failed to create page Exercises1 ('.$this->p2pBot1->bot->results.')');
+            'Failed to create page Lesson1 ('.$this->p2pBot1->bot->results.')');
         $contentWiki1 = "test wiki1";
         echo sleep(10);
-
         $this->p2pBot1->editPage($pageNameLesson1, $contentWiki1);
+        
         $this->assertTrue($this->p2pBot1->createPage('Exercises1','content exercises1 [[forYear::2009]] [[type::Exercise]]'),
             'Failed to create page Exercises1 ('.$this->p2pBot1->bot->results.')');
+            
         $this->assertTrue($this->p2pBot1->createPage('Exam1','content exam1 [[forYear::2009]] [[type::Exam]]'),
             'Failed to create page Exercises1 ('.$this->p2pBot1->bot->results.')');
 
         $pageContentLesson1 = getContentPage($this->p2pBot1->bot->wikiServer, $pageNameLesson1);
+        
         //push on wiki1 for prof2, only the lesson
         $this->assertTrue($this->p2pBot1->createPush('Course1', '[[type::Lesson]][[forYear::2009]]'),
             'Failed to create push : Course1 ('.$this->p2pBot1->bot->results.')');
@@ -99,17 +101,19 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
         //push on wiki2 for prof1 only the lesson
         $this->assertTrue($this->p2pBot2->createPush('Course1', '[[type::Lesson]][[forYear::2009]]'),
             'Failed to create push : Course1 ('.$this->p2pBot2->bot->results.')');
+            
         $this->assertTrue($this->p2pBot2->push('PushFeed:Course1'),
             'failed to push S1Course1 ('.$this->p2pBot2->bot->results.')');
 
         //pull on wiki1 from prof2 push
         $this->assertTrue($this->p2pBot1->createPull('Prof2Course1',$this->p2pBot2->bot->wikiServer, 'Course1'),
             'failed to create pull Prof2Course1 ('.$this->p2pBot1->bot->results.')');
+            
         $this->assertTrue($this->p2pBot1->Pull('PullFeed:Prof2Course1'),
             'failed to pull Prof2Course1 ('.$this->p2pBot1->bot->results.')');
 
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Lesson1');
-        assertContentEquals($this->p2pBot2->bot->wikiServer, $this->p2pBot1->bot->wikiServer, $pageNameLesson1);
+        assertContentEquals($this->p2pBot1->bot->wikiServer,$this->p2pBot2->bot->wikiServer, $pageNameLesson1);
 
         //push on wiki1 for student, lessons and exercises
         $this->assertTrue($this->p2pBot1->createPush('S1Course1', '[[type::!Exam]][[forYear::2009]]'),
@@ -130,7 +134,7 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
         assertContentEquals($this->p2pBot3->bot->wikiServer, $this->p2pBot1->bot->wikiServer, 'Exercises1');
 
         //edit page lesson1 on wiki3
-        //$this->p2pBot3->bot->wikiLogin();
+       //$this->p2pBot3->bot->wikiLogin();
         $addContent = 'content from student';
         $this->assertTrue($this->p2pBot3->editPage('Lesson1', $addContent),
             'failed to edit page Lesson1');

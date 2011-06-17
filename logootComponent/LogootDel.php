@@ -4,53 +4,25 @@
  * Deletion operation used in the logoot algorithm
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author muller jean-philippe
+ * @author muller jean-philippe, emmanuel Desmontils
  */
-class LogootDel {
-    private $mLogootPosition;
-    private $mLineContent;
-    private $mOpDegree;
-    private $mId;
+class LogootDel extends LogootOperation {
 
     /**
      *
      * @param <Object> $position LogootPosition
      * @param <String> $content line content 
      */
-    public function __construct($position, $content, $degree='1', $id = '') {
-        $this->setLogootPosition($position);
-        $this->setLineContent($content);
-        $this->mOpDegree=$degree;
-        $this->mId = $id;
+    function  __construct(LogootPosition $position, $content) {
+        parent::__construct($position, $content);
     }
 
-    public function getLogootPosition(){
-        return $this->mLogootPosition;
+    public function type() {
+        return LogootOperation::DELETE;
     }
 
-    public function getLineContent(){
-        return $this->mLineContent;
+    public function __clone() {
+        return new LogootDel(clone $this->mLogootPosition, $this->mLineContent);
     }
-
-    public function setLogootPosition($position){
-        $this->mLogootPosition = $position;
-    }
-
-    public function setLineContent($content) {
-        $this->mLineContent = $content;
-    }
-
-	public function setLogootDegree($degree){
-    	$this->mOpDegree=$degree;
-    }
-    
-	public function getLogootDegree(){
-    	return $this->mOpDegree;
-    }
-    
-    public function getId() {
-    	return $this->mId;
-    }
-
 }
 ?>

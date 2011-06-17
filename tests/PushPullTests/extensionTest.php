@@ -143,7 +143,7 @@ previous: [[previous::none]]';
         $this->assertTrue(count($operations)==1);
 
         $op = operationToLogootOp($operations[0]);
-        $this->assertTrue($op instanceof LogootIns,'failed to create logootIns operation');
+        $this->assertTrue($op->type() == LogootOperation::INSERT/* instanceof LogootIns*/,'failed to create logootIns operation');
         $this->assertEquals($content, $op->getLineContent());
     //logoutIntegrate
     }

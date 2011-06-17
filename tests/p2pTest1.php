@@ -115,8 +115,6 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
      * wiki2 must receive 2 changeSet
      */
     function testSimple2() {
-    	echo "p2pTest1::testSimple2\n";
-    	
         $pageName = "Lambach";
         $content='content page Lambach
 [[Category:city1]]';
@@ -175,8 +173,6 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
      * continue the testSimple1 by pushing the same page on wiki2 and pulling it on wiki1
      */
     function testSimple3() {
-    	echo "p2pTest1::testSimple3\n";
-    	
         $this->testSimple1();
 
         $countCSonWiki1 = count(getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[Patch:+]]', '-3FpatchID'));
@@ -218,12 +214,12 @@ class p2pTest1 extends PHPUnit_Framework_TestCase {
         $PatchonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[Patch:+]]', '-3FpatchID');
         $PatchonWiki1 = arraytolower($PatchonWiki1);
         $PatchonWiki2 = arraytolower($PatchonWiki2);
-        $this->assertEquals($PatchonWiki1,$PatchonWiki2, "PatchonWiki1 should be the same as PatchonWiki2");
+        $this->assertEquals($PatchonWiki1,$PatchonWiki2);
 
         //assert that there is the same changeSet on the 2 wikis
         $CSonWiki1 = getSemanticRequest($this->p2pBot1->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
         $CSonWiki2 = getSemanticRequest($this->p2pBot2->bot->wikiServer, '[[ChangeSet:+]]', '-3FchangeSetID');
-        $this->assertEquals($CSonWiki1,$CSonWiki2, "CSonWiki1 should be the same as CSonWiki2");
+        $this->assertEquals($CSonWiki1,$CSonWiki2);
     }
 
     /*

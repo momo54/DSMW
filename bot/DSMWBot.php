@@ -31,7 +31,17 @@ function addType($content,$args){
 
 
 $myBot = new BasicBot();
-$myBot->wikiServer = $_POST['server'];
+
+
+if (isset($_POST['server'])) 
+	$serveur = $_POST['server'];
+	else if (isset($_GET['server'])) $serveur = $_GET['server'];
+	else $serveur = $_SESSION['server'];
+	
+$myBot->wikiServer = $serveur;
+
+//echo "Connecting to $serveur.\n";
+//echo "Phase 1\n";
 $args = array();
 // Property array: key=property page and value=type
 $propArray = array("Property:changeSetID"=>"String",
@@ -42,16 +52,19 @@ $propArray = array("Property:changeSetID"=>"String",
                    );
          //"Property:hasOperation"=>"String", "String", "String", "String"!!!!!
 foreach ($propArray as $source=>$type){
-$args['type'] = $type;
-$result = $myBot->wikiFilter($source, 'addType','',$args);
+	$args['type'] = $type;
+	$result = $myBot->wikiFilter($source, 'addType','',$args);
 }
+
+//echo "Phase 2\n";
+
 //hasOperation is a many-valued property
 $source = "Property:hasOperation";
 //$args['type'] = "String;String;String;Text";
 $args['type'] = "Record]]
-[[has fields::String;String;String;Text;Number]]";
+[[has fields::String;String;String;Text";
 $result = $myBot->wikiFilter($source, 'addType','',$args);
 
 echo "Property types are updated!";
-echo '<a href="'.$_POST['server'].'/index.php/Special:DSMWAdmin">back</a>'
+echo '<a href="'.$serveur.'/index.php/Special:DSMWAdmin">back</a>'
 ?>

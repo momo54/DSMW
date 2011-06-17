@@ -29,15 +29,15 @@ class ApiQueryChangeSet extends ApiQueryBase {
     }
     private function run() {
         global $wgServerName, $wgScriptPath;
-        wfDebugLog('p2p','ApiQueryChangeSet');
+        wfDebugLog('p2p','@@@@@@@@@@@@@@@@@@@@ ApiQueryChangeSet : $wgServerName, $wgScriptPath');
         $params = $this->extractRequestParams();
 
        
         $res = utils::getSemanticQuery('[[inPushFeed::PushFeed:'.$params['pushName'].']][[previousChangeSet::'.$params['changeSet'].']]', '?changeSetID
 ?hasPatch');
         $count = $res->getCount();
+        $results = array();
         for($i=0; $i<$count; $i++) {
-
             $row = $res->getNext();
             if ($row===false) break;
             $changesetId = $row[1];
@@ -57,7 +57,8 @@ class ApiQueryChangeSet extends ApiQueryBase {
 
         $result = $this->getResult();
 
-        $CSID = $results[1];
+        if (isset($results[1])) $CSID = $results[1];
+        else $CSID = null;
         wfDebugLog('p2p','  -> CSID : '.$CSID);
         if($CSID) {
             $data = $results[2];

@@ -4,7 +4,7 @@
  * The interface of the logootComponent
  *
  * @copyright INRIA-LORIA-ECOO project
- * @author Jean-Philippe Muller
+ * @author Jean-Philippe Muller, emmanuel Desmontils
  */
 interface  logoot {
     
@@ -24,20 +24,10 @@ interface  logoot {
      *
      * return (object)$modelafterIntegrate
      */
-    function integrate($opList);
+    function integrate(LogootPatch $opList);
+    
+    function deliver(LogootOperation $operation);
     
     function getModel();
-    
-    
-    /**
-     * 
-     * Undo the patch with the $patchId, return the undo patch, 
-     * that containt the undo operation.
-     * @param $patchId the id of the pacth that must be undone
-     */
-    function undo($patchId);
-    
-    
-    
 }
 ?>

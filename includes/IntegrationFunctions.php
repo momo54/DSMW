@@ -1,6 +1,6 @@
 <?php
 /**
- * @author jean-philippe muller & Morel Émile
+ * @author jean-philippe muller
  * @copyright INRIA-LORIA-ECOO project
  */
 
@@ -16,7 +16,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
 //  $lastPatch = utils::getLastPatchId($pageName);
     global $wgServerName,$wgScriptPath,$wgScriptExtension,$wgOut;
     $urlServer = 'http://'.$wgServerName.$wgScriptPath."/index.php/$csName";
-    wfDebugLog('p2p', ' - function integrate : ' . $changeSetId);
+    wfDebugLog('p2p', '@@@@@@@@@@@@@@@@@@@ - function integrate : ' . $changeSetId);
     $i = 1;
     $j = count($patchIdList);
     $pages = array();
@@ -39,7 +39,9 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
                 $patch = utils::file_get_contents_curl($url);
             }
             if(strpos($patch, "<?xml version=\"1.0\"?>")===false) $patch=false;
-
+            
+			//echo $patch;
+			
             if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
             $patch = trim($patch);
             wfDebugLog('p2p','      -> patch content :'.$patch);
@@ -88,6 +90,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
             $op = $dom->getElementsByTagName('operation');
             foreach($op as $o)
                 $operations[] = $o->firstChild->nodeValue;
+            
             $lastPatch = utils::getLastPatchId($onPage);
             if ($lastPatch==false) $lastPatch='none';
 
@@ -125,10 +128,17 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
                 unlink(utils::prepareString($Mime,$Size,$Url));
             }
             utils::writeAndFlush("<span style=\"margin-left:80px;\">" . $i . "/" . $j . ": Integration of Patch: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$patchId>" . $patchId . "</A></span><br/>");
+            
             if ($sub === 'ATT') {
                 $rev = logootIntegrateAtt($onPage, $edit);
+                
                 if ($rev>0) {
-                    $patch = new Patch(true, true, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, $Mime, $Size, $Url, $Date);
+                	$lop = array();
+                    foreach($operations as $o) {
+                    	if ($o instanceof LogootOperation) $lop[] = $o;
+                		else $lop[] = operationToLogootOp($o);
+                    }
+                    $patch = new Patch(true, true, new LogootPatch($patchId,$lop), $SiteUrl, $causal, $patchId, $lastPatch, $siteID, $Mime, $Size, $Url, $Date);
                     $patch->storePage($onPage,$rev);
                 } else {
                     throw new MWException(__METHOD__ . ': article not saved!');
@@ -136,7 +146,8 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
             }
 
             else {
-                $rev = logootIntegrate($operations, $onPage, $sub);
+            	
+                list($rev,$operations) = logootIntegrate($operations, $onPage, $sub);
                 if ($rev>0) {
                     $patch = new Patch(true, false, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, null, null, null, null);
                     $patch->storePage($onPage,$rev);
@@ -160,47 +171,53 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
  * @return <Object> logootOp
  */
 function operationToLogootOp($operation) {
-    wfDebugLog('p2p',' - function operationToLogootOp : '.$operation);
+    wfDebugLog('p2p','@@@@@@@@@@@@@@@@@@@@@@@@@@@ - function operationToLogootOp : '.$operation);
     $arr = array();
     $res = explode(';', $operation);
     foreach ($res as $key=>$attr) {
         $res[$key] = trim($attr, " ");
     }
     
-    
-    $opIds = explode(':', $res[0]);
-    $opId = $opIds[2];
-
+	//echo $operation." <--\n";
+	//var_dump($res);
+	
+	
     $position = $res[2];
     $position = str_ireplace('(', '', $position);
     $position = str_ireplace(')', '', $position);
     $res1 = explode(' ', $position);
     foreach ($res1 as $id) {
         $id1 = explode(':', $id);
-        $idArrray = new LogootId($id1[0], $id1[1]);
+        $idArrray = new LogootId($id1[0], $id1[1], $id1[2]);
         $arr[] = $idArrray;
     }
     $logootPos = new LogootPosition($arr);
-
+    /*$id1 = str_ireplace('(', '', $res[2]);
+    $id2 = $res[3];
+    $id3 = str_ireplace(')', '', $res[4]);
+    $idArrray = new LogootId($id1, $id2, $id3);
+    
+	echo $logootPos->toString();*/
+	
     //    if(strpos($res[3], '-5B-5B')!==false || strpos($res[3], '-5D-5D')!==false) {
     //        $res[3] = utils::decodeRequest($res[3]);
     //    }
     $res[3] = utils::contentDecoding($res[3]);
+    
     //    if($res[3]=="") $res[3]="\r\n";
 
-    //TODO ici gestion du degree + operation undo DEGREE HOW ?
-    
     if($res[1]=="Insert") {
-        $logootOp = new LogootIns($logootPos, $res[3], $res[4], $opId);
+        $logootOp = manager::getNewLogootIns($logootPos, $res[3]);//new LogootIns($logootPos, $res[3]);
     }
     elseif($res[1]=="Delete") {
-        $logootOp = new LogootDel($logootPos, $res[3], $res[4], $opId);
+        $logootOp = manager::getNewLogootDel($logootPos, $res[3]);//new LogootDel($logootPos, $res[3]);
     }
-    elseif ($res[1]=="undo"){
-        $logootOp = new LogootUndo($logootPos, $res[3], $res[4], $opId);
-    } else{
-    	$logootOp = false;
+    else {
+        $logootOp = false;
     }
+    
+    //echo $logootOp;
+    
     return $logootOp;
 }
 
@@ -213,7 +230,7 @@ function operationToLogootOp($operation) {
 function logootIntegrate($operations, $article) {
     global $wgCanonicalNamespaceNames;
     $indexNS = 0;
-    wfDebugLog('p2p', ' - function logootIntegrate : ' . $article);
+    wfDebugLog('p2p', '@@@@@@@@@@@@@@@@@@@@@@@ - function logootIntegrate : ' . $article);
     $dbr = wfGetDB(DB_SLAVE);
     $dbr->immediateBegin();
     if (is_string($article)) {
@@ -266,35 +283,29 @@ function logootIntegrate($operations, $article) {
     $listOp = array();
     //$blobInfo = BlobInfo::loadBlobInfo($rev_id);
     $model = manager::loadModel($rev_id);
-    if(($model instanceof boModel)==false)
-        throw new MWException( __METHOD__.': model loading problem!');
-    $logoot = new logootEngine($model);
+    $logoot = manager::getNewEngine($model,DSMWSiteId::getInstance()->getSiteId());// new logootEngine($model);
 
     foreach ($operations as $operation) {
         wfDebugLog('p2p',' - operation : '.$operation);
         wfDebugLog('testlog',' - operation : '.$operation);
-        $operation = operationToLogootOp($operation);
+        
+        if (!($operation instanceof LogootOperation)) 
+        	$operation = operationToLogootOp($operation);
 
         if ($operation!=false && is_object($operation)) {
             $listOp[]=$operation;
             wfDebugLog('testlog',' -> Operation: '.$operation->getLogootPosition()->toString());
             //$blobInfo->integrateBlob($operation);
-        }//end if
-        //    else {
-        //        throw new MWException( __METHOD__.': operation problem '.$operation );
-        //        wfDebugLog('p2p',' - operation problem : '.$operation);
-        //    }
+        }        
     }//end foreach operations
-
-    $modelAfterIntegrate = $logoot->integrate($listOp);
+    $p = new LogootPatch($rev_id,$listOp);
+    $logoot->integrate($p);
+    $modelAfterIntegrate = $logoot->getModel();
     //$revId = utils::getNewArticleRevId();
     $status = $article->doEdit($modelAfterIntegrate->getText(), $summary="");
     $revId = $status->value['revision']->getId();
     manager::storeModel($revId, $sessionId=session_id(), $modelAfterIntegrate, $blobCB=0);
-    return $revId;
-    //sleep(4);
-    if(is_bool($status)) return $status;
-    else return $status->isGood();
+    return array($revId,$p);
 }
 
 /**

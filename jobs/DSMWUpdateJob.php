@@ -80,7 +80,7 @@ and `page_title` != \"Administration_push_site_addition\"";
 
                 //load an empty model
                 $model = manager::loadModel(0);
-                $logoot = new logootEngine($model);
+                $logoot = manager::getNewEngine($model,DSMWSiteId::getInstance()->getSiteId());// new logootEngine($model);
 
                 $listOp = $logoot->generate("", $pageText);
                 $modelAfterIntegrate = $logoot->getModel();

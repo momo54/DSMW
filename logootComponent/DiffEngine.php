@@ -294,7 +294,7 @@ class _DiffEngine1 {
 		$numer = $xlim - $xoff + $nchunks - 1;
 		$x = $xoff;
 		for ($chunk = 0; $chunk < $nchunks; $chunk++) {
-			wfProfileIn( __METHOD__ . "-chunk" );
+			//wfProfileIn( __METHOD__ . "-chunk" );
 			if ($chunk > 0)
 				for ($i = 0; $i <= $this->lcs; $i++)
 					$ymids[$i][$chunk-1] = $this->seq[$i];
@@ -351,7 +351,7 @@ class _DiffEngine1 {
 		if ($end == 0 || $ypos > $this->seq[$end]) {
 			$this->seq[++$this->lcs] = $ypos;
 			$this->in_seq[$ypos] = 1;
-			wfProfileOut( __METHOD__ );
+			//wfProfileOut( __METHOD__ );
 			return $this->lcs;
 		}
 

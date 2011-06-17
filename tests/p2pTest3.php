@@ -32,16 +32,17 @@ class p2pTest3 extends PHPUnit_Framework_TestCase {
     protected function setUp() {
         exec('./initWikiTest.sh ./dump.sql');
         exec('rm ./cache/*');
+        
         $basicbot1 = new BasicBot();
         $basicbot1->wikiServer = $this->wiki1;
         $this->p2pBot1 = new p2pBot($basicbot1);
-        $this->p2pBot1->updateProperies();
+        //$this->p2pBot1->updateProperies();
 
         $basicbot2 = new BasicBot();
         $basicbot2->wikiServer = $this->wiki2;
         $this->p2pBot2 = new p2pBot($basicbot2);
-        $this->p2pBot2->updateProperies();
-    }
+        //$this->p2pBot2->updateProperies();
+     }
 
     /**
      * Tears down the fixture, for example, closes a network connection.
@@ -53,10 +54,11 @@ class p2pTest3 extends PHPUnit_Framework_TestCase {
     // exec('./deleteTest.sh');
     }
 
-    public function testSimple(){
+    public function testSimple1(){
 
         $this->p2pBot1->createPage('Moldova',
-            'Moldova en-us-Moldova.ogg /mɒlˈdoʊvə/ (help·info), officially the Republic of Moldova (Republica Moldova) is a landlocked country in Eastern Europe, located between Romania to the west and Ukraine to the north, east and south.
+            '
+Moldova en-us-Moldova.ogg /mɒlˈdoʊvə/ (help·info), officially the Republic of Moldova (Republica Moldova) is a landlocked country in Eastern Europe, located between Romania to the west and Ukraine to the north, east and south.
 
 In the Middle Ages, most of the present territory of Moldova was part of the Principality of Moldavia. In 1812, it was annexed by the Russian Empire, and became known as Bessarabia. Between 1856 and 1878, the southern part was returned to Moldavia. In 1859 it united with Wallachia to form modern Romania.
 
@@ -85,6 +87,7 @@ The country is a parliamentary democracy with a president as head of state and a
         $PatchonWiki1 = arraytolower($PatchonWiki1);
         $PatchonWiki2 = arraytolower($PatchonWiki2);
         $this->assertEquals($PatchonWiki1,$PatchonWiki2,'patch are not equals on the 2 wikis');
+        
         // assert that wiki1/Moldova == wiki2/Moldova
         assertContentEquals($this->p2pBot1->bot->wikiServer, $this->p2pBot2->bot->wikiServer, 'Moldova');
     }
@@ -152,7 +155,7 @@ The first column presents the content of the  '''initial state''' of the page.
 |   valign='top' |  Del/Del the same line
 |   valign='top' |  initial_line
 |   valign='top' | <span  style='color: red;'><em><del>line deleted</del></em></span>
-|   valign='top' | <span  style='c/home/mullejea/Bureau/www/mediawiki-1.14.0/extensions/DSMW/tests/p2pTest3.php:258olor: red;'><em><del>line deleted</del></em></span>
+|   valign='top' | <span  style='color: red;'><em><del>line deleted</del></em></span>
 |   valign='top' | <span  style='color: red;'><em><del>line deleted</del></em></span>
 |   valign='top' | <ul><li>DSMW server1 and server2 delete the &ldquo;initial_line&rdquo;
 </li></ul>
