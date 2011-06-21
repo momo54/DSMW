@@ -981,7 +981,9 @@ to be loaded else "allow_url_fopen" set to "On"' );
         echo $msg.'
 
 ';
-        ob_end_flush();
+        ////////////////BEN////////////////
+//        ob_end_flush();
+        ////////////////BEN////////////////
         flush();
     }
 
