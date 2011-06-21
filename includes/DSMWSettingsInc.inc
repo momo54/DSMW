@@ -36,6 +36,11 @@ $wgGroupPermissions['sysop']['editchangeset'] = true;
 $wgGroupPermissions['*']['ArticleAdminPage']       = true;//sysop
 require_once("$IP/extensions/DSMW/specialPage/ArticleAdminPage.php" );
 
+/////////////////////////BEN/////////////////////////
+$wgGroupePermissions['*']['DSMWUndoAdmin'] = true;//sysop
+require_once("$IP/extensions/DSMW/specialPage/DSMWUndoAdmin.php");
+/////////////////////////BEN/////////////////////////
+
 $wgGroupPermissions['*']['DSMWAdmin']       = true;//sysop
 require_once("$IP/extensions/DSMW/specialPage/DSMWAdmin.php" );
 

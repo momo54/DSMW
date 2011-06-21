@@ -365,6 +365,11 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 <table style="border-bottom: 2px solid #000;">
 <caption><b>List of patchs</b></caption>';
 
+            /////////////////////////BEN/////////////////////////
+            $cptID = 0;//used to create the checkboxs
+            $countPatchs = 0;//we need to remenber the number of patchs
+            /////////////////////////BEN/////////////////////////
+            
             //color the remote patch of the current page
             foreach ($patchs as $patch) {
                 wfDebugLog('p2p','  -> patchId : '.$patch);
@@ -401,9 +406,13 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
                 $countOp = utils::countOperation($results);//old code passed $op parameter
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
-                $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td></tr>';
-                /*$titlePatch = Title::newFromText( $patch,PATCH );
-                $article = new Article( $title );*/
+
+                /////////////////////////BEN/////////////////////////
+                $output .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$patch.'">'.$patch.'</a>)</td>';
+                $output .= '<td><input type="checkbox" id="check'.$cptID.'" value="'.$patch.'"/></td></tr>';
+                $cptID += 1;
+                $countPatchs += 1;
+                /////////////////////////BEN/////////////////////////
             }
             $output .= '</table></div>';
 
@@ -528,14 +537,28 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 <h2>Actions</h2>
 <div><FORM  name="formPush">
 <table >
-<tr><td> <input type="button" value="PUSH" onClick="pushpage(\''.$url.'\',\''.$title.'\');"></input></td></tr></table></form></div>
-This [Push page : "'.$title.'"] action will create a PushFeed and
-publish the modifications of the "'.$title.'" article
+<!--/////////////////////////BEN/////////////////////////-->
+    <tr>
+        <td> <input type="button" value="PUSH" onClick="pushpage(\''.$url.'\',\''.$title.'\');"></input></td>
+        <td>This [Push page : "'.$title.'"] action will create a PushFeed and publish the modifications of the "'.$title.'" article</td>
+    </tr>
+    <tr>
+        <td> <input type="button" value="UNDO" onClick="undopatchs(\''.$url.'\',\''.$title.'\','.$countPatchs.');"></input></td>
+        <td>This action will undo the selected patchs.</td>
+    </tr>
+</table>
+</form>
+</div>
 
 <div id="pushstatus" style="display: none; width: 100%; clear: both;" >
 <a name="PUSH_Progress_:" id="PUSH_Progress_:"></a><h2> <span class="mw-headline"> PUSH Progress&nbsp;: </span></h2>
 <div id="statepush" ></div><br />
 </div>
+<div id="undostatus" style="display: none; width: 100%; clear: both;" >
+<a name="UNDO_Progress_:" id="UNDO_Progress_:"></a><h2> <span class="mw-headline"> UNDO Progress&nbsp;: </span></h2>
+<div id="stateundo" ></div><br />
+</div>
+<!--/////////////////////////BEN/////////////////////////-->
 ';
 
 
