@@ -54,10 +54,16 @@ require_once("$wgDSMWIP/includes/Ajax/include.php");
 
 require_once 'includes/SemanticFunctions.php';
 require_once 'includes/IntegrationFunctions.php';
+///////////////BEN///////////////
+require_once 'includes/UndoIntegrationFunctions.php';
+///////////////BEN///////////////
 define('DSMW_VERSION', '1.0');
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWGeneralExhibits'] = 'dsmw_group';
+/////////////////////////BEN/////////////////////////
+$wgSpecialPageGroups['DSMWUndoAdmin'] = 'dsmw_group';
+/////////////////////////BEN/////////////////////////
 $wgGroupPermissions['*']['upload_by_url'] = true;
 $wgGroupPermissions['*']['reupload'] = true;
 $wgGroupPermissions['*']['upload'] = true;
@@ -680,7 +686,191 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
         $article = new Article($title);
         $article->doRedirect();
         return false;
-    } else {
+    }
+    
+    /////////////OnUndo///BEN////////////////////////////////////////////////////
+    elseif (isset($_POST['action']) && $_POST['action'] == 'onundo') {
+        
+        $patches = array();
+        $urlServer = 'http://'.$wgServerName.$wgScriptPath;
+        $title = 'Special:DSMWUndoAdmin';
+
+        //if it has been called to display the patches researched
+        if (isset($_POST['name']) && $_POST['name']=="")
+            {
+            $output = '';
+            $reqs = json_decode($_POST['req']);
+            $patches = utils::getSemanticQuery($reqs[0].$reqs[1].$reqs[2],"?onPage\n?Modification date\n?previous");
+            
+            $output .= '
+                <div style="overflow:auto;">
+                    <table style="border-bottom: 2px solid #000;">
+                        <tr>
+                ';
+            
+            if ($patches===false)
+                {
+                $output .= 'An appropriate Message of error';//BEN//
+                echo($output);
+                return true;
+                }
+            else
+                {
+                $count = $patches->getCount();
+                if ($count<1)
+                    {
+                    $output .= '<td><b>No Patch corresponding to this request</b></td></tr></table></div>';
+                    }
+                else
+                    {
+
+                    $output .= '
+                                <td><b>Page</b></td>
+                                <td><b>|Modification Date</b></td>
+                                <td><b>|Patch ID</b></td>
+                                <td><b>|Operations</b></td>
+                            </tr>
+                            <tr>';
+
+                    //order the patchs in reverse order of age
+                    //bubblesort...(could be improved)
+                    //We will first extract the date of edition of the different patchs and the associated "text" to be displayed
+                    //as the object SMWQueryResult seems to not being able to be scanned more than once
+                    //then we will order the dates and "simultaneously" make the same changes onto the order of the "text"
+                    for( $i=0 ; $i<$count ; $i++ )
+                        {
+                        //patch
+                        $row = $patches->getNext();
+                        if ($row===false) {break;}
+
+                        $rowS = $row[1];//OnPage
+                        $colS = $rowS->getContent();
+                        $objectS = $colS[0];
+                        $wikivalueS = $objectS->getWikiValue();
+			$tmpOutput = '<td>'.$wikivalueS.'</td>';//we use = instead of .= to "reset" the variable
+
+                        $rowT = $row[2];//Modification date
+                        $colT = $rowT->getContent();
+                        $objectT = $colT[0];
+                        $wikivalueT = $objectT->getWikiValue();
+			$tmpKey = $wikivalueT;//we will use the date as a key
+			$tmpOutput .= '<td>'.$wikivalueT.'</td>';
+
+                        $rowR = $row[0];//PatchID
+                        $colR = $rowR->getContent();
+                        $objectR = $colR[0];
+                        $wikivalueR = $objectR->getWikiValue();
+			$tmpOutput .= '<td>(<a href="'.$_SERVER['PHP_SELF'].'?title='.$wikivalueR.'">'.$wikivalueR.'</a>)</td>';
+
+                        //actions of the patch
+                        $results = array();
+                        $op = utils::getSemanticQuery('[[patchID::'.$wikivalueR.']]','?hasOperation');
+                        $nbOp = $op->getCount();
+                        for($j=0; $j<$nbOp; $j++)
+                            {
+                            $tmpRow = $op->getNext();
+                            if ($tmpRow===false) break;
+                            $tmpRow = $tmpRow[1];
+                            $tmpCol = $tmpRow->getContent();//SMWResultArray object
+                            foreach($tmpCol as $object) {//SMWDataValue object
+                                $tmpWikiValue = $object->getWikiValue();
+                                $results[] = $tmpWikiValue;
+                            }
+                        }
+                        $countOp = utils::countOperation($results);//old code passed $op parameter
+			$tmpOutput .= '<td>('.$countOp['insert'].'  insert, '.$countOp['delete'].' delete)</td>';
+			$tmpOutput .= '<td><input type="checkbox" name="checkbox[]" id="check';
+                                                
+                        $tmpArrayToSort[$tmpKey] = array($tmpOutput,'" value="'.$wikivalueR.'"/></td></tr>');//we use that trick to be able to have indices in the order of the display once ordered
+                        }
+                    
+                    
+                    uksort($tmpArrayToSort, "cmpDateStr");
+                    
+                    $tmpArraySorted = array_values($tmpArrayToSort);//the new array only contains the values with an access by numbers 
+                    for($i=0 ; $i<$count ; $i++)
+                        {
+                        $output .= $tmpArraySorted[$i][0];
+                        $output .= $i;
+                        $output .= $tmpArraySorted[$i][1];
+                        }
+                    
+                    
+                    echo($output);//we must echo the table so we can access it using the DOM
+                    $output='';
+                        
+                    $output .= '</table></div>';
+                    $output .= '<p><h2>Actions:</h2></p>';
+
+                    $url = "http://".$wgServerName.$wgScriptPath."/index{$wgScriptExtension}";
+                    $output .= '
+                    <form  name="formUndo">
+                    <table >
+                        <tr>
+                            <td> <input type="button" value="UNDO" onClick="undopatchs(\''.$url.'\',\''.$title.'\','.$count.');"></input></td>
+                            <td>This action will undo the selected patchs.</td>
+                        </tr>
+                    </table>
+                    </form>
+                    <div id="undostatus" style="display: none; width: 100%; clear: both;" >
+                        <a name="UNDO_Progress_:" id="UNDO_Progress_:"></a><h2> <span class="mw-headline"> UNDO Progress&nbsp;: </span></h2>
+                        <div id="stateundo" ></div><br />
+                    </div>
+                    ';
+                    }
+                }
+            utils::writeAndFlush($output);
+            $title = Title::newFromText($_POST['page']);
+            $article = new Article($title);
+            $article->doEdit('', $summary = "");
+            $article->doRedirect();
+            return false;
+            }
+        else
+            {
+            //Warning: use of the lazy evaluation
+            //if name is empty its value is []
+            if (isset($_POST['name']) && !($_POST['name'][1]==']')) {
+                $patches = json_decode($_POST['name'], true);
+
+                wfDebugLog('p2p', 'undo on ');
+            }
+            else {
+                $patches = "";
+            }
+            if ($patches == "") {
+                utils::writeAndFlush('<p><b>No patch selected!</b></p> ');
+                $title = Title::newFromText($_POST['page']);
+                $article = new Article($title);
+                $article->doEdit('', $summary = "");
+                $article->doRedirect();
+                return false; //WARNING this will brutally interrupt the execution of the function
+            }
+
+         utils::writeAndFlush('<p><b>Start undo</b></p>');
+
+         $count = count($patches);
+         
+         $dbr = wfGetDB( DB_SLAVE );
+         
+         for($i=0 ; $i<1 ; $i++)
+                {
+                echo('<p>post'.$i.': '.$patches[$i].'</p><br/>');
+                
+                integrateUndo($patches, $urlServer/*, $csName*/);//will execute the integration of the patches
+                
+                wfDebugLog('p2p', "@@@@@@@@@@@@@@@@@@@@@   attemptUndo :  $wgServerName, $wgScriptPath - ");
+                }
+
+        utils::writeAndFlush('<p><b>End undo</b></p>');
+        $title = Title::newFromText($_POST['page']);
+        $article = new Article($title);
+        $article->doRedirect();
+        return false;
+        }
+    }
+///////////////////BEN//////////////////
+    else {
         return true;
     }
 }
@@ -804,6 +994,80 @@ function attemptSave($editpage) {
     $editpage->textbox1 = $modelAfterIntegrate->getText();
     return true;
 }
+
+/////////////////////////BEN/////////////////////////
+//will compare the dates $date1 and $date2 received as strings
+//WARNING: unlike usual comparison functions we will use positive for inferior and negative for superior
+//because we must use this function to order an array in reverse order
+//(we multiplicate $res by (-1) so, obtaining a regular function could be done by erasing that line)
+//if $date1==$date2 => 0
+//if $date1<$date2  => 1 (or >0)
+//if $date1>$date2  => -1 (or <0)
+function cmpDateStr($date1, $date2)
+    {
+    $month = Array(
+        "January"=>0 ,
+        "February"=>1 ,
+        "March"=>2 ,
+        "April"=>3 ,
+        "May"=>4 ,
+        "June"=>5 ,
+        "July"=>6 ,
+        "August"=>7 ,
+        "September"=>8 ,
+        "October"=>9 ,
+        "November"=>10 ,
+        "December"=>11
+        );
+    $res = 0;
+    $date1X = explode(" " , $date1);
+    $date2X = explode(" " , $date2);
+    
+    if(strcmp($date1X[2],$date2X[2]))
+        {
+        $res = strcmp($date1X[2],$date2X[2]);//if the years are different we have the result
+        }
+    else //we must see if the month match
+        {
+        if(strcmp($date1X[1],$date2X[1]))
+            {
+            //if the month are different we must make a "conversion" to ease the comparison
+            if($month[ $date1X[1] ]<$month[ $date2X[1] ])
+                {
+                $res = -1;
+                }
+            else
+                {
+                $res = 1;
+                }
+            }
+        else //we must see if the day match
+            {
+            if(intval($date1X[0])!=intval($date2X[0]))
+                {
+                //if the days are different
+                if(intval($date1X[0])<intval($date2X[0]))
+                    {
+                    $res = -1;
+                    }
+                else
+                    {
+                    $res = 1;
+                    }
+                }
+            else
+                {
+                if(strcmp($date1X[3],$date2X[3]))
+                    {
+                    $res = strcmp($date1X[3],$date2X[3]);
+                    }
+                }
+            }
+        }
+    $res = $res*(-1);//the inversion is done here
+    return($res);
+    }
+/////////////////////////BEN/////////////////////////
 
 function uploadComplete($image) {
     global $wgServerName, $wgScriptPath, $wgServer,$wgVersion;
