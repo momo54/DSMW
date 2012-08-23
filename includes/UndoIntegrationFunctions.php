@@ -100,7 +100,9 @@ function integrateUndo($patchIdList,$relatedPushServer/*, $csName*/) {
                 utils::writeAndFlush("<span style=\"margin-left:60px;\">Page: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$onPage1>" . $onPage . "</A></span><br/>");
                 $pages[] = $onPage;
             }
-            
+
+            $newPatchID =   "Patch:".utils::generateID();//we create the Undo Patch ID /*changeToUndo?*/
+
             //we will supose that the attachment files are still available on the local server
             //and that re-adding a link into the page using an undo won't lead to obtaining a broken link
             /*
@@ -128,7 +130,7 @@ function integrateUndo($patchIdList,$relatedPushServer/*, $csName*/) {
             }
             
             */
-            utils::writeAndFlush("<span style=\"margin-left:80px;\">" . $i . "/" . $j . ": Integration of Patch: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$patchId>" . $patchId . "</A></span><br/>");
+            utils::writeAndFlush("<span style=\"margin-left:80px;\">" . $i . "/" . $j . ": Integration of Patch: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php/$newPatchID>" . $newPatchID . "</A></span><br/>");
 /*
             if ($sub === 'ATT') {
                 $rev = logootIntegrateAtt($onPage, $edit);
@@ -150,7 +152,7 @@ function integrateUndo($patchIdList,$relatedPushServer/*, $csName*/) {
 */
                 list($rev,$operations) = logootIntegrateUndo($operations, $onPage);
                 if ($rev>0) {
-                    $patch = new Patch(true, false, $operations, $SiteUrl, $causal, $patchId, $lastPatch, $siteID, null, null, null, null);
+                    $patch = new Patch(true, false, $operations, $SiteUrl, $causal, $newPatchID, $lastPatch, $siteID, null, null, null, null);//use of the mechanism for remote patchs, using the standard one seems unable to calculate the causal link attribute correctly
                     $patch->storePage($onPage,$rev);
                 }
                 else {
