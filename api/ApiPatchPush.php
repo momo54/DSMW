@@ -43,19 +43,11 @@ class ApiPatchPush extends ApiQueryBase {
                
                 $patches = array();
                 $res = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']][[onPage::'.$params['pageName'].']]');
-                $count = $res->getCount();
-                for($i=0; $i<$count; $i++) {
-
-                    $row = $res->getNext();
-                    if ($row===false) break;
-                    $row = $row[0];
-
-                    $col = $row->getContent();//SMWResultArray object
-                    foreach($col as $object) {//SMWDataValue object
-                        $wikiValue = $object->getWikiValue();
-                        $patches[] = $wikiValue;
-                    }
-                }
+		while($row=$res->getNext()) {
+		  while ($value=$row[0]->getNextDataValue()) {
+		    $patches[]=$value->getWikiValue();
+		  }
+		}
                 if(count($patches)) {
                     $published[] = $patch;
                 }

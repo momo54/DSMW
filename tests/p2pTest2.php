@@ -61,6 +61,24 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
     //wiki2 = prof2
     //wiki3 = student
 
+
+  
+      //      Wiki1                  Wiki2                 Wiki3
+      //      create(lesson1=
+      //        ::lesson,year::09)
+      //      )
+      //      edit(lesson1=
+      //        testwiki1
+      //      )
+      //      create(exo1)
+      //      create(exam1)
+      //      createpush(course1)
+      //                             createpull(course1)
+      //                             pull(course1)
+      //                             edit(lesson1)
+      //                             createpush()
+      //                             
+
         //create page on wiki1
         $pageNameLesson1 = 'Lesson1';
         $this->assertTrue($this->p2pBot1->createPage($pageNameLesson1,'Intro.... [[type::Lesson]][[forYear::2009]]'),
@@ -93,7 +111,10 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
         assertPageExist($this->p2pBot2->bot->wikiServer, 'Lesson1');
         assertContentEquals($this->p2pBot2->bot->wikiServer,$this->p2pBot1->bot->wikiServer, $pageNameLesson1);
 
+
         //edit page lesson1 on wiki2
+	// quite strange : there is a conflict detection in the log ?????
+	// same in version smw1.5 ??
         $addContent1 = 'edition on wiki2';
         $this->p2pBot2->editPage($pageNameLesson1, $addContent1);
         $pageContentLesson1 = getContentPage($this->p2pBot2->bot->wikiServer, $pageNameLesson1);
@@ -113,6 +134,8 @@ class p2pTest2 extends PHPUnit_Framework_TestCase {
             'failed to pull Prof2Course1 ('.$this->p2pBot1->bot->results.')');
 
         assertPageExist($this->p2pBot1->bot->wikiServer, 'Lesson1');
+	
+	// Bug here !!
         assertContentEquals($this->p2pBot1->bot->wikiServer,$this->p2pBot2->bot->wikiServer, $pageNameLesson1);
 
         //push on wiki1 for student, lessons and exercises

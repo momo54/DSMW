@@ -14,24 +14,16 @@
  * @return <array>
  */
 function getRequestedPages($request) {
-    
+
         $results = array();
         $res = utils::getSemanticQuery($request);
         if($res===false) return false;
-        $count = $res->getCount();
-        for($i=0; $i<$count; $i++) {
 
-            $row = $res->getNext();
-            if ($row===false) break;
-            $row = $row[0];
-
-            $col = $row->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $results[] = $wikiValue;
-            }
-        }
-
+	while($row=$res->getNext()) {
+	  while ($value=$row[0]->getNextDataValue()) {
+	    $results[]=$value->getWikiValue();
+	  }
+	}
         return $results;
 }
 
@@ -44,26 +36,16 @@ function getRequestedPages($request) {
  * @return <String>
  */
 function getPushFeedRequest($pfName) {
-
     $results = array();
     $res = utils::getSemanticQuery('[['.$pfName.']]', '?hasSemanticQuery');//PullFeed:PullBureau
     if($res===false)return false;
-    $count = $res->getCount();
-    for($i=0; $i<$count; $i++) {
 
-        $row = $res->getNext();
-        if ($row===false) break;
-        $row = $row[0];
-
-        $col = $row->getContent();//SMWResultArray object
-        foreach($col as $object) {//SMWDataValue object
-            $wikiValue = $object->getWikiValue();
-            $results[] = $wikiValue;
-        }
+    while($row=$res->getNext()) {
+      while ($value=$row[0]->getNextDataValue()) {
+	$results[]=$value->getWikiValue();
+      }
     }
-
-    $value = utils::decodeRequest($results[0]);
-    return $value;
+    return utils::decodeRequest($results[0]);
 }
 
 /**
@@ -97,25 +79,16 @@ function getPushFeedRequest($pfName) {
  * @return <array> array of the published patches' name
  */
 function getPublishedPatches($pfname) {
-    
     $results = array();
     $res = utils::getSemanticQuery('[[ChangeSet:+]] [[inPushFeed::'.$pfname.']]', '?hasPatch');//PullFeed:PullBureau
     if($res===false) return false;
-    $count = $res->getCount();
-    for($i=0; $i<$count; $i++) {
-
-        $row = $res->getNext();
-        if ($row===false) break;
-        $row = $row[1];
-
-        $col = $row->getContent();//SMWResultArray object
-        foreach($col as $object) {//SMWDataValue object
-            $wikiValue = $object->getWikiValue();
-            $results[] = $wikiValue;
-        }
+    
+    while($row=$res->getNext()) {
+      while ($value=$row[1]->getNextDataValue()) {
+	$results[]=$value->getWikiValue();
+      }
     }
-    $results = array_unique($results);
-    return $results;
+    return array_unique($results);
 }
 
 /**
@@ -170,25 +143,23 @@ function updatePushFeed($name, $CSID) {
  * @return <String or bool> false if no pullhead
  */
 function getHasPullHead($pfName) {//pullfeed name with ns
-    
     $results = array();
     $res = utils::getSemanticQuery('[[PullFeed:+]] [[name::'.$pfName.']]', '?hasPullHead');
-    if ($res===false) return false;
-    $count = $res->getCount();
-    for($i=0; $i<$count; $i++) {
-
-        $row = $res->getNext();
-        if ($row===false) break;
-        $row = $row[1];
-
-        $col = $row->getContent();//SMWResultArray object
-        foreach($col as $object) {//SMWDataValue object
-            $wikiValue = $object->getWikiValue();
-            $results[] = $wikiValue;
-        }
+    
+    if ($res===false) { 
+      return false;
     }
-    if(empty ($results)) return false;
-    else return $results[0];
+
+    while($row=$res->getNext()) {
+      while ($value=$row[1]->getNextDataValue()) {
+	$results[]=$value->getWikiValue();
+      }
+    }
+    if(empty ($results)) {
+      return false;
+    } else { 
+      return $results[0];
+    }
 }
 
 /**
@@ -204,22 +175,22 @@ function getHasPushHead($pfName) {//pushfeed name with ns
     
     $results = array();
     $res = utils::getSemanticQuery('[[PushFeed:+]] [[name::'.$pfName.']]', '?hasPushHead');
-    if ($res===false) return false;
-    $count = $res->getCount();
-    for($i=0; $i<$count; $i++) {
 
-        $row = $res->getNext();
-        if ($row===false) break;
-        $row = $row[1];
-
-        $col = $row->getContent();//SMWResultArray object
-        foreach($col as $object) {//SMWDataValue object
-            $wikiValue = $object->getWikiValue();
-            $results[] = $wikiValue;
-        }
+    if ($res===false) {
+      return false;
     }
-    if(empty ($results)) return false;
-    else return $results[0];
+
+    while($row=$res->getNext()) {
+      while ($value=$row[1]->getNextDataValue()) {
+	$results[]=$value->getWikiValue();
+      }
+    }
+ 
+    if(empty ($results)) {
+      return false;
+    } else {
+      return $results[0];
+    }
 }
 
 /**
@@ -231,25 +202,24 @@ function getHasPushHead($pfName) {//pushfeed name with ns
  * @return <type> pushfeed name
  */
 function getPushName($name) {//pullfeed name with NS
-    
     $results = array();
     $res = utils::getSemanticQuery('[[PullFeed:+]] [[name::'.$name.']]', '?pushFeedName');
-    if ($res===false) return false;
-    $count = $res->getCount();
-    for($i=0; $i<$count; $i++) {
 
-        $row = $res->getNext();
-        if ($row===false) break;
-        $row = $row[1];
-
-        $col = $row->getContent();//SMWResultArray object
-        foreach($col as $object) {//SMWDataValue object
-            $wikiValue = $object->getWikiValue();
-            $results[] = $wikiValue;
-        }
+    if ($res===false) {
+      return false;
     }
-    if(empty ($results)) return false;
-    else return $results[0];
+
+    while($row=$res->getNext()) {
+      while ($value=$row[1]->getNextDataValue()) {
+	$results[]=$value->getWikiValue();
+      }
+    }
+
+    if(empty ($results)) {
+      return false;
+    } else {
+      return $results[0];
+    }
 }
 
 /**
@@ -264,22 +234,21 @@ function getPushURL($name) {//pullfeed name with NS
     
     $results = array();
     $res = utils::getSemanticQuery('[[PullFeed:+]] [[name::'.$name.']]', '?pushFeedServer');
-    if ($res===false) return false;
-    $count = $res->getCount();
-    for($i=0; $i<$count; $i++) {
-
-        $row = $res->getNext();
-        if ($row===false) break;
-        $row = $row[1];
-
-        $col = $row->getContent();//SMWResultArray object
-        foreach($col as $object) {//SMWDataValue object
-            $wikiValue = $object->getWikiValue();
-            $results[] = $wikiValue;
-        }
+    if ($res===false) {
+      return false;
     }
-    if(empty ($results)) return false;
-    else return $results[0];
+
+    while($row=$res->getNext()) {
+      while ($value=$row[1]->getNextDataValue()) {
+	$results[]=$value->getWikiValue();
+      }
+    }
+
+    if(empty ($results)) {
+      return false;
+    } else { 
+      return $results[0];
+    }
 }
 /**
  *In a pullfeed page, the value of [[hasPullHead::]] has to be updated with the

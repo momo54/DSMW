@@ -9,8 +9,13 @@ require_once '../patch/Patch.php';
 require_once '../files/utils.php';
 require_once 'settings.php';
 
+//error_reporting( -1 );
+//ini_set( 'display_errors', 1 );
+
+$wgDebugLogFile='/tmp/p2p.log';
+
 $wgDebugLogGroups  = array(
-    'p2p'=>"/tmp/p2p.log",
+    'p2p'=>'/tmp/p2p.log',
 );
 
 /**

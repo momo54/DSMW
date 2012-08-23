@@ -155,22 +155,16 @@ $output .='    <th >Local <br>Patches</th>
                 
                 $results = array();
                 $pulledCS = utils::getSemanticQuery('[[ChangeSet:+]][[inPullFeed::'.$pullFeed.']]', '?hasPatch');
-                if($pulledCS===false) $countPulledPatch="-";
-                else {
-                    $count = $pulledCS->getCount();
-                    for($i=0; $i<$count; $i++) {
-
-                        $row = $pulledCS->getNext();
-                        if ($row===false) break;
-                        $row = $row[1];
-
-                        $col = $row->getContent();//SMWResultArray object
-                        foreach($col as $object) {//SMWDataValue object
-                            $wikiValue = $object->getWikiValue();
-                            $results[] = $wikiValue;
-                        }
-                    }
-                    $countPulledPatch = count($results);
+                if($pulledCS===false) {
+		  $countPulledPatch="-";
+                } else {
+		  while($row=$pulledCS->getNext()) {
+		    while ($value=$row[1]->getNextDataValue()) {
+		      $results[]=$value->getWikiValue();
+		    }
+		  }
+		  
+		  $countPulledPatch = count($results);
                 }
                
                $pullFeedLink = str_replace(' ', '_', $pullFeed);
@@ -241,19 +235,12 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 }
                 else {
 
-                $count = $tabPage->getCount();
-                    for($i=0; $i<$count; $i++) {
+		  while($row=$tabPage->getNext()) {
+		    while ($value=$row[0]->getNextDataValue()) {
+		      $results1[]=$value->getWikiValue();
+		    }
+		  }
 
-                        $row = $tabPage->getNext();
-                        if ($row===false) break;
-                        $row = $row[0];
-
-                        $col = $row->getContent();//SMWResultArray object
-                        foreach($col as $object) {//SMWDataValue object
-                            $wikiValue = $object->getWikiValue();
-                            $results1[] = $wikiValue;
-                        }
-                    }
                 $countConcernedPage = count($results1);
 
                 //count the number of patchs from the page concerned
@@ -261,20 +248,12 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
                 foreach ($results1 as $page) {
                     $results = array();
                     $patchs = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$page.']]','?patchID');
-
-                    $count = $patchs->getCount();
-                    for($i=0; $i<$count; $i++) {
-                        
-                        $row = $patchs->getNext();
-                        if ($row===false) break;
-                        $row = $row[0];
-                        
-                        $col = $row->getContent();//SMWResultArray object
-                        foreach($col as $object) {//SMWDataValue object
-                            $wikiValue = $object->getWikiValue();
-                            $results[] = $wikiValue;
-                        }
-                    }
+		    
+		    while($row=$patchs->getNext()) {
+		      while ($value=$row[0]->getNextDataValue()) {
+			$results[]=$value->getWikiValue();
+		      }
+		    }
                     
                     $countPatchs += count($results);
                 }
@@ -357,7 +336,8 @@ $output .= '    <td align="center" title="Local patches">['.$countPulledPatch.']
             $wgOut->setPagetitle('DSMW on '.$title);
 
             //part list of patch
-            $patchs = utils::orderPatchByPrevious($title);
+            //$patchs = utils::orderPatchByPrevious($title);
+	    $patchs = utils::getPatches($title);
 $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
 ==Features==');
@@ -389,20 +369,12 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
                
                 $results = array();
                 $op = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']]','?hasOperation');
-                $count = $op->getCount();
-                for($i=0; $i<$count; $i++) {
 
-                    $row = $op->getNext();
-                    if ($row===false) break;
-                    $row = $row[1];
-
-                    $col = $row->getContent();//SMWResultArray object
-                    foreach($col as $object) {//SMWDataValue object
-                        $wikiValue = $object->getWikiValue();
-                        $results[] = $wikiValue;
-                    }
-                }
-
+		while($row=$op->getNext()) {
+		  while ($value=$row[1]->getNextDataValue()) {
+		    $results[]=$value->getWikiValue();
+		  }
+		}
 
                 $countOp = utils::countOperation($results);//old code passed $op parameter
                 $output .= '<td>'.$countOp['insert'].'  insert, '.$countOp['delete'].' delete</td>';
@@ -421,20 +393,11 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
             
             $pushs = array();
             $res = utils::getSemanticQuery('[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPushFeed::+]]', '?inPushFeed');
-            $count = $res->getCount();
-            for($i=0; $i<$count; $i++) {
-
-                $row = $res->getNext();
-                if ($row===false) break;
-                $row = $row[1];
-
-                $col = $row->getContent();//SMWResultArray object
-                foreach($col as $object) {//SMWDataValue object
-                    $wikiValue = $object->getWikiValue();
-                    $pushs[] = $wikiValue;
-                }
-            }
-
+	    while ($row = $res->getNext()) {
+	      while ($value=$row[1]->getNextDataValue()) {
+		$pushs[]=$value->getWikiValue();
+	      }
+	    }
 
             if(!empty ($pushs)) {
 
@@ -445,11 +408,9 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
                     $output .= '<tr><td align="right" width="50%"><a href="'.$_SERVER['PHP_SELF'].'?title='.$pushName.'">'.$pushName.'</a> : </td>';
 
-                    //count the number of published patchs by the current pushFeed for the current page
+                    // count the number of published patchs by the
+                    // current pushFeed for the current page
                     $published = utils::getPublishedPatchs($urlServer, $pushName, $title);
-
-                    //$publishedInPush = utils::getSemanticRequest('http://'.$wgServerName.$wgScriptPath, '', $param);
-                    //count the number of unpublished patchs
                     $unpublished = array_diff($patchs, $published);
                     if(!is_null($unpublished) && count($unpublished)>0) {
                         $output .= '<td align="left" width="50%">'.count($unpublished).' unpublished patchs on '.count($patchs).' </td></tr>';
@@ -465,20 +426,12 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
             $pulls = array();
             $res = utils::getSemanticQuery('[[ChangeSet:+]][[hasPatch::'.$patchs[0].']][[inPullFeed::+]]', '?inPullFeed');
-            $count = $res->getCount();
-            for($i=0; $i<$count; $i++) {
 
-                $row = $res->getNext();
-                if ($row===false) break;
-                $row = $row[1];
-
-                $col = $row->getContent();//SMWResultArray object
-                foreach($col as $object) {//SMWDataValue object
-                    $wikiValue = $object->getWikiValue();
-                    $pulls[] = $wikiValue;
-                }
-            }
-
+	    while($row=$res->getNext()) {
+	      while ($value=$row[1]->getNextDataValue()) {
+		$pulls[]=$value->getWikiValue();
+	      }
+	    }
 
             if(!empty ($pulls)) {
 
@@ -497,19 +450,12 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
                         
                         $onPage = array();
                         $res = utils::getSemanticQuery('[[Patch:+]][[patchID::'.$patch.']]','?onPage');
-                        $count = $res->getCount();
-                        for($i=0; $i<$count; $i++) {
+			while($row=$res->getNext()) {
+			  while ($value=$row[1]->getNextDataValue()) {
+			    $onPage[]=$value->getWikiValue();
+			  }
+			}
 
-                            $row = $res->getNext();
-                            if ($row===false) break;
-                            $row = $row[1];
-
-                            $col = $row->getContent();//SMWResultArray object
-                            foreach($col as $object) {//SMWDataValue object
-                                $wikiValue = $object->getWikiValue();
-                                $onPage[] = $wikiValue;
-                            }
-                        }
                         if($onPage[0]==$title){
                             $patchs[] = $patch;
                         }
@@ -592,19 +538,12 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
         $patchList = array();
         $res = utils::getSemanticQuery('[[Patch:+]][[onPage::'.$title.']]', '?patchID');
-        $count = $res->getCount();
-        for($i=0; $i<$count; $i++) {
-
-            $row = $res->getNext();
-            if ($row===false) break;
-            $row = $row[1];
-
-            $col = $row->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $patchList[] = $wikiValue;
-            }
-        }
+	
+	while($row=$res->getNext()) {
+	  while ($value=$row[1]->getNextDataValue()) {
+	    $patchList[]=$value->getWikiValue();
+	  }
+	}
 
         $patchCount = count($patchList);
         if($skin->mTitle->mNamespace == PATCH
@@ -681,19 +620,12 @@ $wgOut->addWikiText('[[Special:ArticleAdminPage|DSMW Admin functions]]
 
         $results = array();
         $res = utils::getSemanticQuery($request);
-        $count = $res->getCount();
-        for($i=0; $i<$count; $i++) {
 
-            $row = $res->getNext();
-            if ($row===false) break;
-            $row = $row[0];
-
-            $col = $row->getContent();//SMWResultArray object
-            foreach($col as $object) {//SMWDataValue object
-                $wikiValue = $object->getWikiValue();
-                $results[] = $wikiValue;
-            }
-        }
+	while($row=$res->getNext()) {
+	  while ($value=$row[0]->getNextDataValue()) {
+	    $results[]=$value->getWikiValue();
+	  }
+	}
 
         return $results;
     }

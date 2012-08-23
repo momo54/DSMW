@@ -1,0 +1,280 @@
+21 Juillet 2012
+
+* I finally get the debugging to work (funadamental).  to enable all
+these wfDebugLog to work i put this in LocalSettings.php just before
+parserfuntion. I don't know exaclty if entry point in local setting is
+important, of if it is /tmp/dsmw.log that solves the pb.
+
+#
+# Debug config
+# was hard to setup
+# error reporting is on is php.ini (in /etc/php5/apache2 and /etc/php5/CLI
+#
+error_reporting(-1);
+ini_set( 'display_startup_errors', 1);
+ini_set( 'display_errors', 1 );
+ini_set( 'error_reporting', E_ALL );
+
+#$wgDebugLogFile='/tmp/dsmw.log';
+#wfDebugLog('p2p','onskintemplat pouet');
+#$wgShowExceptionDetails = true;
+#$wgDebugToolbar = true;
+#$wgShowDebug = true;
+#$wgDebugComments=true;
+
+#$wgShowSQLErrors = true;
+#$wgDebugDumpSql  = true;
+#$wgShowDBErrorBacktrace = true;
+
+$wgDebugLogGroups = array(
+        'p2p'     => '/tmp/dsmw.log',
+        'anotherloggroup' => 'logs/another.log',
+);
+
+* I also installed xdebug (that allow debugging especialy in
+  netbeans). It has to be well installed (see
+  http://wiki.netbeans.org/HowToConfigureXDebug). Instruction for
+  installing xdebug is very precise. Use the config with xdebug.ini in
+  /etc/php5/conf.d
+
+* Then i start debugging. A convenient way is to just run on test in
+DSMW/test i did it like that :
+
+% phpunit --filter testSimple1 p2pTest1.php 
+
+Then i check results in /tmp/dsmw.log
+
+i found that :
+http://localhost/wiki1/api.php?action=query&meta=changeSet&cspushName=PushCity10&cschangeSet=none&format=xml
+<api>
+<query>
+<changeSet id="ChangeSet:62BD2AF82145042D4C6B1ADB23F468516">
+<patch>62BD2AF82145042D4C6B1ADB23F468513</patch>
+</changeSet>
+</query>
+</api>
+
+The path has no "patch:" namespace has changeset. It seems to me that
+it comes from here. Because of that, the patch cannot be retreived in
+next call. So i think that the generated XML file is not
+correct. IMHO, with the new API from SMW-1.6.1 (SMWDIString), getting
+patches do not include the namespace.
+
+* The function getDBKey in SMWDIWikipage, just return the name of the
+  page without namespace. However, the function getNamespace on the
+  same object return the namespace, but as a number :(
+
+* Mandatory to read
+http://semantic-mediawiki.org/wiki/Architecture_guide before to
+understand how to code extensions. Defines clearly difference between
+SMWDI* (DI means data item i.e. a fact), SMWSemanticData (set of
+facts), SMWQueryResult, same than SMWSemanticData with lazy load.
+
+Still pbs with SMWDataValue, Seems to handle how a fact can be parsed
+and displayed within SMW...
+
+----- 21 aout 2012 ------
+
+* I started debug by comparing the execution of p2ptest1 with SMW1.5
+  (on 1 virtual machine) and with SMW1.6.1 (on another virtual
+  machine)
+
+Both execution are similar until fist call to getpatch, so push is ok,
+starting on the pull is ok, remote getpatch is not working with
+SMW1.6.1
+
+getpatch on 1.5 returns:
+ patch content :<?xml version="1.0"?><api><query><patch id="Patch:69F0822C5AEE934115F18C17A4BD04173" onPage="Lambach" previous="None" siteID="69F0822C5AEE934115F18C17A4BD0417" siteUrl="Http://localhost/wiki1" causal="None"><operation>69F0822C5AEE934115F18C17A4BD04174; Insert; (15:69F0822C5AEE934115F18C17A4BD0417:2); Y29udGVudCBwYWdlIExhbWJhY2g=</operation><operation>69F0822C5AEE934115F18C17A4BD04175; Insert; (53:69F0822C5AEE934115F18C17A4BD0417:2); W1tDYXRlZ29yeTpjaXR5MV1d</operation></patch></query></api>
+2012-08-21 20:25:11  wikidbTest1: ApiQueryPatch params Patch:69F0822C5AEE934115F18C17A4BD04173
+2012-08-21 20:25:11  wikidbTest2: -> patch content :<?xml version="1.0"?><api><query><patch id="Patch:69F0822C5AEE934115F18C17A4BD04173" onPage="Lambach" previous="None" siteID="69F0822C5AEE934115F18C17A4BD0417" siteUrl="Http://localhost/wiki1" causal="None"><operation>69F0822C5AEE934115F18C17A4BD04174; Insert; (15:69F0822C5AEE934115F18C17A4BD0417:2); Y29udGVudCBwYWdlIExhbWJhY2g=</operation><operation>69F0822C5AEE934115F18C17A4BD04175; Insert; (53:69F0822C5AEE934115F18C17A4BD0417:2); W1tDYXRlZ29yeTpjaXR5MV1d</operation></patch></query></api>
+
+Same getpatch (ApiQueryPatch in api directory) on SMW1.6.1, returns:
+ApiQueryPatch params Patch:A9BB7A2443F9DB00FB551A1C3B64AA0F3
+2012-08-21 20:34:17  wikidbTest1: getDataValue type:(SMWDIString), value:(O:11:"SMWDIString":1:{s:11:"*m_string";s:39:"Patch:A9BB7A2443F9DB00FB551A1C3B64AA0F3";})
+2012-08-21 20:34:17  wikidbTest1: getDataValue return type :(utils,s:39:"Patch:A9BB7A2443F9DB00FB551A1C3B64AA0F3";)
+2012-08-21 20:34:17  wikidbTest1: getDataValue type:(SMWDIWikiPage), value:(O:13:"SMWDIWikiPage":4:{s:10:"*m_dbkey";s:7:"Lambach";s:14:"*m_namespace";i:0;s:14:"*m_interwiki";s:0:"";s:18:"*m_subobjectname";s:0:"";})
+2012-08-21 20:34:17  wikidbTest1: getDataValue return type :(utils,N;)
+2012-08-21 20:34:17  wikidbTest1: getDataValue type:(SMWDIContainer), value:(O:14:"SMWDIContainer":1:{s:17:"*m_semanticData";O:24:"SMWContainerSemanticData":6:{s:11:"*mSubject";O:13:"SMWDIWikiPage":4:{s:10:"*m_dbkey";s:33:"A9BB7A2443F9DB00FB551A1C3B64AA0F3";s:14:"*m_namespace";i:110;s:14:"*m_interwiki";s:0:"";s:18:"*m_subobjectname";s:32:"_07828c73894aba3a01ba63e1bf6480f";}s:14:"*mProperties";a:2:{s:4:"_str";O:13:"SMWDIProperty":3:{s:8:"*m_key";s:4:"_str";s:12:"*m_inverse";b:0;s:15:"*m_proptypeid";s:4:"_str";}s:4:"_txt";O:13:"SMWDIProperty":3:{s:8:"*m_key";s:4:"_txt";s:12:"*m_inverse";b:0;s:15:"*m_proptypeid";s:4:"_txt";}}s:12:"*mPropVals";a:2:{s:4:"_str";a:3:{i:0;O:11:"SMWDIString":1:{s:11:"*m_string";s:33:"A9BB7A2443F9DB00FB551A1C3B64AA0F4";}i:1;O:11:"SMWDIString":1:{s:11:"*m_string";s:6:"Insert";}i:2;O:11:"SMWDIString":1:{s:11:"*m_string";s:38:"(6:A9BB7A2443F9DB00FB551A1C3B64AA0F:2)";}}s:4:"_txt";a:1:{i:0;O:9:"SMWDIBlob":1:{s:11:"*m_string";s:28:"Y29udGVudCBwYWdlIExhbWJhY2g=";}}}s:19:"*mHasVisibleProps";b:1;s:19:"*mHasVisibleSpecs";b:1;s:16:"*mNoDuplicates";b:0;}})
+
+So okay, when getPatch is called (it is a remote call), the api
+generate an xml file and return the patch inside. The function that
+generate this XML file does not work. This function calls
+getSemanticQuery and analyze result. the old api allows to call
+getWikiValue() on any subcomponent of a  SMWDataValue object. 
+It is no more the case in SMW1.6.1: 
+
+in /var/log/apache2/error.log:
+    [Tue Aug 21 23:06:57 2012] [error] [client 127.0.0.1] PHP Fatal error:  Call to undefined method SMWDIString::getWikiValue() in /var/www/mw1.16.4/extensions/DSMW/api/ApiQueryPatch.php on line 71
+
+the function getSemanticQuery returns a  SMWQueryResult object (http://semantic-mediawiki.org/doc/classSMWQueryResult.html)
+According to the doc (http://semantic-mediawiki.org/wiki/Architecture_guide):
+
+"Another important case are query results. They have their own special
+container class SMWQueryResult which is similar to a list of
+SMWSemanticData containers for each row, but has some more
+intelligence to fetch the required data only on demand (implementation
+detail, but part of the raison d'etre for this class)."
+
+* Well, after debugging a while, The ApiQueryPatch "results" shoud contain the following informations:
+
+2012-08-21 21:56:21  wikidbTest1: ApiQueryPatch results: a:7:{i:1;s:39:"Patch:D68DD19867A75C69DE081FADF132211C3";i:2;s:7:"Lambach";i:3;a:2:{i:0;s:112:"D68DD19867A75C69DE081FADF132211C4; Insert; (12:D68DD19867A75C69DE081FADF132211C:2); Y29udGVudCBwYWdlIExhbWJhY2g=";i:1;s:108:"D68DD19867A75C69DE081FADF132211C5; Insert; (50:D68DD19867A75C69DE081FADF132211C:2); W1tDYXRlZ29yeTpjaXR5MV1d";}i:4;s:4:"None";i:5;s:32:"D68DD19867A75C69DE081FADF132211C";i:10;s:22:"Http://localhost/wiki1";i:11;s:4:"None";}
+2012-08-21 21:56:21  wikidbTest2: -> patch content :<?xml version="1.0"?><api><query><patch id="Patch:D68DD19867A75C69DE081FADF132211C3" onPage="Lambach" previous="None" siteID="D68DD19867A75C69DE081FADF132211C" siteUrl="Http://localhost/wiki1" causal="None"><operation>D68DD19867A75C69DE081FADF132211C4; Insert; (12:D68DD19867A75C69DE081FADF132211C:2); Y29udGVudCBwYWdlIExhbWJhY2g=</operation><operation>D68DD19867A75C69DE081FADF132211C5; Insert; (50:D68DD19867A75C69DE081FADF132211C:2); W1tDYXRlZ29yeTpjaXR5MV1d</operation></patch></query></api>
+
+* Continuing debugging
+
+The objective is to parse the page:
+[[Special:ArticleAdminPage|DSMW Admin functions]]
+
+==Features==
+[[patchID::Patch:7E1ABE5DB5414040992D6CAC6E491E783| ]]
+
+'''SiteID:''' [[siteID::7E1ABE5DB5414040992D6CAC6E491E78]]
+
+'''SiteUrl:''' [[siteUrl::http://localhost/wiki1]]
+
+'''Rev:''' [[Rev::20]]
+
+'''Date:''' Wed, 22 Aug 12 00:38:28 +0200
+
+'''User:''' 127.0.0.1
+
+This is a patch of the article: [[onPage::Lambach]] <br>
+
+==Operations of the patch==
+
+{| class='wikitable' border='1' style='text-align:left; width:80%;'
+|-
+!bgcolor=#c0e8f0 scope=col | Type
+!bgcolor=#c0e8f0 scope=col | Content
+|-
+|[[hasOperation::7E1ABE5DB5414040992D6CAC6E491E784;Insert;(16:7E1ABE5DB5414040992D6CAC6E491E78:2) ;Y29udGVudCBwYWdlIExhbWJhY2g=| ]]Insert
+|<nowiki>content page Lambach : (16:7E1ABE5DB5414040992D6CAC6E491E78:2) </nowiki>
+|-
+|[[hasOperation::7E1ABE5DB5414040992D6CAC6E491E785;Insert;(58:7E1ABE5DB5414040992D6CAC6E491E78:2) ;W1tDYXRlZ29yeTpjaXR5MV1d| ]]Insert
+|<nowiki>[[Category:city1]] : (58:7E1ABE5DB5414040992D6CAC6E491E78:2) </nowiki>
+|-
+|}
+
+==Previous patch(es)==
+[[previous::none]]
+
+==Causal Link==
+[[causal::none]]
+
+* The container for "hasOperation" has changed...the code
+http://semantic-mediawiki.org/doc/SRF__vCard_8php-source.html#l00045
+is helpfull to see how to process a SMWquery results...
+
+
+* ARGHHH, in fact, the type record changes in SMW 1.6.1 (see
+  http://semantic-mediawiki.org/wiki/Semantic_MediaWiki_1.6.0#Type:Record)
+
+Type:Record
+
+The fields declaration of Record properties now refer to properties,
+not to types. If you have a property with
+
+[[has type::Record]]
+
+that uses a setting like
+
+[[has fields::Page; Number; String]]
+
+then you should now replace it with something like
+
+[[has fields::my page; my number; my string]]
+
+where "my page", "my number", and "my string" are properties in your
+wiki that have the right types. The use of properties instead of types
+is better since it allows custom settings beyond the datatype of a
+field (e.g. conversion factors).  The new method also involves
+internal changes in the data format, and it is not possible to make
+the update without temporarily loosing access to the stored data for
+Type:Record properties (until SMW's self repair has fixed all data
+entries).
+
+
+* So for hasOperation, it should be:
+
+[[has type::Record]]
+[[has fields::"opid of type string";"optype of type string";"logootid of type string";"opcontent of type text"]]
+
+In fact No, it has to be: 
+[[has type::Record]]
+[[has fields::opid;optype;logootid;opcontent]]
+
+with opid,optype,logootid and opcontent defined as properties...
+(with their own page i.e page Property:opid contains [[Has type::string]]...)...
+
+* Reading changelog for semantic mediawiki is helpful:
+
+http://blog.bn2vs.com/2011/07/30/semantic-mediawiki-1-6-released/
+http://semantic-mediawiki.org/wiki/SMW_1.6.0
+
+Just see:
+
+"Reworked internal data model, cleaning up and re-implementing the
+class "SMWDataValue" and all of its subclasses, and introducing new
+data item classes to handle data. The new class
+"SMWCompatibilityHelpers" provides temporal help for extensions that
+still depend on the old format and APIs."
+
+---- 22 aout 2012 ----
+
+* Well, i hacked the dump.sql and get data model working with new
+  record definition of SMW-1.6. Now, we still need to address new
+  internal data model aka getwikivalue() on semanticdataitem
+
+* tried to see if getWikiValue() works after record modification -> no. got:[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP Fatal error:  Call to undefined method SMWDIString::getWikiValue() in /var/www/mw1.16.4/extensions/DSMW/api/ApiQueryPatch.php on line 86
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP Stack trace:
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   1. {main}() /var/www/mw1.16.4/api.php:0
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   2. ApiMain->execute() /var/www/mw1.16.4/api.php:115
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   3. ApiMain->executeActionWithErrorHandling() /var/www/mw1.16.4/includes/api/ApiMain.php:322
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   4. ApiMain->executeAction() /var/www/mw1.16.4/includes/api/ApiMain.php:338
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   5. ApiQuery->execute() /var/www/mw1.16.4/includes/api/ApiMain.php:595
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   6. ApiQueryPatch->execute() /var/www/mw1.16.4/includes/api/ApiQuery.php:233
+[Wed Aug 22 16:16:48 2012] [error] [client 127.0.0.1] PHP   7. ApiQueryPatch->run() /var/www/mw1.16.4/extensions/DSMW/api/ApiQueryPatch.php:22
+
+* tried to see if SMWCompatibilityHelper class (in include directoryin
+   SMW directory) can help -> no.
+
+
+* wow, 18:04, first test run with SMW1.6.1.getWikiValue() available on SmwDataValue class..
+
+* Ok, now it is testsimple2 that does not work. It is coming from
+  apiquerychangset... (surely same pb than before...) A critical call
+  to api shoud return:
+
+http://localhost/wiki1/api.php?action=query&meta=changeSet&cspushName=PushCity10&cschangeSet=ChangeSet:E7B1F2D2EB4056FDE3FAD3DF21334C746&format=xml
+
+<api>
+<query>
+<changeSet id="ChangeSet:E7B1F2D2EB4056FDE3FAD3DF21334C7411">
+<patch>Patch:E7B1F2D2EB4056FDE3FAD3DF21334C749</patch>
+</changeSet>
+</query>
+</api>
+
+and in SMW1.6, it returns nop.
+
+
+----- 23 august 2012
+
+* ARGHH, ALWAYS CHECK that p2p-params in dump.sql hav unitialized
+siteid !!!  otherwise, we will get identical patch on different sites.
+
+LOCK TABLES `p2p_params` WRITE;
+/*!40000 ALTER TABLE `p2p_params` DISABLE KEYS */;
+INSERT INTO `p2p_params` VALUES (0,'0');
+/*!40000 ALTER TABLE `p2p_params` ENABLE KEYS */;
+UNLOCK TABLES;
+
+* debugging test with attachements. Sometimes files can be not removed
+  from /tmp. In this case testAttachement1 can fail. remove all
+  /tmp/*.dsmw from /tmp and relaunch.
+
+* check fatal errors from /var/www/apache2/error.log (see time to see
+  if it correspond to your run...).g
+
+* Hmmm, p2pTest2 is running, but i see concurrency detected in the
+  log, and I don't understand why... ????? maybe i'm wrong, need to recheck...

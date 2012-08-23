@@ -25,7 +25,7 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
         $sub = substr($patchId, 6, 3);
         wfDebugLog('p2p','  -> patchId : '.$patchId);
         if(!utils::pageExist($patchId)) {//if this patch exists already, don't apply it
-            wfDebugLog('p2p','      -> patch unexist');
+            wfDebugLog('p2p','      -> patch unexist locally, so get it');
             $url = utils::lcfirst($relatedPushServer)."/api.php?action=query&meta=patch&papatchId=".$patchId.'&format=xml';
             wfDebugLog('p2p','      -> getPatch request url '.$url);
             $patch = utils::file_get_contents_curl($url);
@@ -35,14 +35,17 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
             */
             if(strpos($patch, "<?xml version=\"1.0\"?>")===false) {
                 $url = utils::lcfirst($relatedPushServer)."/api.php5?action=query&meta=patch&papatchId=".$patchId.'&format=xml';
-                wfDebugLog('p2p','      -> getPatch request url '.$url);
+                wfDebugLog('p2p','      -> getPatch request url2 '.$url);
                 $patch = utils::file_get_contents_curl($url);
             }
             if(strpos($patch, "<?xml version=\"1.0\"?>")===false) $patch=false;
             
 			//echo $patch;
 			
-            if($patch===false) throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
+            if($patch===false) {
+                     wfDebugLog('p2p','      -> huuu patch = false '.$patch);
+                 throw new MWException( __METHOD__.': Cannot connect to Push Server (Patch API)' );
+            }
             $patch = trim($patch);
             wfDebugLog('p2p','      -> patch content :'.$patch);
             $dom = new DOMDocument();
@@ -156,7 +159,9 @@ function integrate($changeSetId,$patchIdList,$relatedPushServer, $csName) {
                     throw new MWException( __METHOD__.': article not saved!');
                 }
             }
-        }//end if pageExists
+        } else { //end if pageExists
+	      wfDebugLog('p2p','->patch already exist : ');
+	}
         $i++;
     }
     utils::writeAndFlush("<span style=\"margin-left:30px;\">Go to <A HREF=".$urlServer.">ChangeSet</A></span> <br/>");
@@ -234,7 +239,7 @@ function logootIntegrate($operations, $article) {
     $dbr = wfGetDB(DB_SLAVE);
     $dbr->immediateBegin();
     if (is_string($article)) {
-        //if there is a space in the title, repalce by '_'
+        //if there is a space in the title, replace by '_'
         $article = str_replace(" ", "_", $article);
 
         if(strpos($article, ":")===false) {
@@ -278,6 +283,9 @@ function logootIntegrate($operations, $article) {
         $article = new Article($title);
     }
     else {
+    	error_log('logoot integration '.var_export($article,true));
+   // 	error_log('logoot integration '.var_export(debug_backtrace()));
+
         $rev_id = $article->getRevIdFetched();
     }
     $listOp = array();

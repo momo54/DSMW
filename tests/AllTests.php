@@ -11,13 +11,13 @@ require_once 'p2pTest4.php';
 //require_once 'p2pTest5.php';
 require_once 'p2pTest6.php';
 require_once 'p2pTest10.php';
-/*require_once 'p2pAttachmentsTest1.php';
+require_once 'p2pAttachmentsTest1.php';
 require_once 'p2pAttachmentsTest2.php';
 require_once 'p2pAttachmentsTest3.php';
 require_once 'p2pAttachmentsTest4.php';
 require_once 'p2pAttachmentsTest5.php';
 require_once 'p2pAttachmentsTest6.php';
-require_once 'p2pAttachmentsTest7.php';*/
+require_once 'p2pAttachmentsTest7.php';
 
 
 
@@ -50,7 +50,7 @@ class AllTests {
         $suite->addTestSuite('p2pTest6');
         echo "\nLancement de p2pTest10\n";
         $suite->addTestSuite('p2pTest10');
-        /*echo "\nLancement de p2pAttachmentsTest1\n";
+        echo "\nLancement de p2pAttachmentsTest1\n";
         $suite->addTestSuite('p2pAttachmentsTest1');
         echo "\nLancement de p2pAttachmentsTest2\n";
         $suite->addTestSuite('p2pAttachmentsTest2');
@@ -63,7 +63,7 @@ class AllTests {
         echo "\nLancement de p2pAttachmentsTest6\n";
         $suite->addTestSuite('p2pAttachmentsTest6');
         echo "\nLancement de p2pAttachmentsTest7\n";
-        $suite->addTestSuite('p2pAttachmentsTest7');*/
+        $suite->addTestSuite('p2pAttachmentsTest7');
         echo "\nFin des tests\n";
         return $suite;
     }

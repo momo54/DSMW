@@ -318,15 +318,15 @@ window.open('" . $specialAsk . "&q='+query1+'&eq=yes&p%5Bformat%5D=broadtable','
 
     ///////PushFeed page////////
     elseif (isset($_GET['action']) && $_GET['action'] == 'pushpage') {
-        //$url = $_POST['url'];//pas url mais changesetId
-        wfDebugLog('p2p', '@@@@@@@@@@@@@@@@@ Create new push ' . $_POST['name'] . ' with ' . $_POST['keyword']);
-        $name = $_POST['name'];
-        $request = $_POST['keyword'];
-        $stringReq = utils::encodeRequest($request); //avoid "semantic injection" :))
+      //$url = $_POST['url'];//pas url mais changesetId
+      wfDebugLog('p2p', '@@@@@@@@@@@@@@@@@ Create new push ' . $_POST['name'] . ' with ' . $_POST['keyword']);
+      $name = $_POST['name'];
+      $request = $_POST['keyword'];
+      $stringReq = utils::encodeRequest($request); //avoid "semantic injection" :))
         //addPushSite($url, $name, $request);
-
-
-        $newtext = "
+      
+      
+      $newtext = "
 [[Special:ArticleAdminPage|DSMW Admin functions]]
 
 ==Features==
@@ -354,72 +354,70 @@ The \"PUSH\" action publishes the (unpublished) modifications of the articles li
         $article->doRedirect();
         return false;
     }
-    ///////ChangeSet page////////
+    ///////onpush action////////
     elseif (isset($_POST['action']) && $_POST['action'] == 'onpush') {
-		wfDebugLog('p2p', '@@@@@@@@@@@@  ChangeSet page');
-        /* In case we push directly from an article page */
-        if (isset($_POST['page']) && isset($_POST['request'])) {
-            $articlename = Title::newFromText($_POST['name']);
-
-            if (!$articlename->exists()) {
-                $result = utils::createPushFeed($_POST['name'], $_POST['request']);
-                utils::writeAndFlush("Create push <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php?title=".$_POST['name'].">" . $_POST['name'] . "</a>");
-                if ($result == false) {
-                    throw new MWException(
-                            __METHOD__ . ': no Pushfeed created in utils:: createPushFeed:
+      wfDebugLog('p2p', '@@@@@@@@@@@@  onpush');
+      /* In case we push directly from an article page */
+      if (isset($_POST['page']) && isset($_POST['request'])) {
+	$articlename = Title::newFromText($_POST['name']);
+	
+	if (!$articlename->exists()) {
+	  $result = utils::createPushFeed($_POST['name'], $_POST['request']);
+	  utils::writeAndFlush("Create push <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php?title=".$_POST['name'].">" . $_POST['name'] . "</a>");
+	  if ($result == false) {
+	    throw new MWException(
+				  __METHOD__ . ': no Pushfeed created in utils:: createPushFeed:
                         name: ' . $_POST['name'] . ' request' . $_POST['request']);
-                }
-            }
-        }
+	  }
+	}
+      }
+      
+      wfDebugLog('p2p', 'push on ');
+      $patches = array();
+      $tmpPatches = array();
+      if (isset($_POST['name'])) {
+	$name1 = $_POST['name'];
+	if (!is_array($name1))
+	  $name1 = array($name1);
+	foreach ($name1 as $push) {
+	  wfDebugLog('p2p', ' - ' . $push);
+	}
+      } else {
+	$name1="";
+      }
 
-        wfDebugLog('p2p', 'push on ');
-        $patches = array();
-        $tmpPatches = array();
-        if (isset($_POST['name'])) {
-            $name1 = $_POST['name'];
-            if (!is_array($name1))
-                $name1 = array($name1);
-            foreach ($name1 as $push) {
-                wfDebugLog('p2p', ' - ' . $push);
-            }
-        }
-        else
-            $name1="";
-        if ($name1 == "") {
-            utils::writeAndFlush('<p><b>No pushfeed selected!</b></p>');
-            $title = Title::newFromText('Special:ArticleAdminPage');
-            $article = new Article($title);
-            $article->doRedirect();
-            return false;
-        }
-
-        //$name = $name1[0];
-        utils::writeAndFlush('<p><b>Start push </b></p>');
-        foreach ($name1 as $name) {
-            utils::writeAndFlush("<span style=\"margin-left:30px;\">begin push: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php?title=$name>" . $name . "</a></span> <br/>");
+      if ($name1 == "") {
+	utils::writeAndFlush('<p><b>No pushfeed selected!</b></p>');
+	$title = Title::newFromText('Special:ArticleAdminPage');
+	$article = new Article($title);
+	$article->doRedirect();
+	return false;
+      }
+      
+      //
+      // Push Starting !!
+      //
+      utils::writeAndFlush('<p><b>Start push </b></p>');
+      foreach ($name1 as $name) {
+	utils::writeAndFlush("<span style=\"margin-left:30px;\">begin push: <A HREF=" . 'http://' . $wgServerName . $wgScriptPath . "/index.php?title=$name>" . $name . "</a></span> <br/>");
             $patches = array();  //// for each pushfeed name==> push
             wfDebugLog('p2p', '  -> pushname ' . $name);
-            // $name = $_GET['name'];//PushFeed name
             $request = getPushFeedRequest($name);
-            //        $previousCSID = getPreviousCSID($name);
             $previousCSID = getHasPushHead($name);
             if ($previousCSID == false) {
-                $previousCSID = "none";
-                //$CSID = $name."_0";
-            }//else{
-            //            $count = explode(" ", $previousCSID);
-            //            $cnt = $count[1] + 1;
-            //            $CSID = $name."_".$cnt;
-            //        }
-            wfDebugLog('p2p', '  ->pushrequest ' . $request);
+	      $previousCSID = "none";
+            }
+            
+	    wfDebugLog('p2p', '  ->pushrequest ' . $request);
             wfDebugLog('p2p', '  ->pushHead : ' . $previousCSID);
+
             $CSID = utils::generateID(); //changesetID
             if ($request == false) {
-                $outtext = '<p><b>No semantic request found!</b></p> <a href="' . $_SERVER['HTTP_REFERER'] . '">back</a>';
-                $wgOut->addHTML($outtext);
-                return false;
+	      $outtext = '<p><b>No semantic request found!</b></p> <a href="' . $_SERVER['HTTP_REFERER'] . '">back</a>';
+	      $wgOut->addHTML($outtext);
+	      return false;
             }
-
+	    
             $pages = getRequestedPages($request); //ce sont des pages et non des patches
             foreach ($pages as $page) {
                 wfDebugLog('p2p', '  ->requested page ' . $page);
@@ -599,7 +597,7 @@ The \"PULL\" action gets the modifications published in the PushFeed of the Push
 
             //$url = $relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
             //$url = $relatedPushServer."/api{$wgScriptExtension}?action=query&meta=changeSet&cspushName=".$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml';
-            wfDebugLog('testlog', '      -> request ChangeSet : ' . $relatedPushServer . '/api.php?action=query&meta=changeSet&cspushName=' . $nameWithoutNS . '&cschangeSet=' . $previousCSID . '&format=xml');
+            wfDebugLog('p2p', '      -> request ChangeSet : '.$relatedPushServer.'/api.php?action=query&meta=changeSet&cspushName='.$nameWithoutNS.'&cschangeSet='.$previousCSID.'&format=xml');
             $cs = utils::file_get_contents_curl(utils::lcfirst($relatedPushServer) . "/api.php?action=query&meta=changeSet&cspushName=" . $nameWithoutNS . '&cschangeSet=' . $previousCSID . '&format=xml');
 
             /* test if it is a xml file. If not, the server is not reachable via the url
@@ -939,8 +937,9 @@ function attemptSave($editpage) {
     }
 
     //if there is no modification on the text
-    if ($actualtext == $conctext)
+    if ($actualtext == $conctext) {
         return true;
+    }
 
     $model = manager::loadModel($rev_id);
     $logoot = manager::getNewEngine($model,DSMWSiteId::getInstance()->getSiteId());// new logootEngine($model);
@@ -1073,11 +1072,13 @@ function uploadComplete($image) {
     global $wgServerName, $wgScriptPath, $wgServer,$wgVersion;
     $urlServer = 'http://' . $wgServerName . $wgScriptPath;
 
+    wfDebugLog('p2p', '@@@@@@@@@@@@@@@@@@  uploadComplete hook ');
+
+
     //$classe = get_class($image);
     if (compareMWVersion($wgVersion, '1.16.0') == -1) {
         $localfile = $image->mLocalFile;
     } else {
-
         $localfile = $image->getLocalFile();
     }
     $path = utils::prepareString($localfile->mime, $localfile->size, $wgServer . $localfile->url);
@@ -1094,6 +1095,8 @@ function uploadComplete($image) {
         $patch = new Patch(false, true, null, $urlServer, $rev_id, null, null, null, $localfile->mime, $localfile->size, $localfile->url, null);
         $patch->storePage($localfile->getTitle(),$revID); //stores the patch in a wikipage
         manager::storeModel($revID, $sessionId = session_id(), $model, $blobCB = 0);
+    } else {
+          wfDebugLog('p2p', 'uploadComplete path:'.$path.' is existing ??');
     }
     return true;
 }
