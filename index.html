@@ -1,77 +1,67 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset='utf-8'>
 
-  <title>momo54/DSMW @ GitHub</title>
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Dsmw : Distributed Semantic MediaWiki" />
 
-  <style type="text/css">
-    body {
-      margin-top: 1.0em;
-      background-color: #db0b5f;
-      font-family: Helvetica, Arial, FreeSans, san-serif;
-      color: #ffffff;
-    }
-    #container {
-      margin: 0 auto;
-      width: 700px;
-    }
-    h1 { font-size: 3.8em; color: #24f4a0; margin-bottom: 3px; }
-    h1 .small { font-size: 0.4em; }
-    h1 a { text-decoration: none }
-    h2 { font-size: 1.5em; color: #24f4a0; }
-    h3 { text-align: center; color: #24f4a0; }
-    a { color: #24f4a0; }
-    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-    .download { float: right; }
-    pre { background: #000; color: #fff; padding: 15px;}
-    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-    .footer { text-align:center; padding-top:30px; font-style: italic; }
-  </style>
-</head>
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-<body>
-  <a href="http://github.com/momo54/DSMW"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+    <title>Dsmw</title>
+  </head>
 
-  <div id="container">
+  <body>
 
-    <div class="download">
-      <a href="http://github.com/momo54/DSMW/zipball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
-      <a href="http://github.com/momo54/DSMW/tarball/master">
-        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/momo54/DSMW">View on GitHub</a>
+
+          <h1 id="project_title">Dsmw</h1>
+          <h2 id="project_tagline">Distributed Semantic MediaWiki</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/momo54/DSMW/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/momo54/DSMW/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
     </div>
 
-    <h1><a href="http://github.com/momo54/DSMW">DSMW</a>
-      <span class="small">by <a href="http://github.com/momo54">momo54</a></span></h1>
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Welcome to the DSMW !</h1>
 
-    <div class="description">
-      Distributed Semantic MediaWiki
+<p>DSMW stands for Distributed Semantic Media Wiki. It allows to create a network of Semantic Media Wiki Server and synchronize data between them. DSMW can be understood as Git or Mercurial but for a networks semantic wikis.</p>
+
+<h2>DSMW principles</h2>
+
+<p>With DSMW extension, each Semantic MediaWiki (SMW) server can create arbitrary number of pushFeeds and publish changes of selected Wiki pages in these pushFeeds. It can be understood as publish operation in publish subscribe paradigm. Next, any SMW server can also subscribe to remote pushfeeds by creating pullfeeds. It can be seen as subscribe operation in publish subscribe paradigm. Then, anyone can push and pull in these channels. DSMW extension ensure eventual consistency on whole network i.e. if the system is idle and every node connected, next all servers are in the same state (no divergence).</p>
+
+<p>More explanation can be found at:</p>
+
+<ul>
+<li><p><a href="https://github.com/momo54/DSMW/wiki">Github Wiki site</a></p></li>
+<li><p>Distributed Semantic MediaWiki. Hala Skaf-Molli, Gérôme Canals and Pascal Molli . In 7th Extended Semantic Web Conference, ESWC 2010 (Demo) , Heraklion, Greece , june 2010.</p></li>
+<li><p><a href="http://pagesperso.lina.univ-nantes.fr/%7Emolli-p/pmwiki/uploads/Main/Skaf09wise.pdf">Multi-Synchronous Collaborative Semantic Wikis</a>. Charbel Rahhal, Hala Skaf-Molli, Pascal Molli and Stéphane Weiss . In Wise'09: International Conference on Web Information Systems , 2009.  </p></li>
+<li><p>Undo in Peer-to-peer Semantic Wikis. Charbel Rahhal, Stéphane Weiss, and Hala Skaf-Molli, Pascal Urso and Pascal Molli. In SemWiki 2009 - 4rd Semantic Wiki Workshop, page 18 , Heraklion, Greece, May 2009.  </p></li>
+<li><p>SWooki: Un Wiki Sémantique sur réseau Pair-à-Pair. Charbel Rahhal, Hala Skaf-Molli and Pascal Molli . Ingénierie des Systèmes d'Information , 14 ( 1 ), 2009.    </p></li>
+</ul><h2>DSMW authors</h2>
+
+<p>Pascal Molli, Hala Skaf, Jean-Philippe Muller, Marlène Hantz, Emmanuel Desmontils, Stéphane Weiss, Emile Morel</p>
+      </section>
     </div>
 
-    <h2>Authors</h2>
-<p>molli (momo54@gmail.com)<br/><br/>      </p>
-<h2>Contact</h2>
-<p>molli (momo54@gmail.com)<br/>      </p>
-
-
-    <h2>Download</h2>
-    <p>
-      You can download this project in either
-      <a href="http://github.com/momo54/DSMW/zipball/master">zip</a> or
-      <a href="http://github.com/momo54/DSMW/tarball/master">tar</a> formats.
-    </p>
-    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/momo54/DSMW</pre>
-    </p>
-
-    <div class="footer">
-      get the source code on GitHub : <a href="http://github.com/momo54/DSMW">momo54/DSMW</a>
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Dsmw maintained by <a href="https://github.com/momo54">momo54</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
     </div>
 
-  </div>
+    
 
-  
-</body>
+  </body>
 </html>
