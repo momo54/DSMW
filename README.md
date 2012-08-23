@@ -6,19 +6,19 @@ DSMW stands for Distributed Semantic Media Wiki. It allows to create a network o
 
 With DSMW extension, each Semantic MediaWiki (SMW) server can create arbitrary number of pushFeeds and publish changes of selected Wiki pages in these pushFeeds. It can be understood as publish operation in publish subscribe paradigm. Next, any SMW server can also subscribe to remote pushfeeds by creating pullfeeds. It can be seen as subscribe operation in publish subscribe paradigm. Then, anyone can push and pull in these channels. DSMW extension ensure eventual consistency on whole network i.e. if the system is idle and every node connected, next all servers are in the same state (no divergence).
 
-
+![doc/dsmwscenario] [dsmwscenario-image]
 
 More explanation can be found at:
-* Distributed Semantic MediaWiki. Hala Skaf-Molli, Gérôme Canals and Pascal Molli . In 7th Extended Semantic Web Conference, ESWC 2010 (Demo) , Heraklion, Greece , june 2010.
+* Distributed Semantic MediaWiki. Hala Skaf-Molli, Gerome Canals and Pascal Molli . In 7th Extended Semantic Web Conference, ESWC 2010 (Demo) , Heraklion, Greece , june 2010.
 
-* [Multi-Synchronous Collaborative Semantic Wikis](http://pagesperso.lina.univ-nantes.fr/~molli-p/pmwiki/uploads/Main/Skaf09wise.pdf). Charbel Rahhal, Hala Skaf-Molli, Pascal Molli and Stéphane Weiss . In Wise'09: International Conference on Web Information Systems , 2009.  
+* [Multi-Synchronous Collaborative Semantic Wikis](http://pagesperso.lina.univ-nantes.fr/~molli-p/pmwiki/uploads/Main/Skaf09wise.pdf). Charbel Rahhal, Hala Skaf-Molli, Pascal Molli and Stephane Weiss . In Wise'09: International Conference on Web Information Systems , 2009.  
 
-* Undo in Peer-to-peer Semantic Wikis. Charbel Rahhal, Stéphane Weiss, and Hala Skaf-Molli, Pascal Urso and Pascal Molli. In SemWiki 2009 - 4rd Semantic Wiki Workshop, page 18 , Heraklion, Greece, May 2009.  
+* Undo in Peer-to-peer Semantic Wikis. Charbel Rahhal, Stephane Weiss, and Hala Skaf-Molli, Pascal Urso and Pascal Molli. In SemWiki 2009 - 4rd Semantic Wiki Workshop, page 18 , Heraklion, Greece, May 2009.  
 
-* SWooki: Un Wiki Sémantique sur réseau Pair-à-Pair. Charbel Rahhal, Hala Skaf-Molli and Pascal Molli . Ingénierie des Systèmes d'Information , 14 ( 1 ), 2009.    
+* SWooki: Un Wiki Semantique sur reseau Pair-a-Pair. Charbel Rahhal, Hala Skaf-Molli and Pascal Molli . Ingénierie des Systèmes d'Information , 14 ( 1 ), 2009.    
 
 
 ## DSMW authors
-Pascal Molli, Hala Skaf, Jean-Philippe Muller, Marlène Hantz, Emmanuel Desmontils, Stéphane Weiss, Emile Morel
+Pascal Molli, Hala Skaf, Jean-Philippe Muller, Marlene Hantz, Emmanuel Desmontils, Stephane Weiss, Emile Morel
 
 
