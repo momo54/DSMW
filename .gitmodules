@@ -1,0 +1,3 @@
+[submodule "DSMW.wiki"]
+	path = DSMW.wiki
+	url = git://github.com/momo54/DSMW.wiki.git
