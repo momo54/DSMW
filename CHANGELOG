@@ -1,5 +1,12 @@
 For more documentation, see http://www.dsmw.org
 
+== DSMW 1.2 ==
+* Compatbility with SMW 1.6.1 (important internal modifications)
+* Start of undo Support (unfunctional)
+* repository moved on github (momo54.github.com/DSMW)
+* There is no DSMW 1.1 because Yaron Koren produced a version of DSMW 1.1. need to merge 1.1 and 1.2 
+  in next version 1.3
+
 == DSMW 1.0 ==
 * Tested with MW-1.16.0
 * better user interface with Ajax
