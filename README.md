@@ -37,7 +37,7 @@ More explanation can be found at:
   4rd Semantic Wiki Workshop, page 18 , Heraklion, Greece, May 2009.
 
 * SWooki: Un Wiki Semantique sur reseau Pair-a-Pair. Charbel Rahhal,
-  Hala Skaf-Molli and Pascal Molli . Ing�nierie des Syst�mes
+  Hala Skaf-Molli and Pascal Molli . Ingenierie des Systemes
   d'Information , 14 ( 1 ), 2009.
 
 

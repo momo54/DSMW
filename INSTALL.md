@@ -26,7 +26,7 @@ database immediatly after having installed DSMW but before using DSMW.
 For more details, see the readme file in the tests directory
 [wikipath]/extensions/DSMW/tests.
 
-# Installation
+## Installation
 
 * Download the zip file and extract it. Paste the folder named DSMW
   into the Mediawiki extension folder "[wikipath]/extensions/".
