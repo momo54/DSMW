@@ -17,7 +17,9 @@ will be the template.  Double check you dependencies:
 tests in file 'myLocalSettings.php'.
 
 * Take a dump of the database :
-    $ mysqldump -uroot -pmomo44 wikidb > dump.sql
+```
+$ mysqldump -uroot -pmomo44 wikidb > dump.sql
+```
 
 The dump.sql file should stored in extensions/DSMW/tests. It is better
 to take the dump just after DSMW tables have been initialised,
@@ -140,7 +142,9 @@ configuration. Go in http://localhost/wiki1 and upload
 DSMW/tests/Import/Ours1.jpg. Repear with Ours1.pdf.
 
 * tests are runned using Phpunit. You have to install it. On Ubuntu (11.04)
-    $ sudo apt-get install phpunit
+```
+$ sudo apt-get install phpunit
+```
 
 But i had some pbs after install. i needed to complete installation
 using 'pear'. This is explained on phpunit web site (http://www.phpunit.de).
@@ -159,7 +163,7 @@ pear install phpunit/PHP_CodeCoverage
 concurrent manipulations. Bots need to be logged. This is done in
 BasicBot.php. 
 
-   * Check if USERID, USERNAME and PASSWORD are correctly set.
+* Check if USERID, USERNAME and PASSWORD are correctly set.
 ```php
 if (!defined('USERID')){	define('USERID','1');} // find it at Special:Preferences
 if (!defined('USERNAME')){	define('USERNAME','WikiSysop');}
@@ -182,14 +186,16 @@ define('WIKI3','http://localhost/wiki3');
 * Ready to run the tests. Be sure that you have the executable
 permissions on DSMW/tests/initWikiTest.sh
 
-    $ cd /var/www/mw1.16.4/extensions/DSMW/tests
-    $ phpunit AllTests.php 
-
-It takes 10-15mn to run all the test, and many output is generated during tests.
+```
+$ cd /var/www/mw1.16.4/extensions/DSMW/tests
+$ phpunit AllTests.php 
+```
+It takes 10-15mn to run all the test, and many output is generated during tests (ignore warning such as header already sent...).
 Phpunit generates a resume at the end of test executions:
 
+```
      Tests: 30, Assertions: 670, Failures: 5, Errors: 7.
-
+```
 Just check all tests are ok (so, it is not good for this example). 
 
 If you have 
@@ -207,6 +213,7 @@ you don't enable 'pdf' uploads. Update your localSetting.php:
 
 ```php
 $wgFileExtensions = array_merge($wgFileExtensions, array('doc', 'xls', 'mpp', 'pdf','ppt','xlsx','jpg','tiff'));
+```
 
 * if you have any others errors, check the apache2 logs to get more
 informations : it is located in /var/log/apache2/error.log. Check "PHP
