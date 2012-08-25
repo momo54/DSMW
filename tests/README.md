@@ -39,14 +39,16 @@ UNLOCK TABLES;
 ```
 
 * create links in /var/www:
-```
+
+```shell
 $ ln -s mw1.16.4 wiki1
 $ ln -s mw1.16.4 wiki2
 $ ln -s mw1.16.4 wiki3
 ```
 
 You must have in /var/www:
-```
+
+```shell
 drwxrwxrwx  4 root  root  4096 2011-05-01 07:52 .
 drwxr-xr-x 16 root  root  4096 2011-04-30 14:50 ..
 -rw-r--r--  1 root  root   177 2011-04-30 14:50 index.html
