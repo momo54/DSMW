@@ -12,18 +12,18 @@
 require_once( dirname( __FILE__ ) . "/../../../maintenance/Maintenance.php" );
  
 class ArticleUpdate extends Maintenance {
+
   public function execute() {
     global $wgServerName,$wgScriptPath, $wgServer, $wgScriptExtension;
     $urlServer = 'http://'.$wgServerName;
-    wfProfileIn('DSMWUpdateJob::run()');
+
     $revids = array();
     $revids1 = array();
     $page_ids = array();
+
     //Getting all the revision ids of pages having been logootized
-    $db = wfGetDB( DB_SLAVE );
-    
+    $db = wfGetDB( DB_SLAVE );    
     $model_table = $db->tableName( 'model' );
-    
     $sql ="SELECT `rev_id` FROM $model_table";
     
     $res = $db->query($sql);
@@ -32,12 +32,8 @@ class ArticleUpdate extends Maintenance {
     }
     $db->freeResult($res);
     
-    //if (count($revids)==0) $revids=array();
-    
-    
     //Getting all the revision ids without the pages in the DSMW namespaces and
-    //Administration_pull_site_addition and Administration_pull_site_addition pages
-    
+    //Administration_pull_site_addition and Administration_pull_site_addition pages    
     $rev_table = $db->tableName( 'revision' );
     $page_table = $db->tableName( 'page' );
     
@@ -51,8 +47,13 @@ and `page_title` != \"Administration_push_site_addition\"";
       $revids1[] = $row->rev_id;
     }
     $db->freeResult($res1);
-    
-    //if (count($revids1)==0) $revids1=array();
+
+    // debug
+    /* foreach ($revids1 as $id) { */
+    /*   $page_id = $db->selectField('revision','rev_page', array('rev_id'=>$id)); */
+    /*   $title = Title::newFromID($page_id); */
+    /*   echo 'selected '.$title->getText()."\n"; */
+    /* } */
     
     //Array_diff returns an array containing all the entries from $revids1 that are
     //not present in $revids.
@@ -72,19 +73,23 @@ and `page_title` != \"Administration_push_site_addition\"";
       foreach($page_ids as $pageid) {
 	$processed++;
 	$title = Title::newFromID($pageid);
+
 	echo "processing (".$processed.",".count($page_ids).") : ".$title->getText().".\n";
-	$ns = $title->getNamespace();
+
 	$lastRev = Revision::loadFromPageId($db, $pageid);
 	$pageText = $lastRev->getText();
 	
 	//load an empty model
 	$model = manager::loadModel(0);
-	$logoot = manager::getNewEngine($model,DSMWSiteId::getInstance()->getSiteId());// new logootEngine($model);
+	$logoot = manager::getNewEngine($model,DSMWSiteId::getInstance()->getSiteId());
 	
 	$listOp = $logoot->generate("", $pageText);
 	$modelAfterIntegrate = $logoot->getModel();
 	$tmp = serialize($listOp);
 	$patchid = sha1($tmp);
+
+	// Media file management...
+	$ns = $title->getNamespace();
 	if ($ns == NS_FILE || $ns == NS_IMAGE || $ns == NS_MEDIA) {
 	  $apiUrl = $wgServer . $wgScriptPath . "/api" . $wgScriptExtension;
 	  $onPage = str_replace(array(' '), array('%20'), $lastRev->getTitle()->getText());
@@ -104,13 +109,11 @@ and `page_title` != \"Administration_push_site_addition\"";
 	  $patch = new Patch(false, false, $listOp, $urlServer, 0);
 	  $patch->storePage($lastRev->getTitle()->getText(), $lastRev->getId());
 	}
+
+	// That's all folks
 	manager::storeModel($lastRev->getId(), $sessionId = session_id(), $modelAfterIntegrate, $blobCB = 0);
       }
     }
-    
-    
-    wfProfileOut('DSMWUpdateJob::run()');
-    return true;
   }
 }
 
