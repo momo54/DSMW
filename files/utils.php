@@ -726,12 +726,23 @@ Pages concerned:
 
         SMWQueryProcessor::processFunctionParams($rawparams, $query, $params, $printouts);
 
+        //wfDebugLog('p2p', 'semanticquery query:'. $query. '; params ' .print_r($params,true). '; printouts :'.print_r($printouts,true));
+	
+
         $queryobj = SMWQueryProcessor::createQuery($query, $params, SMWQueryProcessor::SPECIAL_PAGE, '', $printouts);
         $queryobj->setLimit(5000);
         $res = smwfGetStore()->getQueryResult($queryobj);
 
         if (!($res instanceof SMWQueryResult))
             return false;
+
+	$cols='';
+	$outs=$res->getPrintRequests();
+	foreach ($outs as $out) {
+	  $cols=$cols.';('.$out->getWikiText().')';
+	}
+	wfDebugLog('p2p', 'getSemanticQuery Results: ('.$res->getQueryString().'), #columns ('.$res->getColumnCount().'), #count ('. $res->getCount().'), cols('.$cols.')');
+
         return $res;
     }
 
@@ -961,6 +972,7 @@ to be loaded else "allow_url_fopen" set to "On"');
         ////////////////BEN////////////////
 //        ob_end_flush();
         ////////////////BEN////////////////
+	ob_end_flush();
         flush();
     }
 
