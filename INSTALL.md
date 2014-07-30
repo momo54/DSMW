@@ -19,7 +19,7 @@ provided).
 DSMW-1.2 has been developped on MW1.16.4. SMW-1.6.1 The DSMW extension
 requires an install of Semantic MediaWiki > 1.6 (cf:
 http://semantic-mediawiki.org/wiki/Semantic_MediaWiki).  For more
-details, see those extensions own installation requirements.
+details, see those extensions' own installation requirements.
 
 Important: If you want to run the DSMW tests, you must make a dump of your 
 database immediately after having installed DSMW but before using DSMW.
