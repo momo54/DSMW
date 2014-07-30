@@ -57,7 +57,7 @@ require_once 'includes/IntegrationFunctions.php';
 ///////////////BEN///////////////
 require_once 'includes/UndoIntegrationFunctions.php';
 ///////////////BEN///////////////
-define('DSMW_VERSION', '1.0');
+define('DSMW_VERSION', '1.2');
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWGeneralExhibits'] = 'dsmw_group';
