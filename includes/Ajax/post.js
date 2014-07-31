@@ -11,7 +11,7 @@ function test(urlserveur){
                 $("#state").html('<span style=\"margin-left:10px; color:\"#DC143C;\"></span>');
             },
             success: function(request) {
-                $("#state").html('<span style=\"margin-left:10px; color:#DC143C;\">Warning: this push allready exist or was disable. If you push with this name the former push will be use</span>');
+                $("#state").html('<span style=\"margin-left:10px; color:#DC143C;\">Warning: this push already exists or was disabled. If you push with this name the former push will be used</span>');
             }
         });
     }

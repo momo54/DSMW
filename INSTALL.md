@@ -19,11 +19,11 @@ provided).
 DSMW-1.2 has been developped on MW1.16.4. SMW-1.6.1 The DSMW extension
 requires an install of Semantic MediaWiki > 1.6 (cf:
 http://semantic-mediawiki.org/wiki/Semantic_MediaWiki).  For more
-details, see those extensions'own installation requirements.
+details, see those extensions' own installation requirements.
 
 Important: If you want to run the DSMW tests, you must make a dump of your 
-database immediatly after having installed DSMW but before using DSMW.
-For more details, see the readme file in the tests directory
+database immediately after having installed DSMW but before using DSMW.
+For more details, see the README.md file in the tests directory
 [wikipath]/extensions/DSMW/tests.
 
 ## Installation
@@ -59,17 +59,17 @@ For more details, see the readme file in the tests directory
   "p2p_params" is now part of wikidb.
  
 * "update properties type" installs the vocabulary used by DSMW. for
-  exemple the page "Property:hasoperation" should exist in mediawiki
+  example the page "Property:hasoperation" should exist in mediawiki
   after this.
 
-* "article update" process existing pages in MW. DSMW stores the
-  history of pages differently. Any page that exist before DSMW
+* "article update" processes existing pages in MW. DSMW stores the
+  history of pages differently. Any page that exists before DSMW
   installation has to be saved again to get a DSMW history for that
   page. If not, DSMW will fail to display this page. In a fresh MW,
   the main page has to be processed, otherwise an error will be
-  deplayed when getting the main page.
+  displayed when getting the main page.
 
-* Go to Main page, you shoud see a new tab for the main page called
+* Go to Main page, you should see a new tab for the main page called
   "dsmw".  click on it, you will a see the DSMW history for that page.
 
 * Next, you should read the DSMW manual for using DSMW.

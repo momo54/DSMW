@@ -128,8 +128,8 @@ class DSMWAdmin extends SpecialPage {
         $output .= '<form name="logoot" action="" method="POST">' .
             '<input type="hidden" name="action" value="logootize" />';
         $output .= '<br /><h2>DSMW update older articles</h2>' .
-            '<p>For reasons of conflict management, DSMW works only with articles created after it\'s installation.
-                        Therefore you need to update articles created before it\'s installation in order to edit them.</p>';
+            '<p>For reasons of conflict management, DSMW works only with articles created after its installation.
+                        Therefore you need to update articles created before its installation in order to edit them.</p>';
         $output .= '<input type="submit" value="Articles update"/></form>';
 
         $wgOut->addHTML($output);

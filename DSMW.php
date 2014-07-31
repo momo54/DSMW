@@ -57,7 +57,7 @@ require_once 'includes/IntegrationFunctions.php';
 ///////////////BEN///////////////
 require_once 'includes/UndoIntegrationFunctions.php';
 ///////////////BEN///////////////
-define('DSMW_VERSION', '1.0');
+define('DSMW_VERSION', '1.2');
 $wgSpecialPageGroups['ArticleAdminPage'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWAdmin'] = 'dsmw_group';
 $wgSpecialPageGroups['DSMWGeneralExhibits'] = 'dsmw_group';
@@ -136,11 +136,10 @@ $wgExtensionCredits['parserhook'][] = array(
     'path' => __FILE__,
     'name' => 'Distributed&nbsp;Semantic&nbsp;MediaWiki',
     'version' => DSMW_VERSION,
-    'author' => "[http://www.loria.fr/~mullejea Jean&ndash;Philippe&nbsp;Muller], [http://www.loria.fr/~molli Pascal&nbsp;Molli], [http://www.loria.fr/~skaf Hala&nbsp;Skaf&ndash;Molli],
-            [http://www.loria.fr/~canals Gérôme&nbsp;Canals], [http://www.loria.fr/~rahalcha Charbel&nbsp;Rahal], [http://www.loria.fr/~weiss Stéphane&nbsp;Weiss],
+    'author' => "[http://www.loria.fr/~mullejea Jean&ndash;Philippe&nbsp;Muller], [http://www.loria.fr/~molli Pascal&nbsp;Molli], [http://www.loria.fr/~skaf Hala&nbsp;Skaf&ndash;Molli],<br>[http://www.loria.fr/~canals Gérôme&nbsp;Canals], [http://www.loria.fr/~rahalcha Charbel&nbsp;Rahal], [http://www.loria.fr/~weiss Stéphane&nbsp;Weiss],
             [http://www.univ-nantes.fr/~desmontils-e Emmanuel&nbsp;Desmontils], and [http://m3p.gforge.inria.fr/pmwiki/pmwiki.php?n=Site.Team others].",
-    'url' => 'http://www.dsmw.org',
-    'description' => 'Allows to create a network of Semantic MediaWiki servers that share common semantic wiki pages. ([http://www.dsmw.org www.dsmw.org])',
+    'url' => 'http://momo54.github.com/DSMW',
+    'description' => 'Allows to create a network of Semantic MediaWiki servers that share common semantic wiki pages. ([http://momo54.github.com/DSMW http://momo54.github.com/DSMW])',
 );
 
 global $wgVersion;
